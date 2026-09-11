@@ -58,7 +58,15 @@
     const pages = doc.getPages();
     if (!pages.length || pages.length > limits.maxPages) fail('LIMIT','Page count must be 1–100.');
     return pages.map(page => {
-      const width=page.getWidth(),height=page.getHeight(),angle=page.getRotation().angle;
+      // PDF visible dimensions are CropBox intersected with MediaBox, in
+      // physical points. UserUnit is a page entry, not an inheritable key.
+      const media=page.getMediaBox(),crop=page.getCropBox();
+      const unitObject=page.node.lookup(PDFLib.PDFName.of('UserUnit'));
+      const unit=unitObject===undefined?1:unitObject instanceof PDFLib.PDFNumber?unitObject.asNumber():NaN;
+      if(!Number.isFinite(unit)||unit<=0||unit>75000||[media,crop].some(b=>!Object.values(b).every(Number.isFinite)||b.width<=0||b.height<=0))fail('INVALID_PDF','Invalid page boxes or UserUnit.');
+      const width=(Math.min(media.x+media.width,crop.x+crop.width)-Math.max(media.x,crop.x))*unit;
+      const height=(Math.min(media.y+media.height,crop.y+crop.height)-Math.max(media.y,crop.y))*unit;
+      const angle=page.getRotation().angle;
       if (!Number.isFinite(width) || !Number.isFinite(height) || width<=0 || height<=0 || !Number.isSafeInteger(angle) || angle%90) fail('INVALID_PDF','Invalid page geometry or rotation.');
       return {width,height,rotation:normalize(angle)};
     });

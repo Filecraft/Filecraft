@@ -39,6 +39,7 @@ jobs:
         run: |
           python scripts/check-portable-pdf.py
           python scripts/check-workbench-pdf.py
+          python scripts/check-physical-pdf.py
       - name: Verify budgets and package
         run: |
           python scripts/sync_engine.py --check
