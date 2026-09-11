@@ -47,8 +47,9 @@ are rejected. It does NOT claim every extension can become every other format.
   reject files requiring seek access. Playlists and network protocols disabled.
 - PDF: local visual preview, page operations, text/image export, lossless stream
   optimization, explicitly lossy rasterization, password handling, form filling,
-  annotations and OCR as supported by the bundled PDF adapter. Detailed behavior
-  and test coverage are documented in the release verification report.
+  annotations and OCR. Ordinary AcroForm widgets are rendered without JavaScript
+  or document action callbacks; XFA visual rendering is rejected. Previews identify
+  the filename, page and input SHA-256 and clear after export.
 
 OCR requires separately installed Tesseract and its language data. Media requires
 separately installed FFmpeg. Prepare detects but never installs or downloads them.

@@ -36,6 +36,7 @@ if __name__=='__main__':
         # Synthetic packaging diagnostic only; never reads user documents.
         import io
         import pypdfium2 as pdfium
+        from pypdf._crypt_providers import _cryptography
         from pypdf import PdfWriter
         writer=PdfWriter();writer.add_blank_page(width=100,height=200)
         plain=io.BytesIO();writer.write(plain)

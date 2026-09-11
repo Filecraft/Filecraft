@@ -7,6 +7,15 @@ from test_pdf_ops import form_fixture
 from prepare_suite.core import execute
 
 class RenderRegressions(unittest.TestCase):
+    @unittest.skipUnless(__import__('shutil').which('tesseract'),'optional local Tesseract not installed')
+    def test_ocr_sees_filled_text_widgets(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td);source=root/'form.pdf';filled=root/'filled.pdf';form_fixture(source)
+            execute({'source':str(source),'output':str(filled),'target':'pdf','options':{'action':'fill','fields':{'name':'VISIBLE NAME','agree':True}}})
+            output=root/'ocr.txt'
+            execute({'source':str(filled),'output':str(output),'target':'ocr-txt','options':{'pages':[0],'dpi':200}})
+            self.assertIn('VISIBLE NAME',output.read_text())
+
     def test_filled_widgets_are_visible_in_preview_and_raster(self):
         with tempfile.TemporaryDirectory() as td:
             root=Path(td);source=root/'form.pdf';filled=root/'filled.pdf';form_fixture(source)

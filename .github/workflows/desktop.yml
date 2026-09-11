@@ -53,6 +53,7 @@ jobs:
             python desktop/check_frozen.py build/desktop-package/dist/Prepare-Desktop/Prepare-Desktop
           fi
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
         with:
           name: desktop-${{ runner.os }}-${{ runner.arch }}
           path: build/Prepare-*-desktop-*.zip*
