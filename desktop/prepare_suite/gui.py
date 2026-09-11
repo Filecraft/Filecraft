@@ -65,6 +65,7 @@ class App:
         ttk.Entry(requirements,textvariable=self.max_pages,width=14).grid(row=1,column=1)
         ttk.Button(requirements,text='Import profile…',command=self.import_profile).grid(row=2,column=0)
         ttk.Button(requirements,text='Clear requirements',command=self.clear_requirements).grid(row=2,column=1)
+        self.editable_controls=[self.target_box]+[widgets[1] for widgets in self.option_widgets.values()]+[w for w in requirements.winfo_children() if isinstance(w,(ttk.Entry,ttk.Button))]
         ttk.Label(requirements,textvariable=self.requirement_status,wraplength=430).grid(row=3,column=0,columnspan=2,sticky='w')
         buttons=ttk.Frame(left);buttons.pack(fill='x',pady=10)
         self.save_button=ttk.Button(buttons,text='4. Export new copy…',command=self.save);self.save_button.pack(side='left')
@@ -80,6 +81,9 @@ class App:
         ttk.Label(outer,textvariable=self.status,wraplength=950).pack(fill='x',pady=(10,0))
         root.protocol('WM_DELETE_WINDOW',self.close)
         root.after(60,self.poll)
+        self.configuration_revision=0
+        for var in (self.target,self.action,self.max_bytes,self.max_pages,self.pages,self.rotation,self.page,self.dpi,self.quality,self.password,self.output_password,self.language,self.annotation,self.fields):
+            var.trace_add('write',self.invalidate_export)
     def row(self,label,var,values=None,secret=False):
         n=len(self.options.grid_slaves())//2
         label_widget=ttk.Label(self.options,text=label)
@@ -90,6 +94,11 @@ class App:
         self.options.columnconfigure(1,weight=1)
     def detail(self,text):
         self.details.configure(state='normal');self.details.delete('1.0','end');self.details.insert('1.0',text);self.details.configure(state='disabled')
+    def invalidate_export(self,*args):
+        self.configuration_revision+=1
+        self.output='';self.last_receipt=None;self.receipt_button.configure(state='disabled')
+        self.canvas.delete('all');self.photo=None;self.preview_identity.set('Configuration changed. Export and review a new copy.')
+        self.detail('');self.status.set('Configuration changed. Export again for a current receipt; existing files are unchanged.')
     def update_options(self):
         pdf=Path(self.source).suffix.lower()=='.pdf';target=self.target.get()
         visible={'Image quality (1–95)','Preview / image page'}
@@ -119,6 +128,7 @@ class App:
         except (ValueError,OSError) as exc:self.status.set(str(exc))
 
     def clear_requirements(self):
+        if self.busy:return
         self.profile=None;self.max_bytes.set('');self.max_pages.set('')
         self.requirement_status.set('No requirements selected. Outputs still need visual review.')
 
@@ -154,11 +164,30 @@ class App:
         self.update_options()
         self.status.set('Ready to create a new copy. Existing files will not be replaced.')
         self.detail('Conversion ≠ compression. Outputs can be larger. Re-encoding can lose metadata, quality, formatting, text layers or interactivity. PDF copy/fill/annotation is not sanitization; active content may remain. Use local folders: system file providers can sync to cloud independently.')
-    def get_options(self):
-        pages=[int(n.strip())-1 for n in self.pages.get().split(',')] if self.pages.get().strip() else None
-        if pages is not None and (not pages or any(n<0 for n in pages)):raise ValueError('Pages must be comma-separated positive numbers.')
-        options={'action':self.action.get(),'rotation':int(self.rotation.get()),'page':int(self.page.get())-1,'dpi':int(self.dpi.get()),'quality':int(self.quality.get()),'password':self.password.get(),'output_password':self.output_password.get(),'language':self.language.get(),'annotation':self.annotation.get(),'fields':json.loads(self.fields.get())}
-        if pages is not None:options['pages']=pages
+    def get_options(self,source=None,target=None,preview=False) -> dict:
+        from .core import IMAGE_INPUTS
+        suffix=Path(source or self.source).suffix.lower();target=target or self.target.get()
+        if target in ('zip','gz'):return {}
+        if suffix in IMAGE_INPUTS:
+            return {'page':int(self.page.get())-1,'quality':int(self.quality.get())}
+        if suffix!='.pdf':return {}
+        options:dict={'password':self.password.get()}
+        action=self.action.get() if target=='pdf' else None
+        if target in ('pdf','txt','ocr-pdf','ocr-txt'):
+            pages=[int(n.strip())-1 for n in self.pages.get().split(',')] if self.pages.get().strip() else None
+            if pages is not None:
+                if any(n<0 for n in pages):raise ValueError('Pages must be comma-separated positive numbers.')
+                options['pages']=pages
+        if target in ('png','jpg') or action=='annotate':options['page']=int(self.page.get())-1
+        if target in ('png','jpg','ocr-pdf','ocr-txt') or action=='rasterize':
+            options['dpi']=72 if preview else int(self.dpi.get())
+        if target in ('png','jpg') or action=='rasterize':options['quality']=int(self.quality.get())
+        if target.startswith('ocr-'):options['language']=self.language.get()
+        if target=='pdf':
+            options.update(action=action,rotation=int(self.rotation.get()))
+            if action=='fill':options['fields']=json.loads(self.fields.get())
+            if action=='annotate':options['annotation']=self.annotation.get()
+            if action=='encrypt':options['output_password']=self.output_password.get()
         return options
     def save(self):
         if not self.source or self.busy:return
@@ -166,6 +195,8 @@ class App:
         destination=filedialog.asksaveasfilename(title='Save a new copy — existing files are protected',initialfile=Path(self.source).stem+'-prepared.'+ext,defaultextension='.'+ext)
         if destination:self.begin_export(destination)
     def begin_export(self,destination):
+        if self.busy:return
+        self.invalidate_export()
         try:
             request={'source':self.source,'output':destination,'target':self.target.get(),'options':self.get_options()}
             profile=self.current_profile()
@@ -184,14 +215,17 @@ class App:
             if self.preview_dir:self.preview_dir.cleanup()
             self.preview_dir=tempfile.TemporaryDirectory(prefix='prepare-preview-')
             destination=str(Path(self.preview_dir.name)/'preview.png')
-            options=self.get_options();options['action']='copy';options['dpi']=72
+            options=self.get_options(source=source,target='png',preview=True)
             if use_output and self.output_password.get():options['password']=self.output_password.get()
             self.start({'source':source,'output':destination,'target':'png','options':options},'preview')
         except Exception as exc:self.status.set(str(exc))
     def start(self,request,kind):
         if self.busy:raise ValueError('A job is already running.')
+        self.job_revision=self.configuration_revision
         if kind=='preview':self.preview_request=request
         self.busy=True;self.cancelled=False;self.status.set('Processing locally…');self.cancel_button.configure(state='normal');self.save_button.configure(state='disabled');self.open_button.configure(state='disabled')
+        for widget in self.editable_controls:widget.state(['disabled'])
+        self.receipt_button.configure(state='disabled')
         def run():
             try:
                 kwargs={'start_new_session':True} if os.name=='posix' else {'creationflags':subprocess.CREATE_NO_WINDOW}
@@ -218,6 +252,8 @@ class App:
     def poll(self):
         try:
             kind,response=self.messages.get_nowait();self.busy=False;self.cancel_button.configure(state='disabled');self.save_button.configure(state='normal');self.open_button.configure(state='normal')
+            for widget in self.editable_controls:widget.state(['!disabled'])
+            self.receipt_button.configure(state='normal' if self.last_receipt is not None else 'disabled')
             if not response['ok']:self.status.set(response.get('error','Worker failed.'))
             else:
                 result=response['result']
@@ -230,6 +266,8 @@ class App:
                     self.preview_identity.set(f"{Path(self.preview_request['source']).name} · page {self.preview_request['options']['page']+1} · SHA-256 {result['input_sha256']}")
                     self.detail(json.dumps(result,indent=2))
                 elif kind=='inspect':self.detail(json.dumps(result,indent=2));self.status.set('PDF inspected. No active content was executed.')
+                elif self.job_revision!=self.configuration_revision:
+                    self.status.set('Export finished for an earlier configuration. Its file is unchanged; export again for a current receipt.')
                 else:
                     self.canvas.delete('all');self.photo=None;self.preview_identity.set('Export complete. Preview output to review the new copy.')
                     self.last_receipt=result['receipt'];self.receipt_button.configure(state='normal')
