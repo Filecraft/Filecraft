@@ -39,6 +39,11 @@ def notices(folder):
                     dest=folder/('tcltk-'+str(len(found))+'-'+license_path.name)
                     shutil.copyfile(license_path,dest);found.append(str(license_path))
     if not found:raise RuntimeError('Tcl/Tk redistribution license not found; do not publish this bundle.')
+    if platform.system()=='Darwin' and platform.machine().lower()=='x86_64':
+        prefix=Path(subprocess.check_output(['brew','--prefix','openssl@3'],text=True).strip())
+        license_path=prefix/'LICENSE.txt'
+        if not license_path.is_file():raise RuntimeError('Static Intel OpenSSL license is required.')
+        shutil.copyfile(license_path,folder/'OPENSSL-LICENSE.txt')
     (folder/'DEPENDENCIES.json').write_text(json.dumps(inventory,indent=2),encoding='utf-8')
     shutil.copyfile(ROOT/'LICENSE',folder/'PREPARE-LICENSE')
 
