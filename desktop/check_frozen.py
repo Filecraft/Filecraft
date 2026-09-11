@@ -39,4 +39,19 @@ with tempfile.TemporaryDirectory() as td:
             assert len(checked.pages)==1
         else:
             with Image.open(output) as image:assert image.width>0
-print('PASS frozen worker: image/PDF/archive exports, PDF preview, AES and rasterization')
+    from reportlab.pdfgen import canvas
+    fitting=folder/'fit-source.pdf'
+    doc=canvas.Canvas(str(fitting),pageCompression=0)
+    doc.drawString(20,100,'Synthetic auto-fit retained text')
+    for _ in range(2000):doc.line(10,20,100,200)
+    doc.save()
+    for name,limit,recipe in [('exact',fitting.stat().st_size,'original'),('fit',5000,'structural-optimize')]:
+        out=folder/(name+'.pdf')
+        proc=subprocess.run([str(executable),'prepare',str(fitting),'--output',str(out),'--target','pdf','--auto-fit','--max-bytes',str(limit)],capture_output=True,text=True,timeout=60)
+        assert proc.returncode==0,(proc.stdout,proc.stderr)
+        data=json.loads(proc.stdout)['result'];assert data['receipt']['candidates']['selected']==recipe
+        assert data['receipt']['output']['sha256']==hashlib.sha256(out.read_bytes()).hexdigest()
+        assert out.stat().st_size<=limit
+        if recipe=='original':assert out.read_bytes()==fitting.read_bytes()
+        else:assert PdfReader(out).pages[0].extract_text()==PdfReader(fitting).pages[0].extract_text()
+print('PASS frozen worker: image/PDF/archive, preview, AES, rasterization and exact/optimized auto-fit')

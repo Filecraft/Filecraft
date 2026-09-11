@@ -67,6 +67,15 @@ def execute(request):
     from .requirements import validate_profile, output_facts, receipt
     from . import __version__
     profile=validate_profile(request['profile']) if 'profile' in request else None
+    if options.get('action') == 'fit':
+        if source.suffix.lower() != '.pdf' or target != 'pdf':
+            raise ValueError('Auto-fit supports PDF-to-PDF only.')
+        if profile is None or 'max' not in profile['constraints'].get('bytes', {}):
+            raise ValueError('Auto-fit requires explicit maximum bytes in your requirements.')
+        if (set(options) - {'action', 'rotation', 'password'} or
+                type(options.get('rotation', 0)) is not int or options.get('rotation', 0) != 0 or
+                options.get('password', '') != ''):
+            raise ValueError('Auto-fit cannot combine pages, rotation, passwords or other export options.')
     extension={'ocr-pdf':'pdf','ocr-txt':'txt'}.get(target,target)
     aliases={'jpg':{'jpg','jpeg'},'tiff':{'tiff','tif'}}
     if destination.suffix.lower().lstrip('.') not in aliases.get(extension,{extension}):
@@ -85,7 +94,11 @@ def execute(request):
         snapshot.write_bytes(data)
         digest=hashlib.sha256(data).hexdigest()
         staged=Path(directory)/('output.'+target)
-        if target == 'zip':
+        if options.get('action') == 'fit':
+            from .candidates import fit
+            staged.touch(mode=0o600)
+            metadata=fit(snapshot,staged,profile,destination.name)
+        elif target == 'zip':
             with zipfile.ZipFile(staged,'x',compression=zipfile.ZIP_DEFLATED) as archive:
                 archive.write(snapshot,arcname=source.name)
             with zipfile.ZipFile(staged) as archive:
@@ -117,6 +130,7 @@ def execute(request):
         output_digest=hashlib.sha256(staged.read_bytes()).hexdigest()
         facts=output_facts(staged,target,options.get('output_password',''),destination.name)
         evidence=receipt(digest,len(data),output_digest,facts,profile,__version__)
+        if 'candidates' in metadata:evidence['candidates']=metadata.pop('candidates')
         if evidence['readiness']['status']=='NOT_READY':
             raise ValueError('Output fails your requirements; no copy was published. Adjust the transformation or requirements.')
         # Hardlink publication is atomic and refuses a destination created meanwhile.

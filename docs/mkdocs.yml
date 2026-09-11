@@ -6,6 +6,7 @@ site_dir: ../build/technical-docs
 use_directory_urls: true
 nav:
   - Overview: GUIDE.md
+  - PDF auto-fit: AUTO-FIT.md
   - Migration: MIGRATION.md
   - Online assistance: ONLINE-ASSISTANCE.md
   - Documentation hosting: DOCUMENTATION-HOSTING.md

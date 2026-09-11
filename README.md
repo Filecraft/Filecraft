@@ -3,7 +3,7 @@
 ### Make the right copy. Know what changed.
 
 Local document preparation for Windows, macOS, Linux and the browser.
-Set requirements, prepare a separate copy, verify the result and keep a receipt.
+Set requirements, try bounded PDF auto-fit candidates, verify the result and keep a receipt.
 No account. No document upload. No subscription gate.
 
 **[Download the current release](https://filecraft.github.io/download/)** ·
@@ -36,6 +36,12 @@ Windows/Linux x64, Apple Silicon and Intel Mac packages are qualified through
 native CI. Binaries are unsigned/not notarized; follow your organization’s policy.
 Browser extensions are developer-mode/temporary-install previews, not store listings.
 Mobile development is retired; historical releases are preserved in the archive.
+
+## PDF auto-fit
+
+    Filecraft-Desktop prepare input.pdf --target pdf --output fitted.pdf --max-bytes 2000000 --auto-fit
+
+Try original bytes first, then structural compression. Never publish a larger candidate; refuse if neither meets every requirement. No rasterization, no model, no upload. [Limits and evidence](docs/AUTO-FIT.md).
 
 ## Develop and automate
 

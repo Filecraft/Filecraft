@@ -102,3 +102,7 @@ files may remain after forced cancellation; they are local, not uploaded.
 
 Mobile store distribution and Apple notarization are not provided by this beta.
 The existing Android developer experiment and browser packages remain separate.
+
+## Bounded PDF auto-fit
+
+Choose the PDF `fit` operation with an explicit Maximum bytes, or use CLI `--auto-fit`. Original bytes are preferred; structural compression is tried only when needed. No larger candidate is published. Encrypted/signature PDFs and incompatible transformations are refused. See [AUTO-FIT.md](../docs/AUTO-FIT.md) for exact limits.

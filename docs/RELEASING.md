@@ -1,63 +1,32 @@
-# Release checklist
+# Filecraft release checklist
 
-Releases are deliberate maintainer actions, not automatic publications on push.
-The macOS CI workflow checks source and packaging. The official website is
-https://filecraft.github.io/ and publishes `main:/` from the dedicated
-`gonisulaimann/gonisulaimann.github.io` repository. This app repository keeps
-a legacy landing-page redirect; do not edit its old assets to update the live site.
+Release publication is an explicit maintainer action after independent review and exact-source CI. The canonical website is https://filecraft.github.io/, published from `Filecraft/filecraft.github.io`, branch `main:/`.
 
-1. Update the version in `scripts/package.py`, README, CHANGELOG and website.
-2. Run `swift run PrepareChecks`, release checks, warnings-as-errors and stress
-   checks. Record machine, compiler, fixture workload and real measured values.
-3. Run the app repository redirect check (`python3 scripts/check-site.py`).
-   In the dedicated site repository, regenerate HTML docs and run its site
-   checker. Preview the site at narrow and wide widths; check keyboard focus,
-   anchors, download URLs and reduced motion.
-   Run `node scripts/test-site.cjs` and `python3 scripts/test_release_budget.py`.
-4. `bash scripts/package.sh`; inspect the bundle version and arm64 architecture.
-   Packaging rejects a binary ≥2,000,000 bytes, app ≥3,000,000 bytes, or ZIP
-   ≥1,500,000 bytes. Inspect `build/release-size.json`. Do not loosen budgets
-   silently. Keep marketing images outside the app bundle.
-5. Run `codesign --verify --strict build/Prepare.app`. Launch the app and test
-   add, reorder, rotate, margins, compare, cancellation and new-file export.
-6. Unzip into a temporary directory and repeat signature and bundle checks.
-   Confirm LICENSE, NOTICE and icon resources are included.
-7. Review `git diff --cached` for credentials, private samples and generated
-   artifacts. Require green CI before publishing release assets.
-8. Tag the exact reviewed commit and publish the ZIP, checksum, LICENSE and
-   verification report with `gh release create`. Explain signing status in
-   the release notes. Download the assets again and check SHA-256.
-9. Verify the public repository, release and GitHub Pages URL independently.
+Never publish to or modify `gonisulaimann/gonisulaimann.github.io`. The protected personal site is outside this migration. The application repository's `docs/index.html` is a legacy project-Pages redirect only.
 
-## Signing status
+## Current desktop, CLI, workspace and extension release
 
-Current builds use an ad-hoc signature and are **not notarized**. Do not claim
-otherwise or tell users to disable Gatekeeper globally. Users may need to
-approve the app through System Settings → Privacy & Security after attempting
-to open it. Corporate policies may forbid running it; building locally is an
-alternative, not a policy bypass.
+1. Update `product.json`, `desktop/prepare_suite/__init__.py`, current README and changelog. Run `python3 scripts/check_product.py` and `python3 scripts/test_filecraft_identity.py`. Do not change historical tags or rename old assets.
+2. Install `desktop/requirements.txt`; run `PYTHONPATH=desktop python -m unittest discover -s desktop/tests -v` (set the environment variable separately on Windows). Include GUI, candidate/receipt, publication-race and parser regressions. Use synthetic files.
+3. Run browser regressions with `npm --prefix portable ci` and `npm --prefix portable test`. Install the project's Playwright test browsers first when needed. Run `python3 extension/package.py`, package tests and installed Chromium/Edge/Firefox workflow tests.
+4. Run the four-target desktop CI matrix: Windows x64, Linux x64, macOS ARM64 and macOS x64. `python desktop/package.py` creates current Filecraft archives. `desktop/check_frozen.py` must exercise the actual executable, including auto-fit, receipts, AES and rendering. Optional engines are qualified separately.
+5. Audit each downloaded native archive with `python3 scripts/audit_desktop_archive.py <archive.zip>`. Check architecture, current identity, exact project/dependency notices and checksums. The current legal audit supports the Apache 0.9+ line; older packages need their version-specific audit, not a forced current license comparison.
+6. Build browser ZIP with `python3 scripts/package_workbench.py`. Compare reproducible extension rebuilds and verify extracted workflows, not merely ZIP integrity.
+7. Build docs with `python -m mkdocs build --strict -f docs/mkdocs.yml`. Read the Docs hosting is not established by a successful local build; verify any separately authenticated deployment before linking it.
+8. Inspect staged changes for credentials, private fixtures, scraped page bodies and unintended artifacts. Require independent review plus successful CI for the exact release commit. Keep signing, platform and feature limits explicit.
+9. Create an annotated version tag at the reviewed commit. Publish a prerelease with actual tested assets and SHA-256 sidecars. Do not replace a stable release label with a beta merely to make `/releases/latest` point at it; current-beta entry points are the website and README.
+10. Download every public asset without authentication, verify its size/checksum and inspect extracted packages. Verify the published tag, source SHA and release status through GitHub's API.
+11. Sync the separate organization checkout with `python3 scripts/sync_site.py <filecraft-site-checkout>` and `python3 scripts/sync_releases.py <filecraft-site-checkout> --current <published-tag>`. Both must reject other remotes before writing. Generate docs, product pages and sitemap; run site identity/link/SEO, privacy/offline and responsive tests.
+12. Publish the site, wait for deployment, then verify live home/current downloads, `/releases/`, workspace, 404, disclosures, actual assets and every canonical URL. Recheck the protected site's unchanged remote state.
 
-`SIGN_IDENTITY` can select a valid installed Developer ID certificate when
-packaging. That only signs the app. Notarization, ticket stapling and fresh
-Gatekeeper assessment must be completed separately before changing claims.
-Do not publish signing credentials or embed credentials in CI. Intel/universal
-builds require their own hardware testing and correct asset architecture names.
+## Signing and runtime boundaries
 
-## Cross-platform gates for 0.5 and later
+Desktop beta binaries are unsigned/not notarized. No Developer ID, notarization, Windows certificate, app-store approval or hostile-file sandbox is implied. Do not recommend disabling operating-system protection. Keep complete extracted runtimes together. Tesseract and FFmpeg are optional separate local engines, not silently downloaded dependencies.
 
-Run `npm --prefix portable ci`, `npm --prefix portable test`,
-`python3 scripts/package_portable.py`, and `python3 scripts/test_portable_budget.py`.
-Verify Windows and Linux CI artifacts and extracted contents, not just ZIP hashes:
-ZIP host-system metadata can differ while file contents match exactly.
-Use an independent PDF renderer for Portable output. Preserve desktop-browser
-prerequisites and never rename the ZIP to imply a native binary.
+Chromium/Edge extensions use unpacked developer-mode installation; unsigned Firefox packages use temporary installation. Store access, signing, terms and review are separate gates. Safari packaging is not qualified.
 
-For Android run `python3 android/build.py` and actual API 28 / 36 emulator tests.
-Compile success is insufficient: byte-limit exceptions may be swallowed by native
-PDF writers, and APK packaging constraints differ between API levels. Check every
-accepted PDF and resources.arsc storage/alignment. Never publish disposable test
-signatures. Owner signing, physical devices and store/AAB gates are separate.
+## Retained historical source
 
-Publish only after independent review and exact-source platform CI pass. Download
-public artifacts again, validate SHA-256, signature/manifest and source content.
-Only then deploy the dedicated site with new links. Keep the app's legacy redirect.
+The small Swift image utility retains actual `Prepare` and `PrepareChecks` command/bundle identities. If maintaining that legacy surface, use its version-specific instructions and budgets; do not apply its tiny archive budgets to the broader desktop suite. Its CI remains a regression gate, not a new Filecraft native release claim.
+
+Native Android development and CI are retired; no `android/build.py` command belongs in the current checklist. Android source remains in historical tags. No native iOS/iPadOS release is maintained. Historical assets retain their original bytes, names and license terms.

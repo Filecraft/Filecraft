@@ -12,6 +12,7 @@ def main(argv=None):
     sub=parser.add_subparsers(dest='action',required=True)
     prep=sub.add_parser('prepare');prep.add_argument('source');prep.add_argument('--output',required=True);prep.add_argument('--target',required=True)
     prep.add_argument('--profile');prep.add_argument('--max-bytes',type=int);prep.add_argument('--max-pages',type=int)
+    prep.add_argument('--auto-fit',action='store_true',help='Try original then structural PDF optimization; requires maximum bytes.')
     verify=sub.add_parser('verify');verify.add_argument('source');verify.add_argument('--receipt',required=True)
     caps=sub.add_parser('formats');caps.add_argument('source')
     args=parser.parse_args(argv)
@@ -27,6 +28,7 @@ def main(argv=None):
             for key,val in [('bytes',args.max_bytes),('pageCount',args.max_pages)]:
                 if val is not None:profile['constraints'].setdefault(key,{})['max']=val
             req.update(output=args.output,target=args.target,profile=validate_profile(profile))
+            if args.auto_fit:req['options']={'action':'fit'}
         elif args.action=='verify':
             with open(args.receipt,'rb') as f:raw=f.read(65537)
             if len(raw)>65536:raise ValueError('Receipt exceeds request budget.')

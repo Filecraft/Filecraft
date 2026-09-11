@@ -11,7 +11,7 @@ Turning the connection off after loading the web workspace does not enable an AI
 
 There is no trained Filecraft model, licensed training corpus, measured evaluation, hosted inference service, retention contract or operated security boundary. A toggle implying those exist would be deceptive. Uploading documents to an arbitrary provider would undermine the product's local-processing guarantee.
 
-The bounded research in [REPORT.md](../research/filecraft/REPORT.md) supports deterministic constraint-checked candidates before generative processing. A hosted assistant may later draft requirements from user-supplied instructions; it must not autonomously execute a transformation or decide that a private document is safe to upload.
+The bounded research in [REPORT.md](https://github.com/Filecraft/Filecraft/blob/main/research/filecraft/REPORT.md) supports deterministic constraint-checked candidates before generative processing. A hosted assistant may later draft requirements from user-supplied instructions; it must not autonomously execute a transformation or decide that a private document is safe to upload.
 
 ## Prerequisites before online inference ships
 

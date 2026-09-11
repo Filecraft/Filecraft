@@ -44,7 +44,7 @@ class App:
         self.action.trace_add('write',lambda *a:self.update_options())
         ttk.Label(left,text='ZIP/GZ work with any extension (archive compression).\nFormat conversion is limited to the choices shown.',wraplength=460).pack(anchor='w',pady=(0,12))
         self.options=ttk.LabelFrame(left,text='2. Conversion options',padding=10);self.options.pack(fill='x')
-        self.row('PDF operation',self.action,['copy','optimize','rasterize','encrypt','decrypt','fill','annotate'])
+        self.row('PDF operation',self.action,['copy','fit','optimize','rasterize','encrypt','decrypt','fill','annotate'])
         self.row('Pages (e.g. 1,3,2; blank = all)',self.pages)
         self.row('Clockwise rotation',self.rotation,['0','90','180','270'])
         self.row('Preview / image page',self.page)

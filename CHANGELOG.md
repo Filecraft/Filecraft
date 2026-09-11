@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.0-beta.1 — Filecraft
+
+- Prospective identity migration to Filecraft and organization website; historical releases preserved.
+- Bounded PDF auto-fit: exact original or structural compression, full requirement checks, no size growth, candidate receipts.
+- AI contribution guidelines/disclosure, public research synthesis and current-only download entry points.
+- Native Android development retired; browser and Windows/macOS/Linux desktop prioritized.
+- No online inference service or fine-tuned model is claimed.
+
+
 ## 0.9.0-beta.1 — Requirements workspace
 
 - Personal requirements checked before desktop output publication; hash-bound receipts.

@@ -18,6 +18,26 @@ class GUITests(unittest.TestCase):
         for callback in self.root.tk.splitlist(self.root.tk.call('after','info')):
             self.root.after_cancel(callback)
         for widget in self.root.winfo_children():widget.destroy()
+    def test_pdf_fit_selection_and_actual_export(self):
+        from prepare_suite.gui import App
+        from pypdf import PdfWriter
+        app=App(self.root)
+        with tempfile.TemporaryDirectory() as td:
+            source=Path(td)/'source.pdf';output=Path(td)/'fit.pdf'
+            writer=PdfWriter();writer.add_blank_page(width=100,height=200);writer.write(source)
+            app.load_source(str(source))
+            self.assertIn('fit',app.option_widgets['PDF operation'][1]['values'])
+            app.action.set('fit')
+            self.assertEqual(app.get_options(),{'password':'','action':'fit','rotation':0})
+            app.begin_export(str(output));self.wait_for_job(app)
+            self.assertFalse(output.exists());self.assertIn('maximum bytes',app.status.get())
+            app.max_bytes.set(str(source.stat().st_size))
+            app.pages.set('1');app.begin_export(str(output));self.wait_for_job(app)
+            self.assertFalse(output.exists());self.assertIn('Auto-fit',app.status.get())
+            app.pages.set('');app.begin_export(str(output));self.wait_for_job(app)
+            self.assertEqual(output.read_bytes(),source.read_bytes())
+            self.assertEqual(app.last_receipt['candidates']['selected'],'original')
+
     def test_dropdown_and_actual_async_export(self):
         import tkinter as tk
         from prepare_suite.gui import App
