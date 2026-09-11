@@ -32,6 +32,18 @@ def worker():
         return 1
 
 if __name__=='__main__':
+    if '--check-runtime' in sys.argv:
+        # Synthetic packaging diagnostic only; never reads user documents.
+        import io
+        import pypdfium2 as pdfium
+        from pypdf import PdfWriter
+        writer=PdfWriter();writer.add_blank_page(width=100,height=200)
+        plain=io.BytesIO();writer.write(plain)
+        with pdfium.PdfDocument(plain.getvalue()) as document:
+            page=document[0];bitmap=page.render();bitmap.close();page.close()
+        writer.encrypt('synthetic-runtime-password',algorithm='AES-256')
+        encrypted=io.BytesIO();writer.write(encrypted)
+        print('PASS PDF renderer and AES runtime');sys.exit(0)
     if '--worker' in sys.argv:sys.exit(worker())
     if '--version' in sys.argv:
         from prepare_suite import __version__

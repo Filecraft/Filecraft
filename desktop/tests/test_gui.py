@@ -53,10 +53,13 @@ class GUITests(unittest.TestCase):
                 until=time.monotonic()+20
                 while app.busy and time.monotonic()<until:root.update();time.sleep(.02)
                 self.assertIsNotNone(app.photo,app.status.get())
+                self.assertIn('source.pdf',app.preview_identity.get())
+                self.assertIn('SHA-256',app.preview_identity.get())
                 app.target.set('pdf');app.rotation.set('90');app.begin_export(str(output))
                 until=time.monotonic()+20
                 while app.busy and time.monotonic()<until:root.update();time.sleep(.02)
                 self.assertTrue(output.exists(),app.status.get())
+                self.assertIsNone(app.photo)
                 app.preview(True)
                 until=time.monotonic()+20
                 while app.busy and time.monotonic()<until:root.update();time.sleep(.02)

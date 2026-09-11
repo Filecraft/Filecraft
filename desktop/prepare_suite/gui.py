@@ -21,6 +21,7 @@ def command():
 class App:
     def __init__(self,root):
         self.root=root;root.title('Prepare — local document suite');root.geometry('1040x780');root.minsize(840,680)
+        self.preview_identity=tk.StringVar(value='No preview rendered.');self.preview_request={}
         self.source='';self.busy=False;self.proc=None;self.messages=queue.Queue();self.output='';self.preview_dir=None;self.photo=None
         self.target=tk.StringVar();self.action=tk.StringVar(value='copy');self.password=tk.StringVar();self.output_password=tk.StringVar()
         self.pages=tk.StringVar();self.rotation=tk.StringVar(value='0');self.dpi=tk.StringVar(value='120');self.quality=tk.StringVar(value='85');self.language=tk.StringVar(value='eng')
@@ -61,6 +62,7 @@ class App:
         ttk.Button(pb,text='Preview output',command=lambda:self.preview(True)).pack(side='left',padx=6)
         self.canvas=tk.Canvas(right,width=330,height=365,background='#e8e9eb',highlightthickness=0);self.canvas.pack(fill='both',expand=True,pady=8)
         ttk.Label(right,text='Rendered in a separate process. Review every page.\nPreview is not sanitization or a readability guarantee.',wraplength=360).pack(anchor='w')
+        ttk.Label(right,textvariable=self.preview_identity,wraplength=350).pack(anchor='w')
         self.details=tk.Text(outer,height=5,wrap='word',state='disabled');self.details.pack(fill='x')
         ttk.Label(outer,textvariable=self.status,wraplength=950).pack(fill='x',pady=(10,0))
         root.protocol('WM_DELETE_WINDOW',self.close)
@@ -82,6 +84,7 @@ class App:
         if self.busy:raise ValueError('Cancel or finish the current job first.')
         caps=capabilities(path);self.source=path;self.output='';self.source_label.configure(text=path)
         self.target_box.configure(values=caps['targets']);self.target.set(caps['targets'][0]);self.canvas.delete('all')
+        self.photo=None;self.preview_identity.set('No preview rendered.')
         self.password.set('');self.output_password.set('');self.pages.set('');self.fields.set('{}');self.action.set('copy');self.explain()
     def explain(self):
         self.status.set('Ready to create a new copy. Existing files will not be replaced.')
@@ -118,6 +121,7 @@ class App:
         except Exception as exc:self.status.set(str(exc))
     def start(self,request,kind):
         if self.busy:raise ValueError('A job is already running.')
+        if kind=='preview':self.preview_request=request
         self.busy=True;self.cancelled=False;self.status.set('Processing locally…');self.cancel_button.configure(state='normal');self.save_button.configure(state='disabled');self.open_button.configure(state='disabled')
         def run():
             try:
@@ -154,8 +158,11 @@ class App:
                         image.thumbnail((max(100,self.canvas.winfo_width()-10),max(100,self.canvas.winfo_height()-10)))
                         self.photo=ImageTk.PhotoImage(image.copy())
                     self.canvas.delete('all');self.canvas.create_image(self.canvas.winfo_width()/2,self.canvas.winfo_height()/2,image=self.photo);self.status.set('Preview rendered locally. Inspect other pages before sharing.')
+                    self.preview_identity.set(f"{Path(self.preview_request['source']).name} · page {self.preview_request['options']['page']+1} · SHA-256 {result['input_sha256']}")
+                    self.detail(json.dumps(result,indent=2))
                 elif kind=='inspect':self.detail(json.dumps(result,indent=2));self.status.set('PDF inspected. No active content was executed.')
                 else:
+                    self.canvas.delete('all');self.photo=None;self.preview_identity.set('Export complete. Preview output to review the new copy.')
                     self.output=result['output'];self.status.set(f"Saved {result['bytes']:,} bytes from {result['input_bytes']:,} bytes. Original unchanged.");self.detail(json.dumps(result,indent=2))
         except queue.Empty:pass
         finally:

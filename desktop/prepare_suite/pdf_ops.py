@@ -101,8 +101,13 @@ def _render(source, password, page_index, dpi):
     with _reader(source, password) as reader:
         geometry = _geometry(reader.pages[_page(page_index, len(reader.pages))])
     scale = dpi / 72 * geometry['user_unit']
-    # No init_forms / JS platform / action callbacks: render stored appearances.
+    # Initialize appearance rendering only: no JS platform, callbacks or action calls.
     with pdfium.PdfDocument(source, password=password) as document:
+        import pypdfium2.raw as raw
+        if document.get_formtype() in (raw.FORMTYPE_XFA_FULL, raw.FORMTYPE_XFA_FOREGROUND):
+            raise _Invalid('XFA visual rendering is unsupported; use an ordinary AcroForm PDF.')
+        config = raw.FPDF_FORMFILLINFO(version=2, xfa_disabled=True)
+        document.init_forms(config=config)
         if not 1 <= len(document) <= MAX_PAGES:
             raise _Invalid('Use a PDF containing between 1 and 100 pages.')
         with closing(document[_page(page_index, len(document))]) as page:
@@ -113,7 +118,7 @@ def _render(source, password, page_index, dpi):
             if pixels[0] * pixels[1] > MAX_PIXELS:
                 raise _Invalid('Page exceeds the 20 million pixel budget; lower DPI or crop the source.')
             with closing(page.render(scale=scale, draw_annots=True,
-                                     may_draw_forms=False, limit_image_cache=True)) as bitmap:
+                                     may_draw_forms=True, limit_image_cache=True)) as bitmap:
                 image = bitmap.to_pil()
                 try:
                     yield image

@@ -8,13 +8,14 @@ from PIL import Image
 from pypdf import PdfReader
 
 executable=Path(sys.argv[1]).resolve()
+subprocess.run([str(executable),'--check-runtime'],check=True,timeout=60)
 with tempfile.TemporaryDirectory() as td:
     folder=Path(td);source=folder/'input.png';Image.new('RGB',(80,60),'navy').save(source)
     for target in ['jpg','pdf','zip']:
         output=folder/('out.'+target)
         request={'source':str(source),'output':str(output),'target':target}
         proc=subprocess.run([str(executable),'--worker'],input=json.dumps(request),text=True,capture_output=True,timeout=60)
-        assert proc.returncode==0,(proc.stdout,proc.stderr)
+        assert proc.returncode==0,(target,proc.stdout,proc.stderr)
         result=json.loads(proc.stdout);assert result['ok'],result
         assert output.stat().st_size==result['result']['bytes']
     assert len(PdfReader(folder/'out.pdf').pages)==1
@@ -23,7 +24,7 @@ with tempfile.TemporaryDirectory() as td:
     for target,options in [('png',{}),('pdf',{'action':'encrypt','output_password':'synthetic-password'}),('pdf',{'action':'rasterize'})]:
         output=folder/(options.get('action','preview')+'.'+target)
         proc=subprocess.run([str(executable),'--worker'],input=json.dumps({'source':str(source),'output':str(output),'target':target,'options':options}),text=True,capture_output=True,timeout=60)
-        assert proc.returncode==0,(proc.stdout,proc.stderr)
+        assert proc.returncode==0,(target,proc.stdout,proc.stderr)
         assert json.loads(proc.stdout)['ok'],proc.stdout
         if target=='pdf':
             checked=PdfReader(output)
