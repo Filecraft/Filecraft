@@ -25,6 +25,9 @@ jobs:
           python-version: '3.13'
       - name: Install test/build dependencies
         run: python -m pip install -r desktop/requirements.txt pyinstaller==6.22.2
+      - name: Statically link Intel crypto to avoid Python OpenSSL collision
+        if: matrix.os == 'macos-15-intel'
+        run: OPENSSL_STATIC=1 python -m pip install --no-cache-dir --force-reinstall --no-binary cryptography cryptography==50.0.1
       - name: Linux display and local engines
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y xvfb python3-tk tesseract-ocr ffmpeg
