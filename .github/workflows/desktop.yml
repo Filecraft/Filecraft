@@ -33,9 +33,13 @@ jobs:
         run: xvfb-run -a python -m unittest discover -s desktop/tests -v
         env:
           PYTHONPATH: desktop
+      - name: Diagnose local OCR installation
+        shell: bash
+        run: |
+          python -c "import shutil,subprocess,os; p=shutil.which('tesseract'); print('engine',p,'data',os.environ.get('TESSDATA_PREFIX')); subprocess.run([p,'--version']) if p else None; subprocess.run([p,'--list-langs']) if p else None"
       - name: Tests including native UI (Windows/macOS)
         if: runner.os != 'Linux'
-        run: python -m unittest discover -s desktop/tests -v
+        run: python -u -m unittest discover -s desktop/tests -v
         env:
           PYTHONPATH: desktop
       - name: Build full desktop package
