@@ -64,11 +64,13 @@ public final class Engine {
                     if(progress!=null) progress.page(i+1,inputs.size(),edge);
                 }
                 token.check();
-                try(OutputStream out=new Policy.LimitedOutput(new FileOutputStream(output),limit,token)) {
-                    document.writeTo(out);
+                try(Policy.LimitedOutput out=new Policy.LimitedOutput(new FileOutputStream(output),limit,token)) {
+                    try { document.writeTo(out); }
+                    finally { out.checkFailure(); } // Native may swallow or wrap the callback IOException.
                 }
                 token.check();
-                if(output.length()==0 || output.length()>limit) throw new Policy.TooLarge();
+                if(output.length()==0) throw new IOException("PDF writer produced no output.");
+                if(output.length()>limit) throw new Policy.TooLarge();
                 accepted=true; return output;
             } catch(Policy.TooLarge tooLarge) {
                 token.check(); // Try a smaller raster, never return an oversized file.

@@ -78,6 +78,17 @@ public final class MainActivity extends Activity {
         clear=button(body,"Clear images and prepared copy",v->{ clearPrepared(); images.clear(); selection.setText("No images selected."); status.setText("Workspace cleared. Saved copies and originals are unchanged."); update(); }); clear.setId(CLEAR_ID);
         status=label(body,state==null?"Choose images to begin.":"Workspace reset after recreation; originals and saved copies are unchanged.");
         status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        layout.setOnItemSelectedListener(settingListener(layout));
+        margin.setOnItemSelectedListener(settingListener(margin));
+        limit.addTextChangedListener(new android.text.TextWatcher() {
+            private String previous=limit.getText().toString();
+            public void beforeTextChanged(CharSequence s,int start,int count,int after) { }
+            public void onTextChanged(CharSequence s,int start,int before,int count) { }
+            public void afterTextChanged(android.text.Editable value) {
+                String current=value.toString();
+                if(!current.equals(previous)) { previous=current; outputSettingsChanged(); }
+            }
+        });
         update();
     }
     private TextView label(LinearLayout body,String text) {
@@ -96,6 +107,21 @@ public final class MainActivity extends Activity {
         boolean idle=!busy&&!pickerOpen;
         pick.setEnabled(idle); prepare.setEnabled(idle&&!images.isEmpty()); save.setEnabled(idle&&prepared!=null);
         clear.setEnabled(idle); cancel.setEnabled(busy); layout.setEnabled(idle); margin.setEnabled(idle); limit.setEnabled(idle);
+    }
+    private AdapterView.OnItemSelectedListener settingListener(Spinner spinner) {
+        return new AdapterView.OnItemSelectedListener() {
+            private int previous=spinner.getSelectedItemPosition();
+            public void onItemSelected(AdapterView<?> parent,View view,int position,long id) {
+                if(position!=previous) { previous=position; outputSettingsChanged(); }
+            }
+            public void onNothingSelected(AdapterView<?> parent) { }
+        };
+    }
+    private void outputSettingsChanged() {
+        if(prepared==null) return;
+        clearPrepared();
+        status.setText("Output settings changed. Prepare again before saving a copy.");
+        update();
     }
     private void clearPrepared() { if(prepared!=null) prepared.delete(); prepared=null; }
     private void openPicker() {

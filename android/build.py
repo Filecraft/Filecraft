@@ -5,6 +5,7 @@ import hashlib
 import os
 from pathlib import Path
 import shutil
+import struct
 import subprocess
 import sys
 import zipfile
@@ -41,9 +42,33 @@ def normalize(source, destination, extra):
     with zipfile.ZipFile(destination, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as out:
         for name, content in sorted(entries.items()):
             info = zipfile.ZipInfo(name, (2024, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
+            info.compress_type = zipfile.ZIP_STORED if name == "resources.arsc" else zipfile.ZIP_DEFLATED
             info.external_attr = 0o644 << 16
             out.writestr(info, content)
+
+def verify_resources(apk, required=True):
+    with zipfile.ZipFile(apk) as archive:
+        names = archive.namelist()
+        if "resources.arsc" not in names:
+            if required:
+                raise AssertionError("resources.arsc missing")
+            return
+        if names.count("resources.arsc") != 1:
+            raise AssertionError("duplicate resources.arsc")
+        info = archive.getinfo("resources.arsc")
+        if info.compress_type != zipfile.ZIP_STORED:
+            raise AssertionError("resources.arsc must be ZIP_STORED")
+        with open(apk, "rb") as stream:
+            stream.seek(info.header_offset)
+            header = stream.read(30)
+        if header[:4] != b"PK\x03\x04":
+            raise AssertionError("invalid ZIP local header")
+        method = struct.unpack_from("<H", header, 8)[0]
+        name_len, extra_len = struct.unpack_from("<HH", header, 26)
+        offset = info.header_offset + 30 + name_len + extra_len
+        if method != zipfile.ZIP_STORED or offset % 4:
+            raise AssertionError("resources.arsc must be stored and 4-byte aligned in local header")
+
 
 def apk(test=False):
     if not ANDROID.is_file() or not (TOOLS / ("aapt2" + EXT)).is_file():
@@ -75,6 +100,9 @@ def apk(test=False):
     target = BUILD / ("prepare-tests-unsigned.apk" if test else "prepare-unsigned.apk")
     run(TOOLS / ("zipalign" + EXT), "-f", "4", raw, target)
     run(TOOLS / ("zipalign" + EXT), "-c", "4", target)
+    # Inspect the actual aligned artifact, not just the normalizer's intention.
+    verify_resources(target, required=not test)
+    print(f"PASS {target.name}: resources.arsc stored and 4-byte aligned (if present)")
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     target.with_suffix(".apk.sha256").write_text(digest + "  " + target.name + "\n")
     if not test and target.stat().st_size >= 1000000: sys.exit("APK exceeds 1 MB hard budget")
@@ -86,5 +114,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     core()
     if not args.core:
+        run(sys.executable, "-m", "unittest", "discover", "-s", ROOT / "tests", "-p", "test_release_gates.py", "-v")
         apk()
         apk(test=True)

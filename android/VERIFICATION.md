@@ -19,6 +19,16 @@
   `0.5.0-experimental` / `500`.
 - ZIP inspection: DEX present; no signature entries. Release output stays unsigned.
 
+## First remote emulator run: failed, publication blocked
+
+Parent run 34587805358 at commit 9546a4dd88a962c64c43e471eaccc390802a8899
+executed actual API 28 and API 36 emulators. API 28 passed JPEG/PNG PDF pixel,
+layout and EXIF tests, then failed `oversize accepted`. API 36 rejected APK
+installation because resources.arsc was compressed instead of stored/aligned.
+Local compilation and JVM success did not catch these framework/package bugs.
+Do not publish this APK or claim the native byte-limit gate passes. Independent
+review and fixes with rerun emulator evidence are required.
+
 ## Explicitly not passed
 
 Local ARM64 emulator system-image download was too slow for the bounded task and
