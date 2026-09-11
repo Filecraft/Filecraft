@@ -4,7 +4,7 @@
   <p><strong>A smaller file. A simpler handoff.</strong></p>
   <p>Scans and photos → a size-constrained PDF. Entirely on your Mac.</p>
   <p>
-    <a href="https://gonisulaimann.github.io/Prepare/">Website</a> ·
+    <a href="https://gonisulaimann.github.io/">Website</a> ·
     <a href="https://github.com/gonisulaimann/Prepare/releases/latest">Download</a> ·
     <a href="CONTRIBUTING.md">Contribute</a>
   </p>
@@ -49,6 +49,20 @@ Just native SwiftUI, ImageIO, CoreGraphics and PDFKit, with no package dependenc
   attempts, progress reporting and cooperative cancellation.
 
 This is intentionally a focused image-to-PDF utility, not a general PDF editor.
+
+## Windows and Linux: Portable preview
+
+[Download the offline Portable preview](https://github.com/gonisulaimann/Prepare/releases/tag/v0.5.0-portable-preview.1).
+Extract the whole ZIP and open `Prepare-Portable/index.html` in a current desktop
+Chrome, Edge or Firefox browser. No server or internet needed after download.
+This is a 16,642-byte browser companion, not a native Windows/Linux binary.
+The stable Mac app below remains v0.4.0.
+
+Portable supports JPEG/PNG, compression profiles, DPI ceilings, margins, page
+ordering and left/right spread splitting. Windows/Linux Chromium and Firefox
+[CI checks passed](https://github.com/gonisulaimann/Prepare/actions/runs/34558322793).
+Read the preview release notes for input, browser, privacy and export limitations.
+[Portable source at its tested tag](https://github.com/gonisulaimann/Prepare/tree/v0.5.0-portable-preview.1/portable).
 
 ## Download and install
 
@@ -160,6 +174,14 @@ See [verification results](docs/VERIFICATION.md) for the measured release run
 and its hardware/workload limits. There are no unsupported “instant” or
 universal performance promises here.
 
+## Website and documentation
+
+The official site is https://gonisulaimann.github.io/.
+[Browsable documentation](https://gonisulaimann.github.io/documentation/) and
+website sources are maintained in the dedicated
+[site repository](https://github.com/gonisulaimann/gonisulaimann.github.io).
+Application release assets remain in this repository.
+
 ## Project map
 
 ```text
@@ -168,7 +190,7 @@ Sources/PrepareCore/    Validation, ordering, presets, profiles and bounded PDF 
 Sources/PrepareWorkspace/ Testable main-actor state and bounded preview coordination
 Sources/PrepareChecks/ Synthetic integration and regression checks
 scripts/               App packaging, icon generation and website checks
-docs/                  Dependency-free GitHub Pages website and technical docs
+docs/                  Legacy site redirect and historical technical docs
 .github/               macOS CI, issue forms and pull-request checklist
 ```
 

@@ -1,14 +1,18 @@
 # Release checklist
 
 Releases are deliberate maintainer actions, not automatic publications on push.
-The macOS CI workflow checks source and packaging. GitHub Pages serves `docs/`
-from `main`; there is no JavaScript build toolchain or website dependency tree.
+The macOS CI workflow checks source and packaging. The official website is
+https://gonisulaimann.github.io/ and publishes `main:/` from the dedicated
+`gonisulaimann/gonisulaimann.github.io` repository. This app repository keeps
+a legacy landing-page redirect; do not edit its old assets to update the live site.
 
 1. Update the version in `scripts/package.py`, README, CHANGELOG and website.
 2. Run `swift run PrepareChecks`, release checks, warnings-as-errors and stress
    checks. Record machine, compiler, fixture workload and real measured values.
-3. Run `python3 scripts/check-site.py`, then preview `docs/` at narrow and wide
-   widths. Check keyboard focus, anchors, download URLs and reduced motion.
+3. Run the app repository redirect check (`python3 scripts/check-site.py`).
+   In the dedicated site repository, regenerate HTML docs and run its site
+   checker. Preview the site at narrow and wide widths; check keyboard focus,
+   anchors, download URLs and reduced motion.
    Run `node scripts/test-site.cjs` and `python3 scripts/test_release_budget.py`.
 4. `bash scripts/package.sh`; inspect the bundle version and arm64 architecture.
    Packaging rejects a binary ≥2,000,000 bytes, app ≥3,000,000 bytes, or ZIP
