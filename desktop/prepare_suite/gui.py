@@ -82,8 +82,9 @@ class App:
         root.protocol('WM_DELETE_WINDOW',self.close)
         root.after(60,self.poll)
         self.configuration_revision=0
-        for var in (self.target,self.action,self.max_bytes,self.max_pages,self.pages,self.rotation,self.page,self.dpi,self.quality,self.password,self.output_password,self.language,self.annotation,self.fields):
+        for var in (self.target,self.action,self.max_bytes,self.max_pages,self.pages,self.rotation,self.dpi,self.quality,self.password,self.output_password,self.language,self.annotation,self.fields):
             var.trace_add('write',self.invalidate_export)
+        self.page.trace_add('write',self.page_changed)
     def row(self,label,var,values=None,secret=False):
         n=len(self.options.grid_slaves())//2
         label_widget=ttk.Label(self.options,text=label)
@@ -94,6 +95,14 @@ class App:
         self.options.columnconfigure(1,weight=1)
     def detail(self,text):
         self.details.configure(state='normal');self.details.delete('1.0','end');self.details.insert('1.0',text);self.details.configure(state='disabled')
+    def page_changed(self,*args):
+        # Navigation does not alter a PDF copy. Image/annotation page selection does.
+        if (Path(self.source).suffix.lower()=='.pdf' and self.target.get() not in ('png','jpg')
+                and not (self.target.get()=='pdf' and self.action.get()=='annotate')):
+            self.canvas.delete('all');self.photo=None
+            self.preview_identity.set('Preview page changed. Render the selected page; saved output and receipt are unchanged.')
+            return
+        self.invalidate_export()
     def invalidate_export(self,*args):
         self.configuration_revision+=1
         self.output='';self.last_receipt=None;self.receipt_button.configure(state='disabled')

@@ -226,6 +226,36 @@ class GUITests(unittest.TestCase):
         app.action.set('rasterize')
         with self.assertRaises(ValueError):app.get_options()
 
+    def test_preview_page_navigation_preserves_pdf_copy_receipt(self):
+        from prepare_suite.gui import App
+        from pypdf import PdfWriter
+        app=App(self.root)
+        with tempfile.TemporaryDirectory() as td:
+            source=Path(td)/'two.pdf';output=Path(td)/'copy.pdf'
+            writer=PdfWriter();writer.add_blank_page(width=100,height=200);writer.add_blank_page(width=200,height=100)
+            with source.open('wb') as stream:writer.write(stream)
+            app.load_source(str(source));app.begin_export(str(output));self.wait_for_job(app)
+            receipt=app.last_receipt;original=output.read_bytes()
+            app.preview(True);self.wait_for_job(app)
+            app.page.set('2')
+            self.assertEqual(app.output,str(output))
+            self.assertIs(app.last_receipt,receipt)
+            self.assertIsNone(app.photo)
+            app.preview(True);self.wait_for_job(app)
+            try:
+                self.assertIsNotNone(app.photo,app.status.get())
+                self.assertIn('page 2',app.preview_identity.get())
+                self.assertIs(app.last_receipt,receipt)
+                self.assertEqual(output.read_bytes(),original)
+                app.action.set('annotate');app.annotation.set('Synthetic review');app.begin_export(str(Path(td)/'annotated.pdf'));self.wait_for_job(app)
+                self.assertIsNotNone(app.last_receipt,app.status.get())
+                app.page.set('1');self.assertIsNone(app.last_receipt)
+                app.target.set('png');app.begin_export(str(Path(td)/'page.png'));self.wait_for_job(app)
+                self.assertIsNotNone(app.last_receipt,app.status.get())
+                app.page.set('2');self.assertIsNone(app.last_receipt)
+            finally:
+                if app.preview_dir:app.preview_dir.cleanup()
+
     def test_pdf_source_and_output_previews(self):
         import tkinter as tk
         from prepare_suite.gui import App
