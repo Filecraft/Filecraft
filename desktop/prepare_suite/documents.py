@@ -36,7 +36,7 @@ def _pdf_lines(line, font, size, width):
         if char not in widths:
             widths[char] = stringWidth(char, font, size)
         advance = widths[char]
-        if pending and used + advance > width:
+        while pending and used + advance > width:
             boundary = max((i for i, c in enumerate(pending) if c.isspace()), default=-1)
             if boundary > 0:
                 yield pending[:boundary]

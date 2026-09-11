@@ -8,6 +8,18 @@ from prepare_suite.core import execute
 
 
 class DocumentRegressionTests(unittest.TestCase):
+    def test_wrap_rechecks_suffix_plus_incoming_glyph(self):
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+        import reportlab
+        from prepare_suite.documents import _pdf_lines
+        pdfmetrics.registerFont(TTFont('PrepareVera',str(Path(reportlab.__file__).parent/'fonts'/'Vera.ttf')))
+        for prefix in ['i ', 'ii ', 'a ', ' ']:
+            for glyph in ['@','W','M','i']:
+                for count in range(1,150):
+                    for line in _pdf_lines(prefix+glyph*count,'PrepareVera',11,515):
+                        self.assertLessEqual(pdfmetrics.stringWidth(line,'PrepareVera',11),515)
+
     def _extract(self, ext, entries):
         with tempfile.TemporaryDirectory() as td:
             source = Path(td) / ('input.' + ext)
