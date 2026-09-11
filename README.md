@@ -18,7 +18,7 @@ acceptance, visual fidelity, accessibility or safety.
 
 | Surface | Actual scope | Status |
 | --- | --- | --- |
-| Desktop | Images, text-first documents, PDF operations/previews, optional local OCR/media, ZIP/GZ; personal requirements and receipts | 0.9 beta development; native packages require four-platform qualification |
+| Desktop | Images, text-first documents, PDF operations/previews, optional local OCR/media, ZIP/GZ; personal requirements and receipts | [0.9.0-beta.1 released](https://github.com/gonisulaimann/Prepare/releases/tag/v0.9.0-beta.1); four native platform builds qualified |
 | Web / offline workspace | PDF merge, order, extraction, rotation, profiles, receipts and byte verification | Browser workflow; not desktop parity |
 | Extension | The local PDF workspace in a dedicated browser tab, no host permissions | Chromium/Edge developer-mode package; Firefox temporary-install package; not store-published |
 | CLI | Desktop worker commands: `formats`, `prepare`, `verify` | Same bounded worker and original-preserving export |

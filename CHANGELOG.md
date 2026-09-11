@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.0-beta.1 — Requirements workspace (release candidate)
+## 0.9.0-beta.1 — Requirements workspace
 
 - Personal requirements checked before desktop output publication; hash-bound receipts.
 - Desktop CLI preparation and byte verification, format-specific controls and profile import.
