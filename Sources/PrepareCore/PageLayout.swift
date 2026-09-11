@@ -24,17 +24,19 @@ public struct PageSettings: Sendable, Equatable {
             throw PrepareError.invalidInput("Invalid image dimensions for page layout.")
         }
         let swapped = rotation.rawValue % 2 == 1
-        let w = Double(swapped ? height : width), h = Double(swapped ? width : height)
+        // Keep CoreGraphics arithmetic explicitly CGFloat for Swift 6.0/6.1.
+        let w = CGFloat(swapped ? height : width), h = CGFloat(swapped ? width : height)
+        let inset = CGFloat(margin)
         let size: CGSize
         switch paper {
         case .original: size = CGSize(width: w * 720 / max(w, h), height: h * 720 / max(w, h))
         case .a4: size = CGSize(width: 210 * 72 / 25.4, height: 297 * 72 / 25.4)
         case .usLetter: size = CGSize(width: 612, height: 792)
         }
-        guard margin * 2 < min(size.width, size.height) else {
+        guard inset * 2 < min(size.width, size.height) else {
             throw PrepareError.invalidInput("The margin leaves no image area. Reduce it or choose A4 or US Letter.")
         }
-        let available = CGRect(origin: .zero, size: size).insetBy(dx: margin, dy: margin)
+        let available = CGRect(origin: .zero, size: size).insetBy(dx: inset, dy: inset)
         let scale = min(available.width / w, available.height / h)
         let content = CGRect(x: (size.width - w * scale) / 2, y: (size.height - h * scale) / 2,
                              width: w * scale, height: h * scale)
