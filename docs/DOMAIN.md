@@ -1,23 +1,15 @@
-# Landing-page address
+# Website address
 
-Checked for v0.4.0 on 2026-09-11 using GitHub's public account API.
+The official landing page and documentation live at https://gonisulaimann.github.io/.
+The dedicated repository is https://github.com/gonisulaimann/gonisulaimann.github.io.
 
-- `prepare` exists as a GitHub user: https://github.com/prepare.
-- `https://prepare.github.io` returns 404. That does not make the username available.
-- `getprepare`, `prepare-app`, and `prepareformac` return account API 404s.
-  No public account found is not proof a name can be registered: it may be
-  reserved or unavailable under GitHub policy. None has been claimed.
+GitHub user sites require a repository matching the owner: `OWNER.github.io`.
+The `prepare` username belongs to an existing account; creating a repository
+called `prepare.github.io` under `gonisulaimann` would not grant that hostname.
+The owner chose the existing account's root user-site address instead.
 
-GitHub Pages root subdomains belong to the matching user or organization,
-not to an arbitrary repository name. Creating `prepare.github.io` inside
-`gonisulaimann` would not acquire `https://prepare.github.io`.
-
-Decision: retain the working, HTTPS project site and canonical URL:
-https://gonisulaimann.github.io/Prepare/
-
-A future dedicated organization (after successful registration) or a verified
-custom domain can provide a branded root URL. Do not publish a CNAME until
-ownership and DNS have been verified. No account rename or repository transfer
-was performed for this release.
-
-Reference: https://pages.github.com/
+Application source, issues and release assets remain at
+https://github.com/gonisulaimann/Prepare. The former project-site landing page
+redirects to the new root address. Previously published release archives and
+historical measurements are immutable; links inside older archives may still
+use the former address, which remains reachable.

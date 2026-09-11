@@ -4,7 +4,7 @@
   <p><strong>A smaller file. A simpler handoff.</strong></p>
   <p>Scans and photos → a size-constrained PDF. Entirely on your Mac.</p>
   <p>
-    <a href="https://gonisulaimann.github.io/Prepare/">Website</a> ·
+    <a href="https://gonisulaimann.github.io/">Website</a> ·
     <a href="https://github.com/gonisulaimann/Prepare/releases/latest">Download</a> ·
     <a href="CONTRIBUTING.md">Contribute</a>
   </p>
@@ -174,6 +174,14 @@ See [verification results](docs/VERIFICATION.md) for the measured release run
 and its hardware/workload limits. There are no unsupported “instant” or
 universal performance promises here.
 
+## Website and documentation
+
+The official site is https://gonisulaimann.github.io/.
+[Browsable documentation](https://gonisulaimann.github.io/documentation/) and
+website sources are maintained in the dedicated
+[site repository](https://github.com/gonisulaimann/gonisulaimann.github.io).
+Application release assets remain in this repository.
+
 ## Project map
 
 ```text
@@ -182,7 +190,7 @@ Sources/PrepareCore/    Validation, ordering, presets, profiles and bounded PDF 
 Sources/PrepareWorkspace/ Testable main-actor state and bounded preview coordination
 Sources/PrepareChecks/ Synthetic integration and regression checks
 scripts/               App packaging, icon generation and website checks
-docs/                  Dependency-free GitHub Pages website and technical docs
+docs/                  Legacy site redirect and historical technical docs
 .github/               macOS CI, issue forms and pull-request checklist
 ```
 
