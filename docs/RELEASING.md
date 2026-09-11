@@ -42,3 +42,22 @@ packaging. That only signs the app. Notarization, ticket stapling and fresh
 Gatekeeper assessment must be completed separately before changing claims.
 Do not publish signing credentials or embed credentials in CI. Intel/universal
 builds require their own hardware testing and correct asset architecture names.
+
+## Cross-platform gates for 0.5 and later
+
+Run `npm --prefix portable ci`, `npm --prefix portable test`,
+`python3 scripts/package_portable.py`, and `python3 scripts/test_portable_budget.py`.
+Verify Windows and Linux CI artifacts and extracted contents, not just ZIP hashes:
+ZIP host-system metadata can differ while file contents match exactly.
+Use an independent PDF renderer for Portable output. Preserve desktop-browser
+prerequisites and never rename the ZIP to imply a native binary.
+
+For Android run `python3 android/build.py` and actual API 28 / 36 emulator tests.
+Compile success is insufficient: byte-limit exceptions may be swallowed by native
+PDF writers, and APK packaging constraints differ between API levels. Check every
+accepted PDF and resources.arsc storage/alignment. Never publish disposable test
+signatures. Owner signing, physical devices and store/AAB gates are separate.
+
+Publish only after independent review and exact-source platform CI pass. Download
+public artifacts again, validate SHA-256, signature/manifest and source content.
+Only then deploy the dedicated site with new links. Keep the app's legacy redirect.

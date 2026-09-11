@@ -54,3 +54,21 @@ Normalize ZIP timestamps and order before zipalign for repeatable SDK-only build
 Keep recreation caches per activity session to avoid deleting a still-running
 cancelled worker's files. Provider save verification must reopen and compare
 actual bytes, not trust close() or a successful write return.
+
+## Final checked source and device evidence
+
+Source fb0555bb8e98ca980b0c699c0b669319e4a0af8c passes Android CI
+34589813446 (API 28 and API 36, 17 runtime tests each), macOS CI 34589813411,
+and Windows/Linux CI 34589813399. Independent focused review passed the three
+Android fixes at 6693926. The later harness-only change requests raw `am instrument
+-w -r` output, preserving the explicit success-code check.
+
+Both Android CI APKs were downloaded and matched the locally built unsigned APK
+byte-for-byte: 24,796 bytes, SHA-256
+0dafc2a3c664c182a5693836652f4d3d001994bde6a91aed08eaad1cd9a8d0bc.
+The manifests request no permissions. Both instrumentation reports explicitly
+show `OK (17 tests)` and `INSTRUMENTATION_CODE: -1`. APK alignment, partial-prefix
+rejection, actual PDF rendering, cancellation, cleanup and each settings-change
+invalidation pass. Earlier failed-run notes above are retained as history, not
+current release blockers. No production signing or physical-device verification
+is implied; unsigned Android is a developer artifact, not a normal install.

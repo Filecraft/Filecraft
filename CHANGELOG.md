@@ -3,6 +3,20 @@
 All notable changes are recorded here. Prepare uses semantic versions while
 remaining pre-1.0: file-format and API compatibility are not yet guaranteed.
 
+## 0.5.0
+
+- Mac: explicit 150/200/300 DPI ceilings, identity-safe duplicate and move-last
+  actions, expanded rendered regression checks. Apple Silicon, macOS 14+.
+- Portable: arbitrary 36–600 DPI ceilings; per-page duplicate, rotate and remove;
+  opt-in near-white threshold cleanup (not AI segmentation). JPEG/PNG browser
+  companion for Windows/Linux/macOS, not native EXE/ELF packages.
+- Android: framework-only experimental source and unsigned developer APK build;
+  no network permission, no bundled runtime. Not an installable consumer release
+  or store submission. See android/VERIFICATION.md for actual test coverage.
+- Published 100-capability architecture backlog, first-person governance, store
+  submission foundations and redesigned platform-aware website.
+- Privacy remains local; no OCR, encryption, PDF input or forensic-erasure claim.
+
 ## 0.4.0 — 2026-09-11
 
 ### Added

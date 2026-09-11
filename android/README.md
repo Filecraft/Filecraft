@@ -147,3 +147,10 @@ safety, accessibility, physical-device performance or store eligibility. Follow
 `store/LISTING.md`. Review saved text legibility; raster downsampling is lossy.
 No OCR/PDF input/encryption/password, forensic metadata-erasure or universal
 instant-cancellation claim is made.
+
+## Verified experimental artifact
+
+API 28 and 36 emulator gates passed run 34589813446. See VERIFICATION.md.
+Release artifact `Prepare-0.5.0-android-experimental-UNSIGNED.apk` needs your own
+signing for installation; it is not a consumer or Play Store release. Do not
+use disposable CI signing identities for updates.

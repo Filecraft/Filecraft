@@ -12,6 +12,8 @@
     <a href="https://github.com/gonisulaimann/Prepare/actions/workflows/ci.yml"><img src="https://github.com/gonisulaimann/Prepare/actions/workflows/ci.yml/badge.svg" alt="macOS checks"></a>
     <img src="https://img.shields.io/badge/macOS-14%2B-183e33" alt="macOS 14 or newer">
     <a href="https://github.com/gonisulaimann/Prepare/actions/workflows/portable.yml"><img src="https://github.com/gonisulaimann/Prepare/actions/workflows/portable.yml/badge.svg" alt="Windows and Linux browser checks"></a>
+    <a href="https://github.com/gonisulaimann/Prepare/actions/workflows/android.yml"><img src="https://github.com/gonisulaimann/Prepare/actions/workflows/android.yml/badge.svg" alt="Experimental Android checks"></a>
+    <a href="https://github.com/gonisulaimann/Prepare/actions/workflows/android.yml"><img src="https://github.com/gonisulaimann/Prepare/actions/workflows/android.yml/badge.svg" alt="Android experimental emulator checks"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Hippocratic_3.0_core-657b58" alt="Hippocratic License 3.0 core"></a>
   </p>
 </div>
@@ -26,7 +28,7 @@ desktop browser on Windows/Linux. Android is a separate native engineering targe
 
 ![Prepare showing native page controls and source-versus-PDF review](docs/assets/screenshot.png)
 
-## What makes it useful
+## What makes the Mac app useful
 
 - **A real byte budget.** Set 0.01–100 decimal MB. The finished PDF, not a size
   estimate, must fit before Prepare offers it for export.
@@ -58,7 +60,7 @@ This is intentionally a focused image-to-PDF utility, not a general PDF editor.
 | macOS 14+, Apple Silicon | Native app ZIP | DPI ceilings, duplicate and move-to-last controls; ad-hoc signed, not notarized |
 | Windows | Portable ZIP | Existing current desktop Chrome/Edge/Firefox; not an EXE |
 | Linux | Same Portable ZIP | Existing current desktop Chrome/Firefox; not an ELF/package |
-| Android | Native engineering target | See [Android status](android/README.md); device tests gate release |
+| Android | Experimental native source / unsigned APK build | Not installable until owner-signed; [verification gates](android/README.md) |
 
 [Download v0.5.0](https://github.com/gonisulaimann/Prepare/releases/tag/v0.5.0).
 Extract the whole Portable ZIP and open `Prepare-Portable/index.html`. No server
@@ -102,7 +104,7 @@ needed for a local ad-hoc build.
 
 Downloading and using Prepare is subject to the [Hippocratic License 3.0 core](LICENSE).
 
-## How to use
+## How to use the Mac app
 
 1. Add or drop JPEG, PNG or HEIC still images, or use Finder **Open With → Prepare**.
 2. Pick a workflow preset or customize the compression profile, byte limit,
@@ -119,7 +121,7 @@ size. A4 and US Letter use portrait paper. Margins are points (72 per inch).
 Keyboard shortcuts: ⌘O add images, ⌘R prepare, ⌘[ / ⌘] previous/next page,
 ⇧⌘S save a copy, Escape cancel active preparation.
 
-## Honest limits
+## Mac limits
 
 | Boundary | Behavior |
 | --- | --- |
@@ -137,12 +139,12 @@ The app has no networking code. Files selected from a syncing folder can still
 sync through that provider. Prepare is not an anonymizer, redaction tool or
 secure-erasure utility. Read the complete [security and privacy policy](SECURITY.md).
 
-The v0.4.0 Apple Silicon ZIP is **668 KB** (667,989 bytes); the installed app
-files total **1.53 MB**. System frameworks and the Swift toolchain are excluded.
-See [v0.4 verification](docs/VERIFICATION-0.4.md) and
+The v0.5.0 Apple Silicon ZIP is 682,160 bytes; installed app files total
+1,607,206 bytes. Portable is 17,173 bytes compressed. System frameworks and the Swift toolchain are excluded.
+See [v0.5 verification](docs/VERIFICATION-0.5.md) and
 [domain findings](docs/DOMAIN.md).
 
-## Build from source
+## Build the Mac app from source
 
 Requires macOS 14+ and Swift 6 (Xcode command-line tools). No third-party Swift
 packages, cloud credentials or web build tools are needed for the app. Apple’s
@@ -232,3 +234,11 @@ Copyright © 2026 Goni Sulaiman and Prepare contributors.
 source-available software: the license restricts harmful uses and is **not
 an OSI-approved open-source license**. The first public release replaces the
 unpublished prototype's MIT notice at the project owner's direction.
+
+### Android experimental download
+
+[Unsigned APK and checksum](https://github.com/gonisulaimann/Prepare/releases/tag/v0.5.0-android-experimental.1)
+(24,796 bytes). Native Java, Android 9+; no network permission. API 28/36 emulator
+regressions pass. Not tap-to-install: developers must sign their own copy.
+Production signing, physical-device/SAF qualification and store submission remain
+pending. Read [Android verification](android/VERIFICATION.md) before use.

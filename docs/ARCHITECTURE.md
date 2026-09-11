@@ -1,5 +1,22 @@
 # Architecture
 
+## Version 0.5 platform boundaries
+
+Mac uses SwiftUI / PDFKit / CoreGraphics with no package dependencies.
+Portable is an offline file-open HTML/CSS/JavaScript companion using browser
+Canvas and a small raster PDF writer; the browser is not bundled. Windows and
+Linux do not have native EXE/ELF binaries. Android is a separate Java/framework
+engine using ImageDecoder, PdfDocument and Storage Access Framework; it has no
+network permission. The unsigned APK is developer material, not a consumer app.
+
+Geometry and byte-budget concepts are shared, not an identical binary engine.
+Platform codecs, page defaults, cancellation latency and previews differ. Each
+platform has separate rendered-output, input-bound and packaging tests; do not
+infer parity from a roadmap item. See [Android scope](../android/README.md),
+[Portable scope](../portable/README.txt) and [v0.5 evidence](VERIFICATION-0.5.md).
+
+## Earlier native architecture notes
+
 ```text
 SwiftUI workspace (main actor)
   ordered pages + rotation + paper + margin + byte limit
