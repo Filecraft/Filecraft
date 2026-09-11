@@ -1,0 +1,15 @@
+{
+  "planned": 27,
+  "collected": 27,
+  "unique": 27,
+  "statuses": {
+    "retrieved": 23,
+    "robots_denied_or_unavailable": 4
+  },
+  "kinds": {
+    "official": 11,
+    "github": 5,
+    "forum": 7,
+    "reddit": 4
+  }
+}

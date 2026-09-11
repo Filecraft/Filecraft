@@ -7,6 +7,8 @@ use_directory_urls: true
 nav:
   - Overview: GUIDE.md
   - Migration: MIGRATION.md
+  - Online assistance: ONLINE-ASSISTANCE.md
+  - Documentation hosting: DOCUMENTATION-HOSTING.md
   - AI disclosure: AI-DISCLOSURE.md
   - Architecture: ENGINE-ARCHITECTURE.md
   - Design: DESIGN-SYSTEM.md

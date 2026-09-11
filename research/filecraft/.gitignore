@@ -1,0 +1,11 @@
+raw/
+text/
+robots/
+sources.jsonl
+SOURCE_LEDGER.md
+search-discovery*.json
+scrapling-readme-inspection.md
+scrapling-docs-inspection.html
+superseded-candidates.json
+REPRODUCE.md
+WORKFLOW_LESSONS.md

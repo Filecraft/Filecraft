@@ -1,0 +1,10 @@
+{
+  "source_count": 27,
+  "status_counts": {
+    "retrieved": 23,
+    "robots_denied_or_unavailable": 4
+  },
+  "raw_and_text_hashes": "all verified",
+  "report_source_links": "all ledger-backed",
+  "scrapling_version": "0.4.15"
+}
