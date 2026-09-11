@@ -38,3 +38,12 @@ unsupported universal binary is introduced merely for a platform badge.
 AppImage/Flatpak/Snap/MSIX and store submission wait for qualified native
 hosts and a real distribution need. Existing bundle IDs, source URLs and
 stable tags are preserved.
+
+## Intel qualification result
+
+The macos-15-intel runner passed debug, release/stress, strict-concurrency,
+packaging and signature checks. Its x86_64 0.5.0 app was downloaded, checksum
+verified, extracted, signature-verified and launched under Rosetta locally.
+It is offered as an Intel preview alongside the 0.7 PDF beta, not silently
+added to the established stable download. It remains ad-hoc signed and
+not notarized. No PDF-input feature is added to this native image app.

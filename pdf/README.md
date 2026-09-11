@@ -141,3 +141,9 @@ and this entire standalone `pdf/` tree including vendor/licenses, CLI, worker,
 API, docs and tests. Node modules, build caches and dist files are excluded.
 The companion `.sha256` identifies the built bytes. Extract then run the same
 commands from the extracted root. Python is needed only to build the ZIP.
+
+## Physical page measurements
+
+Widths/heights are visible CropBox intersected with MediaBox, scaled by
+UserUnit, in physical points before separately reported rotation. Original
+page boxes are also preserved and compared after export.
