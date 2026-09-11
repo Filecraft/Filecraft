@@ -1,0 +1,61 @@
+name: Audit and stage native release assets
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful desktop workflow run
+        required: true
+      source_sha:
+        description: Exact source SHA built by that run
+        required: true
+      tag:
+        description: Existing draft release tag
+        required: true
+permissions:
+  actions: read
+  contents: write
+jobs:
+  stage:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha }}
+      - name: Verify source and draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.run_id }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          python3 - <<'PY'
+          import json,os,subprocess,re
+          run=os.environ['RUN_ID'];sha=os.environ['SOURCE_SHA'];tag=os.environ['TAG']
+          assert re.fullmatch(r'[0-9]+',run) and re.fullmatch(r'[0-9a-f]{40}',sha)
+          assert re.fullmatch(r'v[0-9A-Za-z.-]+',tag)
+          def api(path):return json.loads(subprocess.check_output(['gh','api','repos/Filecraft/Filecraft/'+path]))
+          r=api('actions/runs/'+run);assert r['head_sha']==sha and r['conclusion']=='success' and r['name']=='Desktop suite'
+          release=api('releases/tags/'+tag);assert release['draft']
+          PY
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: desktop-*
+          path: artifacts
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Audit all four archives and stage unchanged bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          python3 - <<'PY'
+          import glob,hashlib,json,os,subprocess
+          from pathlib import Path
+          files=sorted(glob.glob('artifacts/**/*.zip',recursive=True));assert len(files)==4
+          result=subprocess.check_output(['python3','scripts/audit_desktop_archive.py',*files],text=True)
+          Path('native-audit.json').write_text(result)
+          for f in files:
+              p=Path(f);assert hashlib.sha256(p.read_bytes()).hexdigest()==Path(f+'.sha256').read_text().split()[0]
+              subprocess.run(['gh','release','upload',os.environ['TAG'],f,f+'.sha256'],check=True)
+          subprocess.run(['gh','release','upload',os.environ['TAG'],'native-audit.json'],check=True)
+          PY
