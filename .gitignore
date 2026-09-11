@@ -3,3 +3,6 @@ build/
 .DS_Store
 __pycache__/
 *.pyc
+node_modules/
+portable/test-results/
+portable/playwright-report/

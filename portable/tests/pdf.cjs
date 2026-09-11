@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict');const p=require('../core.js');
+const jpeg=new Uint8Array([255,216,255,217]);
+const pdf=p.pdf([{jpeg,width:2,height:3,layout:p.layout(2,3,{paper:'letter',margin:24})}]);
+const text=new TextDecoder().decode(pdf);
+assert.ok(text.startsWith('%PDF-1.4'));assert.ok(text.includes('/MediaBox [0 0 612 792]'));
+const offset=Number(text.match(/startxref\n(\d+)/)[1]);assert.equal(text.slice(offset,offset+4),'xref');
+const refs=[...text.matchAll(/(\d{10}) 00000 n/g)];assert.equal(refs.length,5);
+refs.forEach((m,i)=>assert.ok(text.slice(Number(m[1])).startsWith(`${i+1} 0 obj`)));
+assert.throws(()=>p.pdf([]));
+console.log('PASS byte-correct PDF xref, page geometry and empty rejection');

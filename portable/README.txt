@@ -1,0 +1,44 @@
+Prepare Portable 0.5.0 — Goni Sulaiman
+
+QUICK START
+Extract the whole ZIP. Open Prepare-Portable/index.html in a current desktop
+Chrome, Edge or Firefox browser on Windows, Linux or macOS. Keep the files
+together. No installation, local server, Node, Python or internet is needed.
+Use the native Prepare.app on Apple Silicon macOS 14+ for PDFKit review and HEIC.
+This companion is not a Windows EXE or Linux ELF binary. It uses your existing
+browser, which is a separate prerequisite and not included in the size budget.
+
+Add JPEG/PNG images, choose a preset, sort/reorder/rotate or split a spread,
+set paper/margins/DPI ceiling and a byte limit, then Prepare PDF. Split divides
+the EXIF-oriented source into left then right halves before user rotation.
+Review every page and check the legibility box to unlock Save PDF copy.
+The browser controls where the copy is saved; use a new filename.
+
+PRIVACY / LIMITS
+Everything runs in this page on your computer. No analytics, network requests,
+accounts, server, external fonts, persistence or automatic updates. The page
+blocks network connections with CSP. Browser extensions, sync folders and OS
+swap/crash handling are outside Prepare's control. A trusted browser matters.
+Originals are read only, not modified. Canvas re-encoding discards source EXIF
+and GPS metadata; visible private content remains. Output is lossy raster PDF,
+not OCR or searchable text. Preview shows embedded JPEGs in page geometry,
+not an independent full PDF renderer. Check the PDF in a reader before use.
+
+20 pages; 20 MB per image; 100 MB selected input; 24 megapixels per image.
+Serial processing, three attempts; no unlimited compression below the floor.
+A DPI ceiling can intentionally reduce pixels below a profile's automatic
+edge limit; source resolution is never increased. Browser decoding can use a
+full source bitmap; these caps are not a browser-memory guarantee. Cancel takes
+effect between decode/encode operations. Animated PNG, HEIC, SVG, PDF input and
+mobile browsers are not supported by this companion. Grayscale uses equal RGB
+channels, unlike the Mac app's dedicated DeviceGray encoding.
+
+SOURCE / LICENSE
+https://github.com/gonisulaimann/Prepare
+https://gonisulaimann.github.io/Prepare/
+Hippocratic License 3.0 core, included as LICENSE. Ethical-source with use
+restrictions; not OSI-approved open source. NOTICE contains attribution.
+Development tests use dependencies, but none are in this release folder.
+I maintain Prepare independently. Read CONTRIBUTING.md and CODE_OF_CONDUCT.md
+in the repository before joining in; report security problems privately at
+https://github.com/gonisulaimann/Prepare/security/advisories/new
