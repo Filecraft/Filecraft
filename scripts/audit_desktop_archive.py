@@ -2,19 +2,28 @@
 from pathlib import Path
 import hashlib
 import json
+import re
 import sys
 import zipfile
 ROOT=Path(__file__).resolve().parents[1]
 results=[]
 for arg in sys.argv[1:]:
     p=Path(arg)
+    if p.name.startswith('Prepare-'):
+        if not re.fullmatch(r'Prepare-0\.9\.\d+(?:-[A-Za-z0-9.]+)?-desktop-.+\.zip',p.name):
+            raise SystemExit('Unsupported historical license line: '+p.name)
+        legal_prefix='PREPARE'
+    elif p.name.startswith('Filecraft-'):
+        legal_prefix='FILECRAFT'
+    else:
+        raise SystemExit('Unsupported archive identity: '+p.name)
     with zipfile.ZipFile(p) as z:
         names=z.namelist();assert z.testzip() is None
         assert all(not n.startswith('/') and '..' not in Path(n).parts for n in names)
         assert not any(Path(n).name.lower().startswith('darkgarden') for n in names)
-        license_name=next(n for n in names if n.endswith('/licenses/FILECRAFT-LICENSE'))
+        license_name=next(n for n in names if n.endswith('/licenses/'+legal_prefix+'-LICENSE'))
         assert z.read(license_name)==(ROOT/'LICENSE').read_bytes()
-        assert any(n.endswith('/licenses/FILECRAFT-NOTICE') for n in names)
+        assert any(n.endswith('/licenses/'+legal_prefix+'-NOTICE') for n in names)
         assert any(n.endswith('Vera.ttf') for n in names)
         assert any(n.endswith('bitstream-vera-license.txt') for n in names)
         source=next(n for n in names if n.endswith('SOURCE-ATTRIBUTION.txt'))

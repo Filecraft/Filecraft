@@ -2,6 +2,14 @@
 import argparse,json,subprocess,re
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('site',type=Path);p.add_argument('--current',required=True);args=p.parse_args()
+args.site=args.site.resolve()
+if not (args.site/'.git').exists():raise SystemExit('Expected existing site checkout.')
+try:
+    remote=subprocess.check_output(['git','-C',str(args.site),'remote','get-url','origin'],text=True).strip().removesuffix('.git')
+except subprocess.CalledProcessError:
+    raise SystemExit('Refusing sync: expected Filecraft/filecraft.github.io origin.')
+if remote.lower() not in ('git@github.com:filecraft/filecraft.github.io','https://github.com/filecraft/filecraft.github.io'):
+    raise SystemExit('Refusing sync: only Filecraft/filecraft.github.io is authorized.')
 pages=json.loads(subprocess.check_output(['gh','api','--paginate','--slurp','repos/Filecraft/Filecraft/releases?per_page=100'],text=True))
 releases=sorted([r for page in pages for r in page],key=lambda r:r['published_at'] or '',reverse=True)
 releases=[r for r in releases if not r['draft']]
