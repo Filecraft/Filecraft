@@ -35,7 +35,7 @@ channels, unlike the Mac app's dedicated DeviceGray encoding.
 
 SOURCE / LICENSE
 https://github.com/gonisulaimann/Prepare
-https://gonisulaimann.github.io/Prepare/
+https://gonisulaimann.github.io/
 Hippocratic License 3.0 core, included as LICENSE. Ethical-source with use
 restrictions; not OSI-approved open source. NOTICE contains attribution.
 Development tests use dependencies, but none are in this release folder.
