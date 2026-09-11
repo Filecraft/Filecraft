@@ -1,0 +1,23 @@
+name: Feature request
+description: Propose a focused improvement to the local document workflow.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What workflow is difficult today?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed behavior and alternatives
+    validations:
+      required: true
+  - type: checkboxes
+    id: local
+    attributes:
+      label: Product boundaries
+      options:
+        - label: This proposal can work locally, without accounts, uploads or a cloud service.
+          required: true

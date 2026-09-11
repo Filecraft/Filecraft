@@ -1,0 +1,32 @@
+name: Bug report
+description: Something in Prepare did not behave as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Use synthetic images, never private scans. Report vulnerabilities privately using the Security tab."
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Prepare version, macOS version, Apple Silicon or Intel; source build or release ZIP.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include image format, dimensions, page count, target size and layout settings.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Error text, synthetic sample, or screenshot with personal information removed.

@@ -1,0 +1,38 @@
+name: macOS checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  release-check:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Toolchain
+        run: swift --version
+      - name: Debug behavioral checks
+        run: swift run PrepareChecks
+      - name: Release behavioral checks
+        run: swift run -c release PrepareChecks
+      - name: Compiler warnings are errors
+        run: swift build -c release -Xswiftc -warnings-as-errors
+      - name: Check website
+        run: python3 scripts/check-site.py
+      - name: Package native build
+        run: bash scripts/package.sh
+      - name: Verify signed bundle
+        run: codesign --verify --strict build/Prepare.app
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Prepare-${{ runner.arch }}
+          path: |
+            build/Prepare-*.zip
+            build/Prepare-*.zip.sha256
+          if-no-files-found: error
+          retention-days: 14
