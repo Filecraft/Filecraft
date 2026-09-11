@@ -1,0 +1,6 @@
+Pillow==12.3.0
+pypdfium2==5.13.0
+pypdf==6.18.1
+cryptography==50.0.1
+reportlab==5.0.1
+defusedxml==0.7.1

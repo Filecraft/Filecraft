@@ -1,0 +1,55 @@
+name: Desktop suite
+on:
+  push:
+    paths: ['desktop/**', '.github/workflows/desktop.yml', 'LICENSE']
+  pull_request:
+    paths: ['desktop/**', '.github/workflows/desktop.yml', 'LICENSE']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022, macos-15, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.13'
+      - name: Install test/build dependencies
+        run: python -m pip install -r desktop/requirements.txt pyinstaller==6.22.2
+      - name: Linux display and local engines
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb python3-tk tesseract-ocr ffmpeg
+      - name: Tests including native UI (Linux)
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python -m unittest discover -s desktop/tests -v
+        env:
+          PYTHONPATH: desktop
+      - name: Tests including native UI (Windows/macOS)
+        if: runner.os != 'Linux'
+        run: python -m unittest discover -s desktop/tests -v
+        env:
+          PYTHONPATH: desktop
+      - name: Build full desktop package
+        run: python desktop/package.py
+      - name: Exercise frozen binary
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            python desktop/check_frozen.py build/desktop-package/dist/Prepare-Desktop/Prepare-Desktop.exe
+          else
+            python desktop/check_frozen.py build/desktop-package/dist/Prepare-Desktop/Prepare-Desktop
+          fi
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: desktop-${{ runner.os }}-${{ runner.arch }}
+          path: build/Prepare-*-desktop-*.zip*
+          if-no-files-found: error

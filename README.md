@@ -29,6 +29,19 @@ operations bundle pdf-lib. Android is a separate native engineering target.
 
 ![Prepare showing native page controls and source-versus-PDF review](docs/assets/screenshot.png)
 
+## Desktop suite — 0.8 beta development
+
+The larger [Desktop suite](desktop/README.md) adds native Windows/Linux/macOS
+controls, format-aware output dropdowns, separate-process PDF previews, broader
+image/text conversions and lossless ZIP/GZ compression for arbitrary extensions.
+Local PDF operations include password handling, OCR, form filling and notes as
+qualified in the desktop test suite. OCR and media conversion require locally
+installed Tesseract/FFmpeg; no cloud fallback or automatic engine downloads.
+
+This is a separate package from the tiny stable image converter. It is not an
+all-extension converter or a sanitizer. See its explicit conversion and loss
+matrix before using it. Existing stable and browser releases are unchanged.
+
 ## PDF workflows — 0.7.0-beta.1
 
 A separate offline [PDF Workbench](workbench/README.txt) and [PDF CLI](pdf/README.md)

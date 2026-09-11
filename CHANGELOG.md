@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0-beta.1 — Desktop suite (in development)
+
+- Native Tk desktop frontend, output dropdown, private subprocess conversion and previews.
+- Exclusive new-copy publication, source hash, measured output size and loss warnings.
+- Broad image conversion, bounded text-first Office extraction, arbitrary-extension ZIP/GZ.
+- Optional local FFmpeg media conversion; no runtime network fallback.
+- PDF renderer, password/OCR/form/annotation paths under desktop qualification.
+- Self-contained desktop packaging and Windows/Linux/Apple Silicon/Intel CI matrix.
+
+
 All notable changes are recorded here. Prepare uses semantic versions while
 remaining pre-1.0: file-format and API compatibility are not yet guaranteed.
 

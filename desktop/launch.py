@@ -1,0 +1,40 @@
+"""Prepare desktop entrypoint and bounded JSON worker transport."""
+import json
+import os
+import sys
+
+
+def worker():
+    try:
+        if os.name=='posix':
+            import resource
+            resource.setrlimit(resource.RLIMIT_CPU,(180,180))
+            resource.setrlimit(resource.RLIMIT_FSIZE,(105*1024*1024,105*1024*1024))
+            if sys.platform!='darwin':resource.setrlimit(resource.RLIMIT_AS,(2*1024**3,2*1024**3))
+        raw=sys.stdin.buffer.read(65537)
+        if len(raw)>65536:raise ValueError('Request exceeds 64 KiB.')
+        request=json.loads(raw)
+        if not isinstance(request,dict):raise ValueError('Request must be an object.')
+        from prepare_suite.core import execute,capabilities,regular
+        mode=request.get('mode','convert')
+        if mode=='capabilities':result=capabilities(request['source'])
+        elif mode=='inspect':
+            from prepare_suite.pdf_ops import inspect
+            result=inspect(str(regular(request['source'])),password=request.get('options',{}).get('password',''))
+        elif mode=='convert':result=execute(request)
+        else:raise ValueError('Unknown operation.')
+        print(json.dumps({'ok':True,'result':result},ensure_ascii=True),flush=True)
+        return 0
+    except Exception as exc:
+        # Do not return parser diagnostics or user passwords in JSON/logs.
+        message=str(exc) if isinstance(exc,(ValueError,FileExistsError)) else 'Unable to process this file. Check the format, options and local engine installation.'
+        print(json.dumps({'ok':False,'error':message[:800]},ensure_ascii=True),flush=True)
+        return 1
+
+if __name__=='__main__':
+    if '--worker' in sys.argv:sys.exit(worker())
+    if '--version' in sys.argv:
+        from prepare_suite import __version__
+        print(__version__);sys.exit(0)
+    from prepare_suite.gui import main
+    main()
