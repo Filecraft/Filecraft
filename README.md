@@ -29,9 +29,9 @@ operations bundle pdf-lib. Android is a separate native engineering target.
 
 ![Prepare showing native page controls and source-versus-PDF review](docs/assets/screenshot.png)
 
-## Desktop suite — 0.8 beta development
+## Desktop suite — 0.8.0-beta.1 released
 
-The larger [Desktop suite](desktop/README.md) adds native Windows/Linux/macOS
+[Download the desktop beta](https://github.com/gonisulaimann/Prepare/releases/tag/v0.8.0-beta.1) (28–51 MB). The larger [Desktop suite](desktop/README.md) adds native Windows/Linux/macOS
 controls, format-aware output dropdowns, separate-process PDF previews, broader
 image/text conversions and lossless ZIP/GZ compression for arbitrary extensions.
 Local PDF operations include password handling, OCR, form filling and notes as
