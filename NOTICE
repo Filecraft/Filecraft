@@ -1,15 +1,23 @@
 Prepare
 Copyright (c) 2026 Goni Sulaiman and Prepare contributors.
 
-Licensed under the Hippocratic License 3.0, core configuration, with no
-optional modules. The complete license is in LICENSE.
-Canonical text: https://firstdonoharm.dev/version/3/0/core.txt
-License author: Coraline Ada Ehmke / Organization for Ethical Source.
+Original Prepare work in this source tree is licensed under the Apache License,
+Version 2.0. The complete, unmodified license is in LICENSE.
+Canonical text: https://www.apache.org/licenses/LICENSE-2.0.txt
 
-This is ethical-source, source-available software. The Hippocratic License
-restricts harmful uses and is not an OSI-approved open-source license.
+This prospective change starts with the 0.9 development line; it does not
+relicense previously published releases, tags or binaries. See docs/LICENSING.md.
 
-The native macOS application uses Apple system frameworks; Apple framework
-rights remain with Apple. The PDF Workbench and PDF CLI additionally bundle
-pdf-lib under its separate MIT license. See pdf/THIRD-PARTY.md and its vendor
-license. Original Prepare code remains under Hippocratic License 3.0 core.
+Third-party code, fonts, native libraries and platform frameworks retain their
+own copyrights and licenses. In particular, pdf/vendor/pdf-lib.min.js and the
+vendor portion of workbench/worker-bundle.js are composite upstream code, not
+original Prepare work. See pdf/THIRD-PARTY.md, pdf/vendor/LICENSE* and
+pdf/vendor/PROVENANCE.json. Desktop distributions include separate notices for
+Python, Tcl/Tk, PDFium, Pillow/codecs, OpenSSL, ReportLab/fonts and dependencies;
+see their licenses directory and docs/DEPENDENCIES.md.
+
+Prepare uses the FreeType Project (https://freetype.org/) through applicable
+bundled dependencies. FreeType is copyright its respective authors. Full
+upstream attributions and license terms remain in the bundled dependency texts.
+Apple and Android platform rights remain with their respective owners.
+No trademark rights or third-party endorsement are granted by this notice.

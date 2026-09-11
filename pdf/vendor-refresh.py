@@ -23,6 +23,15 @@ def refresh():
             if integrity!=registry['integrity']: raise ValueError('Package integrity mismatch: '+identity)
             record={'name':package,'version':version,'tarball':registry['tarball'],'integrity':integrity,'sha256':hashlib.sha256(raw).hexdigest(),'files':{}}
             with tarfile.open(Path(temp)/packed['filename']) as archive:
+                if package=='pako':
+                    source='package/lib/zlib/deflate.js'
+                    data=archive.extractfile(source).read()
+                    start=data.index(b'// (C)');end=data.index(b'\n\n',start)
+                    notice=data[start:end]+b'\n'
+                    output='LICENSE.pako.zlib'
+                    (DEST/output).write_bytes(notice)
+                    record['files'][output]=hashlib.sha256(notice).hexdigest()
+                    record['supplementary_notices']=[{'file':output,'source':source,'source_sha256':hashlib.sha256(data).hexdigest(),'extraction':'verbatim leading // copyright/license block; trailing newline retained','scope':'Supplementary source notice; not proof of the exact pako version embedded in pdf-lib UMD (upstream lock also lists 1.0.10).'}]
                 for member in archive.getmembers():
                     leaf=Path(member.name).name.lower()
                     if not member.isfile(): continue

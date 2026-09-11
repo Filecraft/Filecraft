@@ -2,7 +2,8 @@
 
 Dependency-local Node 22+ and browser PDF page operations. No runtime npm install,
 network access, server, shell execution, or document upload. Project code retains
-the repository's **Hippocratic License 3.0** (`../LICENSE`). Vendor code retains
+the repository's **Apache-2.0** license (`../LICENSE`) prospectively. Historical
+releases keep their original Hippocratic terms. Vendor code retains
 its original licenses; see [vendor notes](vendor/README.md).
 
 ## Shared API (stable paths for the browser workbench)

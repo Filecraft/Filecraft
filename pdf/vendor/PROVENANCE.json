@@ -10,8 +10,8 @@
       "sha256": "a7cc1eaf12e41e612a7be581162a63b18118aefc01e90f6a1f35347b1f324a1c",
       "files": {
         "LICENSE.pdf-lib": "f2c9fc00fdb66eb99ac156ba52d734af66d8d309f65753ae809ad34ee2883bcb",
-        "pdf-lib.min.js": "0f9a5cad07941f0826586c94e089d89b918c46e5c17cf2d5a3c6f666e3bc694f",
-        "LICENSE": "f2c9fc00fdb66eb99ac156ba52d734af66d8d309f65753ae809ad34ee2883bcb"
+        "LICENSE": "f2c9fc00fdb66eb99ac156ba52d734af66d8d309f65753ae809ad34ee2883bcb",
+        "pdf-lib.min.js": "0f9a5cad07941f0826586c94e089d89b918c46e5c17cf2d5a3c6f666e3bc694f"
       }
     },
     {
@@ -41,8 +41,18 @@
       "integrity": "sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==",
       "sha256": "0d4028dc0352a740c30cbfd772917f2744986d42bfa0b06ec7642bffe7ad3941",
       "files": {
+        "LICENSE.pako.zlib": "170d7d544d380b38d5f76ab5eda29475b44ef537f4564163d6d9bece85c51c13",
         "LICENSE.pako": "a04665b3b2de56c66730c1f720f528175739e4104f79073614aa611da1e85539"
-      }
+      },
+      "supplementary_notices": [
+        {
+          "file": "LICENSE.pako.zlib",
+          "source": "package/lib/zlib/deflate.js",
+          "source_sha256": "4b9b71ae7f42e506fe1fb134f1c21b944ef2b7ef79667ba1fe59eb963c353d22",
+          "extraction": "verbatim leading // copyright/license block; trailing newline retained",
+          "scope": "Supplementary source notice; not proof of the exact pako version embedded in pdf-lib UMD (upstream lock also lists 1.0.10)."
+        }
+      ]
     },
     {
       "name": "tslib",

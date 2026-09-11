@@ -1,50 +1,43 @@
-# Small design system
+# Prepare visual system
 
-Prepare uses restrained editorial typography and a workbench, not a dashboard.
-The browser products share the same visual vocabulary; native apps retain
-platform controls instead of imitating a website.
+Identity: local preparation, measured evidence, honest unknowns.
 
 ## Tokens
 
-- Body: system UI, 16px / 1.5; no external fonts.
-- Headings: Georgia/system serif, 28px section and 42px product heading.
-- Spacing: 6, 8, 12, 16, 20, 24, 32px; borders rather than shadows.
-- Dark canvas #0d1916, panel #172823, text #f2f3e9, muted #b3c6b9,
-  accent #c5ee9b, divider #45594f.
-- Light colors are defined in the browser stylesheet's light media query.
-- Buttons: visible labels, 44px minimum height in the PDF workbench,
-  4px corner radius; do not communicate an action through color alone.
-- Focus: 3px accent outline with offset, never suppressed.
+| Token | Light | Dark |
+| --- | --- | --- |
+| Paper | #f4f1e8 | #17201d |
+| Surface | #fffdf7 | #202d27 |
+| Ink | #172c26 | #f1eee3 |
+| Secondary text | #52625c | #b9c9bf |
+| Accent | #174f40 | #bbd9c7 |
+| Rule | #bbc6be | #53645a |
 
-## Layout and interaction
+System sans-serif for controls and reading; Georgia for editorial headings;
+system monospace for numbered stages, measurements and fingerprints. No network
+fonts. Spacing follows 4/8/12/16/24/32/48/64px steps; fluid page margins. Borders
+organize evidence; they are not decorative card shadows. No gradient identity.
 
-A compact left rail holds source inputs and output requirements. The larger
-right area holds pages, reversible actions and output review. Stack these
-at narrow widths without horizontal scrolling. Use real labels, native
-inputs, keyboard-operable buttons and an unobscured skip link. Filename
-strings are text nodes, never HTML. Long names wrap.
+Website mode: decide and learn. Broad editorial headings and a six-stage process
+introduce the product; the actual workspace is one click away, not a fake demo.
+Workspace mode: operate. Controls stay labeled, document measurements are not
+presented as thumbnails, output state invalidates when its inputs change.
+Desktop mode: native Tk controls respect platform conventions; the same stage
+names and evidence semantics matter more than forcing CSS into native widgets.
 
-Actions that change pages or requirements invalidate the generated copy.
-Cancel terminates PDF parsing workers. Destructive workspace clearing asks
-for confirmation; original documents are never changed. Import and Clear
-reset history explicitly. Do not imply persisted state where none exists.
+## States and accessibility
 
-## Validation
+Use explicit pass/fail/unknown text, never color alone. Unknown is not green.
+No document health percentage or acceptance certification. Visible focus rings,
+keyboard skip links, explicit file-input labels, touch-sized primary controls,
+reduced-motion support and light/dark tests are required. No drag-only action.
 
-PASS, FAIL and UNKNOWN are words, not color-only dots. Show actual values,
-expected ranges/units and remediation. Parsing is not visual, accessibility
-or standards certification. Keep uncertainty visible even after byte/page
-checks pass. Report failures in an aria-live status region.
+Output ready means available to review—not that review has occurred. Receipts
+are optional JSON evidence, unsigned and editable. Error copy states what failed,
+what was preserved and what can be tried next. Do not promise cancellation can
+undo a copy already published just before interruption.
 
-## Motion and theme
-
-No decorative motion or transitions are required. Honor system light/dark
-preferences and reduced motion. Avoid remote assets and runtime theme
-storage. Browser theme and native appearance may differ by platform.
-
-## Review gates
-
-Check populated and empty states, long names, error paths, keyboard focus,
-390/768/1440px widths, light/dark and no-JavaScript explanatory content.
-Processing requires JavaScript; navigation/privacy/download documentation
-must not pretend otherwise. Never replace real verification with screenshots.
+Website/documentation share one layout generator; workspace shares the palette
+but gives controls precedence. Preserve no-JS navigation and state clearly that
+actual local processing needs JavaScript. Automated layout tests are not a
+blanket WCAG certification or complete screen-reader qualification.

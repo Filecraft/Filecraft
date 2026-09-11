@@ -100,10 +100,11 @@ I won't merge a generated patch on confidence alone.
 
 ## Licensing and review
 
-I accept contributions under the project's Hippocratic License 3.0 core.
-I ask you to contribute only work you have permission to share. I don't
-require copyright assignment or a CLA. I describe this as ethical-source,
-not OSI-approved open source, because the license includes use restrictions.
+For the 0.9 development line onward, contributions to original Prepare work
+are accepted under Apache-2.0. Contribute only work you have permission to
+license, retain upstream notices, and identify third-party imports. No copyright
+assignment or separate CLA is required. Earlier releases retain their supplied
+licenses; see [licensing scope](docs/LICENSING.md).
 
 I make the final scope and release decisions, and I try to explain them.
 I don't promise a response SLA. I welcome a focused follow-up, but I would

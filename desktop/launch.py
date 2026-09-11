@@ -21,6 +21,9 @@ def worker():
         elif mode=='inspect':
             from prepare_suite.pdf_ops import inspect
             result=inspect(str(regular(request['source'])),password=request.get('options',{}).get('password',''))
+        elif mode=='verify-receipt':
+            from prepare_suite.requirements import verify_receipt
+            result=verify_receipt(request['receipt'],request['source'])
         elif mode=='convert':result=execute(request)
         else:raise ValueError('Unknown operation.')
         print(json.dumps({'ok':True,'result':result},ensure_ascii=True),flush=True)
@@ -46,8 +49,14 @@ if __name__=='__main__':
         encrypted=io.BytesIO();writer.write(encrypted)
         print('PASS PDF renderer and AES runtime');sys.exit(0)
     if '--worker' in sys.argv:sys.exit(worker())
+    if '--cli' in sys.argv:
+        from prepare_suite.cli import main
+        sys.exit(main(sys.argv[sys.argv.index('--cli')+1:]))
     if '--version' in sys.argv:
         from prepare_suite import __version__
         print(__version__);sys.exit(0)
+    if len(sys.argv)>1:
+        from prepare_suite.cli import main
+        sys.exit(main(sys.argv[1:]))
     from prepare_suite.gui import main
     main()

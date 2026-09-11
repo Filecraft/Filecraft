@@ -1,4 +1,4 @@
-Prepare PDF Workbench 0.7.0-beta.1
+Prepare Workspace 0.9.0-beta.1
 
 START
 Extract this entire folder. Open index.html in a current desktop Chrome,
@@ -17,6 +17,12 @@ WORKFLOW
 5. Read the checks. UNKNOWN is not PASS. Acknowledge the review requirement,
    save under a NEW name, then open the saved PDF in a trusted PDF reader
    and inspect EVERY page before submission.
+
+RECEIPTS
+Save receipt downloads optional unsigned JSON with output SHA-256 and byte count.
+Verify a saved copy compares those bytes; it does not authenticate the receipt,
+rerun transformations, certify a portal requirement or prove visual quality.
+Editing the plan or requirements invalidates the old output and receipt.
 
 EXTRACT / MERGE / SPLIT
 Remove unwanted pages to extract a subset. Add more source files to merge.
@@ -50,8 +56,8 @@ non-synced files and a trusted browser. Original inputs are never written.
 The browser controls downloads and overwrite prompts: choose a new name.
 
 LICENSE / DEPENDENCIES
-Original Prepare code: Hippocratic License 3.0 core, ethical-source with
-use restrictions; not OSI-approved open source. See LICENSE and NOTICE.
+Current original Prepare code: Apache-2.0. See LICENSE and NOTICE.
+Historical releases through 0.8 retain their original Hippocratic terms.
 Bundled pdf-lib: separately MIT licensed. See THIRD-PARTY.txt and
 vendor/LICENSE and the other vendor/LICENSE.* files. No dependency download happens at runtime.
 

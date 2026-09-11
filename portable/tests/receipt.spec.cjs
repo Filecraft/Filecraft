@@ -1,0 +1,20 @@
+const {test,expect}=require('@playwright/test');
+const path=require('node:path'),fs=require('node:fs'),{pathToFileURL}=require('node:url'),{createHash}=require('node:crypto');
+const PDF=require('../../pdf/vendor/pdf-lib.min.js');
+test('receipt binds actual prepared bytes and invalidates after edits',async({page})=>{
+ const doc=await PDF.PDFDocument.create();doc.addPage([300,400]);const bytes=await doc.save();
+ await page.goto(pathToFileURL(path.resolve(__dirname,'../../workbench/index.html')).href);
+ await page.locator('#files').setInputFiles({name:'private-name.pdf',mimeType:'application/pdf',buffer:Buffer.from(bytes)});
+ await expect(page.locator('#pages li')).toHaveCount(1);await page.locator('#prepare').click();
+ await expect(page.locator('#status')).toContainText('Output parsed');await page.locator('#reviewed').check();
+ const saved=page.waitForEvent('download');await page.locator('#download').click();const output=fs.readFileSync(await(await saved).path());
+ const event=page.waitForEvent('download');await page.locator('#receipt-download').click();const receipt=JSON.parse(fs.readFileSync(await(await event).path(),'utf8'));
+ expect(receipt.output.sha256).toBe(createHash('sha256').update(output).digest('hex'));
+ expect(JSON.stringify(receipt)).not.toContain('private-name');expect(receipt.visualReviewVerified).toBe(false);
+ await page.locator('#verify-receipt').setInputFiles({name:'receipt.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(receipt))});
+ await page.locator('#verify-file').setInputFiles({name:'Prepared.pdf',mimeType:'application/pdf',buffer:output});
+ await expect(page.locator('#verify-status')).toContainText('Bytes match');
+ await page.locator('#verify-file').setInputFiles({name:'changed.pdf',mimeType:'application/pdf',buffer:Buffer.from('changed')});
+ await expect(page.locator('#verify-status')).toContainText('DO NOT match');
+ await page.getByRole('button',{name:'Rotate page 1',exact:true}).click();await expect(page.locator('#receipt-download')).toBeHidden();
+});

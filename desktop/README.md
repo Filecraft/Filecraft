@@ -1,4 +1,4 @@
-# Prepare Desktop 0.8.0-beta.1
+# Prepare Desktop 0.9.0-beta.1 (development)
 
 A larger, offline desktop suite alongside the tiny image app and browser tools.
 Native Tk controls, a separate process for conversion/rendering, no HTTP server,
@@ -14,10 +14,17 @@ run it on a desktop with X11/XWayland. macOS: this beta is not notarized. Do not
 disable Gatekeeper; inspect/build the source if policy blocks the download.
 Windows builds are unsigned and may trigger reputation warnings.
 
-Source: Python 3.12+ with Tk, `pip install -r desktop/requirements.txt`, then
+Source qualification: Python 3.13 with Tk, `pip install -r desktop/requirements.txt`, then
 `python desktop/launch.py`. Development packaging also needs PyInstaller 6.22.2.
-Dependencies are separately licensed; see bundled licenses. Prepare core uses
-Hippocratic License 3.0 and is ethical-source, not OSI-approved open source.
+Original Prepare work now uses Apache-2.0; earlier published binaries retain
+their original licenses. Dependencies remain separately licensed; preserve the
+complete bundled `licenses/` directory, including PREPARE-NOTICE. See
+[licensing scope](../docs/LICENSING.md) and [dependencies](../docs/DEPENDENCIES.md).
+New packages retain Vera fonts and their Bitstream license, exclude unused
+DarkGarden fonts, and collect exact-version OpenSSL notices on every platform.
+Packaging requires network access for upstream legal texts (not at runtime);
+unknown TLS versions or missing texts block publication. This is not a complete
+recursive native-library audit.
 
 ## Use
 
@@ -55,6 +62,26 @@ OCR requires separately installed Tesseract and its language data. Media require
 separately installed FFmpeg. Prepare detects but never installs or downloads them.
 These are real local engines, not cloud fallbacks. All other listed conversions
 are bundled. Additional engines retain their own licenses.
+
+## Requirements, receipts and CLI
+
+Maximum decimal MB and page limits are optional; blank means no limit. A shared
+version-1 JSON profile may also constrain formats, dimensions, orientation and
+filenames. The output is measured before publication; failed requirements leave
+no output copy. Unknown properties remain NEEDS_REVIEW, never a pass. The receipt
+stores only mechanical checks—not visual/accessibility/full-conformance proof.
+
+Save receipt after export writes a separate JSON file exclusively. It contains
+hashes, sizes and your chosen rules, not full source paths/passwords. Profile IDs
+and descriptions are user-entered and may themselves contain private details.
+
+CLI: `Prepare-Desktop prepare input.png --target pdf --output prepared.pdf
+--max-bytes 2000000` (one command line). `--cli` before the command is also
+accepted. JSON output includes `result.receipt`; save that object as receipt.json
+and run `Prepare-Desktop verify prepared.pdf --receipt receipt.json`. Match returns
+0; mismatch 2; processing error 1. The receipt is unsigned/editable: byte identity
+is not authenticity or institutional acceptance. `formats input.png` lists actual
+available targets. CLI uses the same bounded separate worker as the UI.
 
 ## Boundaries
 

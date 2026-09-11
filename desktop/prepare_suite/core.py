@@ -64,6 +64,9 @@ def execute(request):
     destination=Path(request['output']).absolute()
     target=request['target']
     options=request.get('options',{})
+    from .requirements import validate_profile, output_facts, receipt
+    from . import __version__
+    profile=validate_profile(request['profile']) if 'profile' in request else None
     extension={'ocr-pdf':'pdf','ocr-txt':'txt'}.get(target,target)
     aliases={'jpg':{'jpg','jpeg'},'tiff':{'tiff','tif'}}
     if destination.suffix.lower().lstrip('.') not in aliases.get(extension,{extension}):
@@ -112,7 +115,11 @@ def execute(request):
                     raise ValueError('Output password verification failed.')
                 if not 1<=len(checked.pages)<=100:raise ValueError('Output page count failed validation.')
         output_digest=hashlib.sha256(staged.read_bytes()).hexdigest()
+        facts=output_facts(staged,target,options.get('output_password',''),destination.name)
+        evidence=receipt(digest,len(data),output_digest,facts,profile,__version__)
+        if evidence['readiness']['status']=='NOT_READY':
+            raise ValueError('Output fails your requirements; no copy was published. Adjust the transformation or requirements.')
         # Hardlink publication is atomic and refuses a destination created meanwhile.
         # A local filesystem supporting hard links is required; never use overwrite.
         os.link(staged,destination)
-    return {**metadata,'output':str(destination),'bytes':size,'input_bytes':len(data),'input_sha256':digest,'sha256':output_digest}
+    return {**metadata,'receipt':evidence,'output':str(destination),'bytes':size,'input_bytes':len(data),'input_sha256':digest,'sha256':output_digest}

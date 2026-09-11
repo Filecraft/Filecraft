@@ -38,6 +38,27 @@ class GUITests(unittest.TestCase):
                 self.assertTrue(source.exists())
         finally:pass
 
+    def test_requirements_gate_and_receipt_export(self):
+        from prepare_suite.gui import App
+        from unittest.mock import patch
+        app=App(self.root)
+        with tempfile.TemporaryDirectory() as td:
+            source=Path(td)/'source.png';output=Path(td)/'result.png';receipt=Path(td)/'receipt.json'
+            Image.new('RGB',(40,30),'green').save(source)
+            app.load_source(str(source));app.max_bytes.set('1')
+            app.begin_export(str(output))
+            until=time.monotonic()+20
+            while app.busy and time.monotonic()<until:self.root.update();time.sleep(.02)
+            self.assertFalse(output.exists());self.assertIn('requirements',app.status.get())
+            app.max_bytes.set('100000');app.begin_export(str(output))
+            until=time.monotonic()+20
+            while app.busy and time.monotonic()<until:self.root.update();time.sleep(.02)
+            self.assertTrue(output.exists(),app.status.get())
+            with patch('prepare_suite.gui.filedialog.asksaveasfilename',return_value=str(receipt)):
+                app.save_receipt()
+            self.assertEqual(json.loads(receipt.read_text())['readiness']['status'],'CHECKS_PASSED')
+            self.assertEqual(app.option_widgets['PDF operation'][1].winfo_manager(),'')
+
     def test_pdf_source_and_output_previews(self):
         import tkinter as tk
         from prepare_suite.gui import App

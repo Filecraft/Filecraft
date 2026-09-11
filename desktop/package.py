@@ -12,9 +12,62 @@ import sys
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='0.8.0-beta.1'
+VERSION='0.9.0-beta.1'
+
+
+def openssl_versions():
+    """Both Python TLS and cryptography may carry distinct OpenSSL builds."""
+    import ssl
+    from cryptography.hazmat.backends.openssl.backend import backend
+    return {'python': ssl.OPENSSL_VERSION, 'cryptography': backend.openssl_version_text()}
+
+
+def openssl_notices(folder):
+    """Build-time upstream retrieval; fail closed on unknown/missing notices."""
+    import re
+    import urllib.request
+    versions = openssl_versions()
+    records = []
+    for description in sorted(set(versions.values())):
+        match = re.match(r'^OpenSSL ((?:3|4)\.\d+\.\d+)\b', description)
+        if not match:
+            raise RuntimeError('Review unsupported TLS license before packaging: '+description)
+        version = match.group(1)
+        target = folder/('openssl-'+version)
+        target.mkdir(parents=True, exist_ok=True)
+        files = []
+        for name in ('LICENSE.txt', 'AUTHORS.md', 'include/openssl/opensslv.h.in'):
+            url = f'https://raw.githubusercontent.com/openssl/openssl/openssl-{version}/{name}'
+            with urllib.request.urlopen(url, timeout=30) as response:
+                data = response.read()
+            if name.endswith('.h.in'):
+                # Retain the exact upstream copyright/license comment, not a paraphrase.
+                start = data.index(b'/*'); end = data.index(b'*/', start)+2
+                data = data[start:end]+b'\n'
+                output = 'COPYRIGHT.txt'
+            else:
+                output = name
+            if not data or (output == 'LICENSE.txt' and b'Apache License' not in data):
+                raise RuntimeError('Unexpected OpenSSL legal text: '+url)
+            (target/output).write_bytes(data)
+            files.append({'file': output, 'source': url, 'sha256': hashlib.sha256(data).hexdigest()})
+        records.append({'version': version, 'files': files})
+    (folder/'OPENSSL-PROVENANCE.json').write_text(json.dumps({'runtimes': versions, 'sources': records}, indent=2)+'\n', encoding='utf-8')
+
+
+def prune_unused_fonts(bundle):
+    """Exclude separable, unused GPL-exception fonts; leave Vera and its license."""
+    for path in bundle.rglob('*'):
+        if path.is_file() and path.name.lower().startswith('darkgarden'):
+            path.unlink()
+    if any(p.name.lower().startswith('darkgarden') for p in bundle.rglob('*')):
+        raise RuntimeError('Unused DarkGarden assets remain in package')
+    fonts = list(bundle.rglob('Vera.ttf'))
+    if not fonts or not all((font.parent/'bitstream-vera-license.txt').is_file() for font in fonts):
+        raise RuntimeError('Vera output font and its license are required')
 
 def notices(folder):
+    if folder.exists():shutil.rmtree(folder)
     folder.mkdir(parents=True,exist_ok=True)
     inventory=[]
     for name in ['Pillow','pypdfium2','pypdf','cryptography','reportlab','defusedxml','cffi','pycparser','charset-normalizer']:
@@ -22,6 +75,17 @@ def notices(folder):
         for f in dist.files or []:
             if any(word in str(f).lower() for word in ('license','copyright','notice','copying')) and Path(dist.locate_file(f)).is_file():
                 target=folder/name/str(f);target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(dist.locate_file(f),target)
+        if name=='pypdfium2':
+            # Generic BSD templates are not author attribution. Keep exact SPDX headers.
+            headers=set()
+            for f in dist.files or []:
+                if str(f).endswith('.py'):
+                    data=Path(dist.locate_file(f)).read_bytes()
+                    headers.update(line for line in data.splitlines() if line.startswith(b'# SPDX-'))
+            if not any(b'SPDX-FileCopyrightText:' in line for line in headers):
+                raise RuntimeError('pypdfium2 source copyright attribution missing')
+            target=folder/name/'SOURCE-ATTRIBUTION.txt';target.parent.mkdir(parents=True,exist_ok=True)
+            target.write_bytes(b'\n'.join(sorted(headers))+b'\n')
     # Python and bundled Tcl/Tk licenses are required alongside codec notices.
     for base in [Path(sys.base_prefix),Path(sys.base_prefix)/'lib']:
         for pattern in ['LICENSE*','lib/python*/LICENSE*','tcl*/license*','tk*/license*']:
@@ -39,13 +103,13 @@ def notices(folder):
                     dest=folder/('tcltk-'+str(len(found))+'-'+license_path.name)
                     shutil.copyfile(license_path,dest);found.append(str(license_path))
     if not found:raise RuntimeError('Tcl/Tk redistribution license not found; do not publish this bundle.')
-    if platform.system()=='Darwin' and platform.machine().lower()=='x86_64':
-        prefix=Path(subprocess.check_output(['brew','--prefix','openssl@3'],text=True).strip())
-        license_path=prefix/'LICENSE.txt'
-        if not license_path.is_file():raise RuntimeError('Static Intel OpenSSL license is required.')
-        shutil.copyfile(license_path,folder/'OPENSSL-LICENSE.txt')
+    openssl_notices(folder)
     (folder/'DEPENDENCIES.json').write_text(json.dumps(inventory,indent=2),encoding='utf-8')
     shutil.copyfile(ROOT/'LICENSE',folder/'PREPARE-LICENSE')
+    shutil.copyfile(ROOT/'NOTICE',folder/'PREPARE-NOTICE')
+    shutil.copyfile(ROOT/'docs/LICENSING.md',folder/'PREPARE-LICENSING.md')
+    shutil.copyfile(ROOT/'docs/DEPENDENCIES.md',folder/'PREPARE-DEPENDENCIES.md')
+    shutil.copyfile(ROOT/'docs/ACKNOWLEDGMENTS.md',folder/'PREPARE-ACKNOWLEDGMENTS.md')
 
 def build():
     system=platform.system();arch=platform.machine().lower()
@@ -60,6 +124,7 @@ def build():
     subprocess.run([str(executable),'--version'],check=True)
     shutil.copyfile(ROOT/'desktop'/'README.md',bundle/'README.txt')
     shutil.copytree(docs,bundle/'licenses',dirs_exist_ok=True)
+    prune_unused_fonts(bundle)
     archive=ROOT/'build'/f'Prepare-{VERSION}-desktop-{system.lower()}-{arch}.zip'
     with zipfile.ZipFile(archive,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=6) as z:
         for p in sorted(bundle.rglob('*')):

@@ -14,8 +14,9 @@
   legibility before submitting important documents.
 - Data Safety draft: no developer collection or sharing; no network permission.
   Review document-provider behavior and the privacy policy before attestation.
-- License: repository Hippocratic License 3 core; ethical-source restrictions,
-  not OSI-approved open source. LICENSE and NOTICE are included in the APK.
+- License: current project-owned source is Apache-2.0. The historical published
+  0.5 APK retains Hippocratic 3.0; a source license change does not relabel it.
+  LICENSE and NOTICE must accompany any newly built distribution.
 
 ## Gates before any public store release
 

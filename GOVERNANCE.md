@@ -9,8 +9,9 @@ have a corporate committee, a foundation or a paid support team behind this repo
 I prioritize local processing, preservation of originals, readable results,
 accessibility and small downloads over a long feature list. I won't add telemetry,
 account requirements or cloud processing to the conversion path. I keep the source
-inspectable under the Hippocratic License 3.0 core; I don't call its use-restricted
-terms OSI-approved open source.
+available under Apache-2.0 for original work in the 0.9 development line onward.
+Third-party terms and historical releases are preserved; see
+[licensing scope](docs/LICENSING.md).
 
 ## How I make decisions
 

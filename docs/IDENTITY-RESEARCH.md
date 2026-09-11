@@ -36,5 +36,6 @@ without rewriting document processing.
    upgrade path is supplied. Display-name changes do not require ID churn.
 7. Retain the original licenses and notices in immutable historical releases.
 
-The maintainer explicitly reconfirmed Hippocratic License 3.0 core for future
-work. Describe the product as ethical-source, not OSI-approved open source.
+Historical decision (superseded for new source): the maintainer then chose
+Hippocratic License 3.0 core. The 0.9 development line transitions original
+work to Apache-2.0; see LICENSING.md. Historical releases retain their terms.

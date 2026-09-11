@@ -1,8 +1,8 @@
 # Store submission foundations — not submissions
 
-The downloadable builds are not store-certified. Source is inspectable under
-Hippocratic License 3.0 core; its ethical-use restrictions may exclude some
-free-software repositories. Do not replace the license with MIT to pass a check.
+The downloadable builds are not store-certified. Current original source is
+Apache-2.0 after provenance review; preserve third-party terms. Historical
+artifacts retain their original licenses. See docs/LICENSING.md.
 
 ## Shared metadata
 
@@ -26,10 +26,9 @@ https://developer.apple.com/documentation/xcode/configuring-the-macos-app-sandbo
 
 ## Microsoft Store
 
-The current Windows artifact is a portable browser bundle, not EXE/MSIX. A future
-native system-WebView host needs explicit local origin/CSP/navigation limits,
-file-picker integration and end-to-end offline tests. Do not simply submit a
-ZIP as a Windows executable. Reserve identity in Partner Center, choose a supported
+The current desktop suite has a native Tk/Python executable ZIP, not MSIX or
+store approval. The older browser bundle remains separate. Do not simply submit
+a ZIP as a store-certified Windows application. Reserve identity in Partner Center, choose a supported
 packaging model, then produce and test signed MSIX/App Installer or the approved
 unpackaged flow. No installable MSIX is claimed by these foundations.
 https://learn.microsoft.com/en-us/windows/apps/publish/

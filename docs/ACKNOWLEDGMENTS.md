@@ -1,7 +1,12 @@
 # Acknowledgments and project conventions
 
-Prepare uses Apple system frameworks and no third-party application packages.
-Its page/check artwork and website are original project assets.
+The Swift app uses Apple system frameworks; PDF tools and the separate Python
+desktop suite also use third-party packages. See [DEPENDENCIES.md](DEPENDENCIES.md)
+for platform-specific scope and complete notice requirements. Prepare uses the
+FreeType Project (https://freetype.org/) through applicable bundled dependencies;
+FreeType is copyright its respective authors. Exact notices remain bundled.
+The page/check artwork and website were developed as project assets with AI
+assistance; this is not a claim of ownership over third-party components.
 
 Repository conventions were informed by inspecting established projects:
 
@@ -18,7 +23,15 @@ No source code or documentation text was copied from them.
 
 ## License provenance
 
-`LICENSE` is the unmodified official **Hippocratic License 3.0 core** plaintext
+Current `LICENSE` is the unmodified official **Apache License, Version 2.0**
+from https://www.apache.org/licenses/LICENSE-2.0.txt. SHA-256:
+`cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30`.
+This prospective change begins with the 0.9 development line; see
+[LICENSING.md](LICENSING.md). The legal instrument is published by the Apache
+Software Foundation and is not original Prepare code.
+
+Historically, releases through 0.8.0-beta.1 used **Hippocratic License 3.0 core**
+for original work. Their `LICENSE` was the unmodified official plaintext
 from https://firstdonoharm.dev/version/3/0/core.txt, retrieved 2026-09-11.
 No optional modules are selected. SHA-256 of the downloaded license:
 
@@ -26,7 +39,8 @@ No optional modules are selected. SHA-256 of the downloaded license:
 
 The license is by Coraline Ada Ehmke / the Organization for Ethical Source.
 The previous unpublished local prototype used MIT; the first public release
-uses Hippocratic License 3.0 core at the project owner's direction.
+used Hippocratic License 3.0 core at the project owner's direction. Historical
+tags, published archives and checksums are preserved.
 
 Prepare's initial implementation and release work were developed with AI
 assistance and locally exercised by executable checks. That is not a

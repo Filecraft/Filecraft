@@ -5,7 +5,7 @@ import json
 import sys
 import zipfile
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='0.7.0-beta.1'
+VERSION=json.loads((ROOT/'product.json').read_text())['version']
 HANDLER="""
 self.onmessage=async function(event){
  try {

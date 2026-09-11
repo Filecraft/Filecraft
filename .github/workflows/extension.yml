@@ -1,0 +1,30 @@
+name: Browser workspace and extension
+on:
+  push:
+    paths: ['extension/**', 'workbench/**', 'engine/**', 'pdf/**', 'product.json', 'LICENSE', 'NOTICE', '.github/workflows/extension.yml']
+  pull_request:
+    paths: ['extension/**', 'workbench/**', 'engine/**', 'pdf/**', 'product.json', 'LICENSE', 'NOTICE', '.github/workflows/extension.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: npm ci --prefix portable
+      - run: cd portable && npx playwright install --with-deps chromium
+      - run: python3 scripts/package_workbench.py --check
+      - run: python3 extension/package.py
+      - run: python3 -m unittest discover -s extension/tests -v
+      - run: node extension/tests/browser.cjs
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: browser-workspace-extension
+          path: |
+            build/Prepare-*-extension-*.zip*
+            build/extension-evidence/

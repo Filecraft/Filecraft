@@ -10,10 +10,14 @@ SHA-256 of UMD:
 
 The published UMD includes upstream dependencies; there are no runtime npm imports.
 Retained licenses cover pdf-lib (MIT), @pdf-lib/standard-fonts (MIT), @pdf-lib/upng
-(MIT), pako (MIT / bundled zlib terms in code), and tslib (Apache-2.0 plus Microsoft
+(MIT), pako (MIT plus the separately retained `LICENSE.pako.zlib` source header),
+and tslib (Apache-2.0 plus Microsoft
 copyright notice). Pinned direct dependency versions were read from pdf-lib's
 published package and yarn lockfile. The upstream lock also includes pako 1.0.10;
-the same pako license applies. These supplementary license packages were packed
+the supplementary 1.0.11 source notice is not proof of every embedded module
+version. The zlib notice is not present in the minified UMD. Its verbatim header
+comes from `package/lib/zlib/deflate.js`; source and notice hashes are recorded
+in `PROVENANCE.json`. These supplementary license packages were packed
 only to retain their original notices, not installed into runtime code.
 
 `PROVENANCE.json` records registry tarballs, SHA-512 integrity and SHA-256 hashes
@@ -25,5 +29,7 @@ Hashes establish byte identity, not security or signature verification. This is 
 pinned older release, not a claim that upstream or its dependencies are free of
 vulnerabilities. Audit before changing the pin or widening accepted PDF features.
 
-Project files outside this vendor directory remain under the root Hippocratic
-License 3.0; vendor licenses are retained separately, not relicensed.
+Original Prepare source in the 0.9 development line uses Apache-2.0; historical
+releases retain their supplied terms. Vendor components (including the vendor
+portion of generated `workbench/worker-bundle.js`) retain their own licenses,
+not a blanket original-code grant. See `../../docs/LICENSING.md`.

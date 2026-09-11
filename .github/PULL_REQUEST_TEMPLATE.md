@@ -10,7 +10,7 @@ Closes #
 - [ ] Inspected exported PDF pixels, page count and byte limit where relevant.
 - [ ] Originals, cancellation, stale-preview invalidation and offline operation remain intact.
 - [ ] Updated docs and CHANGELOG; disclosed AI assistance if used.
-- [ ] I have the right to contribute this work under the Hippocratic License 3.0 core.
+- [ ] I have the right to contribute this work under Apache-2.0 (with upstream exceptions preserved).
 
 ## Evidence
 

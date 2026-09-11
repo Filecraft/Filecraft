@@ -1,6 +1,17 @@
 # Changelog
 
-## 0.8.0-beta.1 — Desktop suite (in development)
+## 0.9.0-beta.1 — Requirements workspace (release candidate)
+
+- Personal requirements checked before desktop output publication; hash-bound receipts.
+- Desktop CLI preparation and byte verification, format-specific controls and profile import.
+- Browser receipts, saved-copy verification and real in-memory sample PDF demonstration.
+- Minimal-permission MV3 workspace packages; Chromium/Edge installed tests and Firefox
+  temporary-install qualification. No marketplace or Safari publication claimed.
+- Editorial website redesign with shared documentation shell and explicit surface matrix.
+- Prospective Apache-2.0 migration for original source; upstream/historical terms retained.
+- Packaging adds pako/zlib attribution and OpenSSL notices; unused DarkGarden fonts excluded.
+
+## 0.8.0-beta.1 — Desktop suite
 
 - Native Tk desktop frontend, output dropdown, private subprocess conversion and previews.
 - Exclusive new-copy publication, source hash, measured output size and loss warnings.

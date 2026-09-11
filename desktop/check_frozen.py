@@ -20,6 +20,13 @@ with tempfile.TemporaryDirectory() as td:
         assert output.stat().st_size==result['result']['bytes']
     assert len(PdfReader(folder/'out.pdf').pages)==1
     with Image.open(folder/'out.jpg') as image:assert image.size==(80,60)
+    import hashlib
+    proof=folder/'receipt.json';proof.write_text(json.dumps(result['result']['receipt']))
+    verified=subprocess.run([str(executable),'verify',str(folder/'out.zip'),'--receipt',str(proof)],capture_output=True,text=True,timeout=60)
+    assert verified.returncode==0 and json.loads(verified.stdout)['result']['matches'],verified.stdout
+    blocked=folder/'blocked.pdf'
+    failed=subprocess.run([str(executable),'prepare',str(source),'--output',str(blocked),'--target','pdf','--max-bytes','1'],capture_output=True,text=True,timeout=60)
+    assert failed.returncode==1 and not blocked.exists(),failed.stdout
     source=folder/'out.pdf'
     for target,options in [('png',{}),('pdf',{'action':'encrypt','output_password':'synthetic-password'}),('pdf',{'action':'rasterize'})]:
         output=folder/(options.get('action','preview')+'.'+target)

@@ -22,6 +22,8 @@ class App:
     def __init__(self,root):
         self.root=root;root.title('Prepare — local document suite');root.geometry('1040x780');root.minsize(840,680)
         self.preview_identity=tk.StringVar(value='No preview rendered.');self.preview_request={}
+        self.last_receipt=None;self.profile=None;self.option_widgets={}
+        self.max_bytes=tk.StringVar();self.max_pages=tk.StringVar();self.requirement_status=tk.StringVar(value='Optional personal requirements; not portal certification.')
         self.source='';self.busy=False;self.proc=None;self.messages=queue.Queue();self.output='';self.preview_dir=None;self.photo=None
         self.target=tk.StringVar();self.action=tk.StringVar(value='copy');self.password=tk.StringVar();self.output_password=tk.StringVar()
         self.pages=tk.StringVar();self.rotation=tk.StringVar(value='0');self.dpi=tk.StringVar(value='120');self.quality=tk.StringVar(value='85');self.language=tk.StringVar(value='eng')
@@ -39,6 +41,7 @@ class App:
         ttk.Label(left,text='1. Choose output format',font=('TkDefaultFont',13,'bold')).pack(anchor='w')
         self.target_box=ttk.Combobox(left,textvariable=self.target,state='readonly',width=30);self.target_box.pack(fill='x',pady=6)
         self.target_box.bind('<<ComboboxSelected>>',lambda e:self.explain())
+        self.action.trace_add('write',lambda *a:self.update_options())
         ttk.Label(left,text='ZIP/GZ work with any extension (archive compression).\nFormat conversion is limited to the choices shown.',wraplength=460).pack(anchor='w',pady=(0,12))
         self.options=ttk.LabelFrame(left,text='2. Conversion options',padding=10);self.options.pack(fill='x')
         self.row('PDF operation',self.action,['copy','optimize','rasterize','encrypt','decrypt','fill','annotate'])
@@ -54,9 +57,19 @@ class App:
         self.row('Form values (JSON object)',self.fields)
         ttk.Button(left,text='Inspect PDF / list form fields',command=self.inspect).pack(anchor='w',pady=8)
         ttk.Label(left,text='PDF options apply only to PDF input. OCR needs local Tesseract. Media needs local FFmpeg. Text-first Office conversion loses layout; it does not execute macros.',wraplength=450).pack(anchor='w')
+        requirements=ttk.LabelFrame(left,text='3. Requirements · checked before saving',padding=8)
+        requirements.pack(fill='x',pady=8)
+        ttk.Label(requirements,text='Maximum bytes (blank = no limit)').grid(row=0,column=0,sticky='w')
+        ttk.Entry(requirements,textvariable=self.max_bytes,width=14).grid(row=0,column=1)
+        ttk.Label(requirements,text='Maximum pages').grid(row=1,column=0,sticky='w')
+        ttk.Entry(requirements,textvariable=self.max_pages,width=14).grid(row=1,column=1)
+        ttk.Button(requirements,text='Import profile…',command=self.import_profile).grid(row=2,column=0)
+        ttk.Button(requirements,text='Clear requirements',command=self.clear_requirements).grid(row=2,column=1)
+        ttk.Label(requirements,textvariable=self.requirement_status,wraplength=430).grid(row=3,column=0,columnspan=2,sticky='w')
         buttons=ttk.Frame(left);buttons.pack(fill='x',pady=10)
-        self.save_button=ttk.Button(buttons,text='3. Export new copy…',command=self.save);self.save_button.pack(side='left')
+        self.save_button=ttk.Button(buttons,text='4. Export new copy…',command=self.save);self.save_button.pack(side='left')
         self.cancel_button=ttk.Button(buttons,text='Cancel',command=self.cancel,state='disabled');self.cancel_button.pack(side='left',padx=8)
+        self.receipt_button=ttk.Button(bar,text='Save receipt…',command=self.save_receipt,state='disabled');self.receipt_button.pack(side='left')
         pb=ttk.Frame(right);pb.pack(fill='x')
         ttk.Button(pb,text='Preview source',command=lambda:self.preview(False)).pack(side='left')
         ttk.Button(pb,text='Preview output',command=lambda:self.preview(True)).pack(side='left',padx=6)
@@ -69,12 +82,62 @@ class App:
         root.after(60,self.poll)
     def row(self,label,var,values=None,secret=False):
         n=len(self.options.grid_slaves())//2
-        ttk.Label(self.options,text=label).grid(row=n,column=0,sticky='w',pady=2,padx=(0,10))
+        label_widget=ttk.Label(self.options,text=label)
+        label_widget.grid(row=n,column=0,sticky='w',pady=2,padx=(0,10))
         widget=ttk.Combobox(self.options,textvariable=var,values=values,state='readonly',width=22) if values else ttk.Entry(self.options,textvariable=var,width=25,show='•' if secret else '')
         widget.grid(row=n,column=1,sticky='ew',pady=2)
+        self.option_widgets[label]=(label_widget,widget)
         self.options.columnconfigure(1,weight=1)
     def detail(self,text):
         self.details.configure(state='normal');self.details.delete('1.0','end');self.details.insert('1.0',text);self.details.configure(state='disabled')
+    def update_options(self):
+        pdf=Path(self.source).suffix.lower()=='.pdf';target=self.target.get()
+        visible={'Image quality (1–95)','Preview / image page'}
+        if pdf:
+            visible|={'PDF input password','Pages (e.g. 1,3,2; blank = all)','Render DPI (36–200)'}
+            if target.startswith('ocr-'):visible.add('OCR language (local data)')
+            if target=='pdf':
+                visible|={'PDF operation','Clockwise rotation'}
+                if self.action.get()=='encrypt':visible.add('New encryption password')
+                if self.action.get()=='fill':visible.add('Form values (JSON object)')
+                if self.action.get()=='annotate':visible.add('Text note (annotate)')
+        for label,widgets in self.option_widgets.items():
+            for w in widgets:
+                w.grid() if label in visible else w.grid_remove()
+
+    def import_profile(self):
+        if self.busy:return
+        from .requirements import validate_profile
+        path=filedialog.askopenfilename(title='Import personal requirement profile',filetypes=[('JSON profile','*.json')])
+        if not path:return
+        try:
+            with open(path,'rb') as stream:raw=stream.read(65537)
+            if len(raw)>65536:raise ValueError('Profile exceeds 64 KiB desktop request budget.')
+            self.profile=validate_profile(json.loads(raw))
+            self.max_bytes.set('');self.max_pages.set('')
+            self.requirement_status.set('Profile: '+self.profile['id']+'. Extra limits below override matching maximums.')
+        except (ValueError,OSError) as exc:self.status.set(str(exc))
+
+    def clear_requirements(self):
+        self.profile=None;self.max_bytes.set('');self.max_pages.set('')
+        self.requirement_status.set('No requirements selected. Outputs still need visual review.')
+
+    def current_profile(self):
+        from .requirements import validate_profile
+        p=json.loads(json.dumps(self.profile)) if self.profile else {'version':1,'id':'desktop-personal','constraints':{}}
+        for field,var in [('bytes',self.max_bytes),('pageCount',self.max_pages)]:
+            if var.get().strip():p['constraints'].setdefault(field,{})['max']=int(var.get())
+        return validate_profile(p) if p['constraints'] else None
+
+    def save_receipt(self):
+        if self.busy or self.last_receipt is None:return
+        path=filedialog.asksaveasfilename(title='Save verification receipt',initialfile='Prepared.receipt.json',defaultextension='.json')
+        if not path:return
+        try:
+            with open(path,'x',encoding='utf-8') as stream:json.dump(self.last_receipt,stream,indent=2,ensure_ascii=False)
+            self.status.set('Receipt saved. Byte identity evidence, not authenticity or portal acceptance; may reveal personal requirements.')
+        except OSError:self.status.set('Receipt not saved. Choose a new local filename; existing files are never replaced.')
+
     def choose(self):
         path=filedialog.askopenfilename(title='Choose a local file')
         if path:
@@ -85,8 +148,10 @@ class App:
         caps=capabilities(path);self.source=path;self.output='';self.source_label.configure(text=path)
         self.target_box.configure(values=caps['targets']);self.target.set(caps['targets'][0]);self.canvas.delete('all')
         self.photo=None;self.preview_identity.set('No preview rendered.')
+        self.last_receipt=None;self.receipt_button.configure(state='disabled')
         self.password.set('');self.output_password.set('');self.pages.set('');self.fields.set('{}');self.action.set('copy');self.explain()
     def explain(self):
+        self.update_options()
         self.status.set('Ready to create a new copy. Existing files will not be replaced.')
         self.detail('Conversion ≠ compression. Outputs can be larger. Re-encoding can lose metadata, quality, formatting, text layers or interactivity. PDF copy/fill/annotation is not sanitization; active content may remain. Use local folders: system file providers can sync to cloud independently.')
     def get_options(self):
@@ -101,7 +166,11 @@ class App:
         destination=filedialog.asksaveasfilename(title='Save a new copy — existing files are protected',initialfile=Path(self.source).stem+'-prepared.'+ext,defaultextension='.'+ext)
         if destination:self.begin_export(destination)
     def begin_export(self,destination):
-        try:self.start({'source':self.source,'output':destination,'target':self.target.get(),'options':self.get_options()},'export')
+        try:
+            request={'source':self.source,'output':destination,'target':self.target.get(),'options':self.get_options()}
+            profile=self.current_profile()
+            if profile is not None:request['profile']=profile
+            self.start(request,'export')
         except Exception as exc:self.status.set(str(exc))
     def inspect(self):
         if not self.source or self.busy:return
@@ -163,7 +232,8 @@ class App:
                 elif kind=='inspect':self.detail(json.dumps(result,indent=2));self.status.set('PDF inspected. No active content was executed.')
                 else:
                     self.canvas.delete('all');self.photo=None;self.preview_identity.set('Export complete. Preview output to review the new copy.')
-                    self.output=result['output'];self.status.set(f"Saved {result['bytes']:,} bytes from {result['input_bytes']:,} bytes. Original unchanged.");self.detail(json.dumps(result,indent=2))
+                    self.last_receipt=result['receipt'];self.receipt_button.configure(state='normal')
+                    self.output=result['output'];self.status.set(f"{result['receipt']['readiness']['status']}. Saved {result['bytes']:,} bytes from {result['input_bytes']:,} bytes. Original unchanged.");self.detail(json.dumps(result,indent=2))
         except queue.Empty:pass
         finally:
             if self.root.winfo_exists():self.root.after(60,self.poll)
