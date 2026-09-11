@@ -18,7 +18,7 @@ self.onmessage=async function(event){
 };
 """
 def sync(check=False):
-    script=(ROOT/'pdf/vendor/pdf-lib.min.js').read_text()+'\n'+(ROOT/'pdf/document.js').read_text()+'\n'+HANDLER
+    script=(ROOT/'pdf/vendor/pdf-lib.min.js').read_text(encoding='utf-8')+'\n'+(ROOT/'pdf/document.js').read_text(encoding='utf-8')+'\n'+HANDLER
     payload={'worker-bundle.js':('/* Generated: python3 scripts/package_workbench.py --sync */\nconst PREPARE_WORKER_SOURCE='+json.dumps(script)+';\n').encode(),'document-engine.js':(ROOT/'engine/document-engine.js').read_bytes(),'readiness-ui.js':(ROOT/'portable/readiness-ui.js').read_bytes()}
     for name,data in payload.items():
         p=ROOT/'workbench'/name

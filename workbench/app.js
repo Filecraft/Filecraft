@@ -14,7 +14,7 @@
   function invalidate() {
     if (outputURL) URL.revokeObjectURL(outputURL);
     outputURL = null; evidence = null; $('result').hidden = true; $('download').hidden = true;
-    $('download').removeAttribute('href'); $('reviewed').checked = false;
+    $('download').removeAttribute('href'); $('reviewed').checked = false; $('save-hint').hidden = false;
   }
   function checks() {
     try { ReadinessUI.render($('checks'), E.evaluate(evidence || documentModel(rows()), requirement())); }
@@ -117,7 +117,7 @@
       status(`Output parsed · ${bytes.length.toLocaleString()} bytes · ${info.pageCount} pages. Review in a PDF reader before submission.`);
     }catch(e){invalidate();status(e.message);}finally{busy=false;render();}
   };
-  $('reviewed').onchange=()=>{$('download').hidden=!outputURL||!$('reviewed').checked;};
+  $('reviewed').onchange=()=>{$('download').hidden=!$('reviewed').checked||!outputURL;$('save-hint').hidden=$('reviewed').checked&&!!outputURL;};
   $('profile-file').onchange=async e=>{if(busy)return;const file=e.target.files[0];e.target.value='';if(!file)return;busy=true;render();try{if(file.size>E.LIMITS.jsonBytes)throw Error('Profile exceeds 1 MiB');const p=E.validateProfile(E.parseJSON(await file.text()));custom=p;invalidate();$('profile-status').textContent='Imported '+p.id+'. Size ceiling still applies.';}catch(e){$('profile-status').textContent='Not imported: '+e.message;}finally{busy=false;render();}};
   $('profile-reset').onclick=()=>{if(!busy){custom=null;invalidate();render();$('profile-status').textContent='Using current limits.';}};
   $('profile-export').onclick=()=>{try{const p=requirement(),url=URL.createObjectURL(new Blob([JSON.stringify(p,null,2)+'\n'],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=p.id+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){status(e.message);}};
