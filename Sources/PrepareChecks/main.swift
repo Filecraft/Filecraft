@@ -24,6 +24,11 @@ for y in stride(from: 100, to: 1500, by: 50) { context.fill(CGRect(x: 80,y: y,wi
 let destination = CGImageDestinationCreateWithURL(input as CFURL, UTType.png.identifier as CFString, 1, nil)!
 CGImageDestinationAddImage(destination, context.makeImage()!, nil)
 try require(CGImageDestinationFinalize(destination), "fixture PNG must write")
+try checkDPICeiling(folder: folder)
+try checkDuplicateSelected(input: input)
+try checkMoveSelectedLast(input: input)
+try await checkWorkspaceDPI(input: input)
+try await checkWorkspacePageActions(input: input)
 let before = try Data(contentsOf: input)
 final class ProgressLog: @unchecked Sendable {
     private let lock = NSLock()

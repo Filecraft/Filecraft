@@ -11,7 +11,10 @@ func checkUIContract() throws {
         "Source · original color", "Exact output ·", "Save a copy…",
         "model.applyPreset", "selection: $model.profile", "model.batch(.sortByFilename)",
         "model.batch(.reverse)", "model.batch(.rotateAll)", "model.batch(.clear)",
-        ".confirmationDialog", "private var actionToolbar", "private var sidebar"
+        ".confirmationDialog", "private var actionToolbar", "private var sidebar",
+        "DPI ceiling", "selection: $model.dpiCeiling", "DPICeiling.allCases",
+        "Duplicate selected", "model.duplicateSelected", "Move selected to last", "model.moveSelectedLast",
+        "Selected page actions", "minWidth: 950, minHeight: 740", "may go below 960 px"
     ] {
         try require(ui.contains(token), "UI contract missing label or action wiring: \(token)")
     }

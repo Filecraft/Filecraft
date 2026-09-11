@@ -140,6 +140,10 @@ struct ContentView: View {
                         Text("A4").tag(PaperFormat.a4)
                         Text("US Letter").tag(PaperFormat.usLetter)
                     }.accessibilityLabel("Output paper size")
+                    Picker("DPI ceiling", selection: $model.dpiCeiling) {
+                        ForEach(DPICeiling.allCases, id: \.self) { Text($0.title).tag($0) }
+                    }.accessibilityLabel("DPI ceiling")
+                        .help("Maximum raster density at the actual placed image size. Never upscales; the byte budget may lower it further.")
                     HStack {
                         Text("Margin")
                         Spacer()
@@ -151,6 +155,8 @@ struct ContentView: View {
                         Text("pt").foregroundStyle(.secondary)
                     }
                     Text(model.paper == .original ? "Original aspect uses a 720 pt page edge, not original resolution or scan DPI." : "Fits portrait paper without cropping. 72 pt = 1 inch.")
+                        .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    Text("DPI limits placed content, never upscales, and may go below 960 px. The byte budget can lower density further.")
                         .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 }.padding(.top, 10).disabled(model.busy)
             }.font(.callout.weight(.medium))
@@ -196,6 +202,16 @@ struct ContentView: View {
                 .keyboardShortcut("o", modifiers: .command).disabled(model.busy)
                 .help("JPEG, PNG or HEIC · up to 20 pages. You can also drop files here.")
             Spacer(minLength: 0)
+            Menu {
+                Button("Duplicate selected", systemImage: "plus.square.on.square") { model.duplicateSelected() }
+                    .disabled(model.inputs.count >= 20)
+                Button("Move selected to last", systemImage: "arrow.down.to.line") { model.moveSelectedLast() }
+                    .disabled(model.selection.selectedIndex == model.inputs.count - 1)
+            } label: { Image(systemName: "ellipsis.circle") }
+                .menuStyle(.borderlessButton).fixedSize()
+                .accessibilityLabel("Selected page actions")
+                .help("Duplicate selected page or move it to the end")
+                .disabled(model.busy || model.selection.selected == nil)
             Menu {
                 Button("Sort by filename") { model.batch(.sortByFilename) }
                     .disabled(model.inputs.count < 2)

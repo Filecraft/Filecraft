@@ -18,6 +18,21 @@ public struct PageSelection: Sendable {
     public init(entries: [PageEntry] = []) { self.entries = entries; selectedID = entries.first?.id }
     public var selectedIndex: Int? { entries.firstIndex { $0.id == selectedID } }
     public var selected: PageEntry? { selectedIndex.map { entries[$0] } }
+    @discardableResult
+    public mutating func moveSelectedLast(isBusy: Bool = false) -> Bool {
+        guard !isBusy, let index = selectedIndex, index < entries.count - 1 else { return false }
+        entries.append(entries.remove(at: index))
+        return true
+    }
+    @discardableResult
+    public mutating func duplicateSelected(isBusy: Bool = false) -> Bool {
+        guard !isBusy, entries.count < 20, let index = selectedIndex else { return false }
+        var copy = PageEntry(url: entries[index].url)
+        copy.rotation = entries[index].rotation
+        entries.insert(copy, at: index + 1)
+        selectedID = copy.id
+        return true
+    }
     /// Returns false for guarded or unchanged edits so a reviewed result stays valid.
     @discardableResult
     public mutating func apply(_ action: PageBatchAction, isBusy: Bool = false) -> Bool {

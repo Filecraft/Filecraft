@@ -71,17 +71,42 @@ public enum Preparation {
             let url = page.url
             try Task.checkCancellation()
             try autoreleasepool {
-                let image = try ImageInput.thumbnail(url, edge: edge)
+                // Automatic retains the v0.4 thumbnail/layout path. An explicit
+                // ceiling uses oriented SOURCE geometry, not rounded thumbnails.
+                var exactLayout: PageLayout?
+                var targetSize: CGSize?
+                if settings.dpiCeiling != .automatic {
+                    let source = try ImageInput.orientedSize(url)
+                    let layout = try settings.layout(width: source.width, height: source.height, rotation: page.rotation)
+                    exactLayout = layout
+                    let swaps = page.rotation.rawValue % 2 == 1
+                    let widthPoints = swaps ? layout.content.height : layout.content.width
+                    let heightPoints = swaps ? layout.content.width : layout.content.height
+                    let density = CGFloat(settings.dpiCeiling.rawValue) / 72
+                    let scale = min(1, CGFloat(edge) / CGFloat(max(source.width, source.height)),
+                                    widthPoints * density / CGFloat(source.width),
+                                    heightPoints * density / CGFloat(source.height))
+                    let width = Int(floor(CGFloat(source.width) * scale))
+                    let height = Int(floor(CGFloat(source.height) * scale))
+                    guard width > 0, height > 0 else {
+                        throw PrepareError.invalidInput("The DPI ceiling leaves less than one pixel of content. Reduce the margin.")
+                    }
+                    targetSize = CGSize(width: width, height: height)
+                }
+                let decodeEdge = targetSize.map { Int(max($0.width, $0.height)) } ?? edge
+                let image = try ImageInput.thumbnail(url, edge: decodeEdge)
+                let pixelWidth = min(image.width, targetSize.map { Int($0.width) } ?? image.width)
+                let pixelHeight = min(image.height, targetSize.map { Int($0.height) } ?? image.height)
                 // Flatten transparency over white and omit source metadata.
                 // A single-component gray buffer produces a genuinely grayscale JPEG,
                 // not an RGB image merely decorated with a display-only filter.
                 let gray = profile == .grayscale
-                guard let canvas = CGContext(data: nil, width: image.width, height: image.height,
+                guard let canvas = CGContext(data: nil, width: pixelWidth, height: pixelHeight,
                      bitsPerComponent: 8, bytesPerRow: 0, space: gray ? CGColorSpaceCreateDeviceGray() : CGColorSpaceCreateDeviceRGB(),
                      bitmapInfo: gray ? CGImageAlphaInfo.none.rawValue : CGImageAlphaInfo.noneSkipLast.rawValue) else {
                     throw PrepareError.invalidInput("Could not allocate an image buffer.")
                 }
-                let imageRect = CGRect(x: 0, y: 0, width: image.width, height: image.height)
+                let imageRect = CGRect(x: 0, y: 0, width: pixelWidth, height: pixelHeight)
                 canvas.setFillColor(CGColor(gray: 1, alpha: 1)); canvas.fill(imageRect)
                 canvas.draw(image, in: imageRect)
                 let compressed = NSMutableData()
@@ -95,7 +120,7 @@ public enum Preparation {
                       let jpeg = CGImage(jpegDataProviderSource: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent) else {
                     throw PrepareError.invalidInput("Image encoding failed.")
                 }
-                let layout = try settings.layout(width: jpeg.width, height: jpeg.height, rotation: page.rotation)
+                let layout = try exactLayout ?? settings.layout(width: jpeg.width, height: jpeg.height, rotation: page.rotation)
                 let swaps = page.rotation.rawValue % 2 == 1
                 let width = swaps ? layout.content.height : layout.content.width
                 let height = swaps ? layout.content.width : layout.content.height

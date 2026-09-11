@@ -25,6 +25,7 @@ public final class Workspace: ObservableObject {
     @Published public var profile: CompressionProfile = .balanced { didSet { if oldValue != profile { invalidate() } } }
     @Published public var paper: PaperFormat = .original { didSet { if oldValue != paper { invalidate() } } }
     @Published public var margin = "0" { didSet { if oldValue != margin { invalidate() } } }
+    @Published public var dpiCeiling: DPICeiling = .automatic { didSet { if oldValue != dpiCeiling { invalidate() } } }
     @Published public var result: Prepared?
     @Published public var busy = false
     @Published public var message = ""
@@ -50,10 +51,17 @@ public final class Workspace: ObservableObject {
         guard !busy else { return }
         megabytes = String(Double(preset.maxBytes) / 1_000_000)
         paper = preset.settings.paper; margin = String(preset.settings.margin)
+        dpiCeiling = preset.settings.dpiCeiling
         profile = preset.profile
     }
     public func batch(_ action: PageBatchAction) {
         if selection.apply(action, isBusy: busy) { invalidate() }
+    }
+    public func duplicateSelected() {
+        if selection.duplicateSelected(isBusy: busy) { invalidate() }
+    }
+    public func moveSelectedLast() {
+        if selection.moveSelectedLast(isBusy: busy) { invalidate() }
     }
     public var inputs: [PageEntry] { selection.entries }
     public var byteLimit: Int? {
@@ -62,7 +70,7 @@ public final class Workspace: ObservableObject {
     }
     public var settings: PageSettings? {
         guard let points = Double(margin), points.isFinite, (0...72).contains(points) else { return nil }
-        let value = PageSettings(paper: paper, margin: points)
+        let value = PageSettings(paper: paper, margin: points, dpiCeiling: dpiCeiling)
         guard (try? value.validate()) != nil else { return nil }
         return value
     }

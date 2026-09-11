@@ -24,6 +24,14 @@ enum ImageInput {
         }
         return (source, size)
     }
+    static func orientedSize(_ url: URL) throws -> (width: Int, height: Int) {
+        let (source, _) = try validatedSource(url)
+        let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as! [CFString: Any]
+        let width = properties[kCGImagePropertyPixelWidth] as! Int
+        let height = properties[kCGImagePropertyPixelHeight] as! Int
+        let orientation = properties[kCGImagePropertyOrientation] as? Int ?? 1
+        return (5...8).contains(orientation) ? (height, width) : (width, height)
+    }
     static func thumbnail(_ url: URL, edge: Int) throws -> CGImage {
         let (source, _) = try validatedSource(url)
         guard let image = CGImageSourceCreateThumbnailAtIndex(source, 0, [

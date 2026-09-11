@@ -9,11 +9,17 @@ public enum PageRotation: Int, CaseIterable, Sendable {
 public enum PaperFormat: String, CaseIterable, Sendable {
     case original, a4, usLetter
 }
+public enum DPICeiling: Int, CaseIterable, Sendable {
+    case automatic = 0, dpi150 = 150, dpi200 = 200, dpi300 = 300
+    public var title: String { self == .automatic ? "Automatic" : "\(rawValue) DPI" }
+}
+
 public struct PageSettings: Sendable, Equatable {
     public var paper: PaperFormat
     public var margin: Double
-    public init(paper: PaperFormat = .original, margin: Double = 0) {
-        self.paper = paper; self.margin = margin
+    public var dpiCeiling: DPICeiling
+    public init(paper: PaperFormat = .original, margin: Double = 0, dpiCeiling: DPICeiling = .automatic) {
+        self.paper = paper; self.margin = margin; self.dpiCeiling = dpiCeiling
     }
 
     /// Original means image aspect ratio with a 720-point longest page edge,
