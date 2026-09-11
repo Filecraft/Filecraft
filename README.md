@@ -2,7 +2,7 @@
   <img src="docs/assets/icon.svg" width="96" height="96" alt="Prepare icon">
   <h1>Prepare</h1>
   <p><strong>A smaller file. A simpler handoff.</strong></p>
-  <p>Scans and photos → a size-constrained PDF. Entirely on your Mac.</p>
+  <p>Scans and photos → a size-constrained PDF. Entirely on your device.</p>
   <p>
     <a href="https://gonisulaimann.github.io/">Website</a> ·
     <a href="https://github.com/gonisulaimann/Prepare/releases/latest">Download</a> ·
@@ -11,7 +11,7 @@
   <p>
     <a href="https://github.com/gonisulaimann/Prepare/actions/workflows/ci.yml"><img src="https://github.com/gonisulaimann/Prepare/actions/workflows/ci.yml/badge.svg" alt="macOS checks"></a>
     <img src="https://img.shields.io/badge/macOS-14%2B-183e33" alt="macOS 14 or newer">
-    <img src="https://img.shields.io/badge/Swift-6-183e33" alt="Swift 6">
+    <a href="https://github.com/gonisulaimann/Prepare/actions/workflows/portable.yml"><img src="https://github.com/gonisulaimann/Prepare/actions/workflows/portable.yml/badge.svg" alt="Windows and Linux browser checks"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Hippocratic_3.0_core-657b58" alt="Hippocratic License 3.0 core"></a>
   </p>
 </div>
@@ -21,7 +21,8 @@ Prepare turns up to 20 images into one ordered, reviewed PDF under your chosen
 byte limit—or tells you when it cannot fit within its quality floor.
 
 No account. No uploads. No analytics. No subscription. No AI service.
-Just native SwiftUI, ImageIO, CoreGraphics and PDFKit, with no package dependencies.
+Native Apple frameworks on Mac; dependency-free HTML/JavaScript in an existing
+desktop browser on Windows/Linux. Android is a separate native engineering target.
 
 ![Prepare showing native page controls and source-versus-PDF review](docs/assets/screenshot.png)
 
@@ -50,23 +51,35 @@ Just native SwiftUI, ImageIO, CoreGraphics and PDFKit, with no package dependenc
 
 This is intentionally a focused image-to-PDF utility, not a general PDF editor.
 
-## Windows and Linux: Portable preview
+## Platform matrix — v0.5.0
 
-[Download the offline Portable preview](https://github.com/gonisulaimann/Prepare/releases/tag/v0.5.0-portable-preview.1).
-Extract the whole ZIP and open `Prepare-Portable/index.html` in a current desktop
-Chrome, Edge or Firefox browser. No server or internet needed after download.
-This is a 16,642-byte browser companion, not a native Windows/Linux binary.
-The stable Mac app below remains v0.4.0.
+| Platform | Artifact | Scope |
+|---|---|---|
+| macOS 14+, Apple Silicon | Native app ZIP | DPI ceilings, duplicate and move-to-last controls; ad-hoc signed, not notarized |
+| Windows | Portable ZIP | Existing current desktop Chrome/Edge/Firefox; not an EXE |
+| Linux | Same Portable ZIP | Existing current desktop Chrome/Firefox; not an ELF/package |
+| Android | Native engineering target | See [Android status](android/README.md); device tests gate release |
 
-Portable supports JPEG/PNG, compression profiles, DPI ceilings, margins, page
-ordering and left/right spread splitting. Windows/Linux Chromium and Firefox
-[CI checks passed](https://github.com/gonisulaimann/Prepare/actions/runs/34558322793).
-Read the preview release notes for input, browser, privacy and export limitations.
-[Portable source at its tested tag](https://github.com/gonisulaimann/Prepare/tree/v0.5.0-portable-preview.1/portable).
+[Download v0.5.0](https://github.com/gonisulaimann/Prepare/releases/tag/v0.5.0).
+Extract the whole Portable ZIP and open `Prepare-Portable/index.html`. No server
+or internet is needed after download. JPEG/PNG, custom 36–600 DPI (0 automatic),
+A4/Letter/margins, spread splitting, duplicate/remove/rotate pages and opt-in
+near-white threshold cleanup. Cleanup may erase faint detail: review every page.
+This is not semantic background segmentation. No OCR, PDF input or encryption.
+
+Source EXIF/GPS metadata is not copied. Metadata retention controls and password
+protection are roadmap items, not shipped features. Browser previews show embedded
+images, not an independent PDF render; inspect output in a PDF reader. Use a trusted
+browser and local storage; browser extensions, OS backup/sync and cloud-backed
+file providers are outside Prepare's privacy boundary.
+
+[100-capability architecture backlog](docs/ROADMAP-100.md) ·
+[First-person governance](GOVERNANCE.md) · [Store foundations](distribution/README.md).
+A roadmap entry or store config is not a supported feature or approved listing.
 
 ## Download and install
 
-[Download Prepare 0.4.0 for Apple Silicon](https://github.com/gonisulaimann/Prepare/releases/download/v0.4.0/Prepare-0.4.0-arm64.zip)
+[Download Prepare 0.5.0 for Apple Silicon](https://github.com/gonisulaimann/Prepare/releases/download/v0.5.0/Prepare-0.5.0-arm64.zip)
 
 Requires macOS 14 or later. Expand the ZIP and drag `Prepare.app` to Applications.
 Intel and universal release binaries are not provided or release-tested.
@@ -80,7 +93,7 @@ Intel and universal release binaries are not provided or release-tested.
 Verify a download in the directory containing both release assets:
 
 ```sh
-shasum -a 256 -c Prepare-0.4.0-arm64.zip.sha256
+shasum -a 256 -c Prepare-0.5.0-arm64.zip.sha256
 ```
 
 The checksum detects accidental corruption; it is not an independent publisher
@@ -149,7 +162,7 @@ bash scripts/package.sh
 open build/Prepare.app
 ```
 
-Outputs: `build/Prepare.app`, `build/Prepare-0.4.0-arm64.zip` and its `.sha256`
+Outputs: `build/Prepare.app`, `build/Prepare-0.5.0-arm64.zip` and its `.sha256`
 (on an Apple Silicon build host). The package includes the full license,
 notice and original app icon. Packaging uses an ad-hoc signature by default.
 

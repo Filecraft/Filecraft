@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Prepare
+Comment=Convert images to PDF locally
+Exec=prepare-portable %F
+Icon=org.prepareapp.prepare
+Terminal=false
+Categories=Utility;Graphics;
+MimeType=image/jpeg;image/png;
+NoDisplay=true

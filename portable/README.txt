@@ -9,7 +9,10 @@ This companion is not a Windows EXE or Linux ELF binary. It uses your existing
 browser, which is a separate prerequisite and not included in the size budget.
 
 Add JPEG/PNG images, choose a preset, sort/reorder/rotate or split a spread,
-set paper/margins/DPI ceiling and a byte limit, then Prepare PDF. Split divides
+set paper/margins/custom 36–600 DPI ceiling (0 = automatic) and a byte limit,
+then Prepare PDF. Optional near-white cleanup turns pixels above a threshold
+white; it is not semantic background removal and may erase faint content.
+Duplicate, rotate or remove individual pages before preparing. Split divides
 the EXIF-oriented source into left then right halves before user rotation.
 Review every page and check the legibility box to unlock Save PDF copy.
 The browser controls where the copy is saved; use a new filename.

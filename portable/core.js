@@ -1,7 +1,7 @@
 'use strict';
 const PrepareCore = (() => {
   function layout(w,h,{paper='original',margin=0,dpi=0,edge=2400}={}) {
-    if (![w,h,margin,dpi,edge].every(Number.isFinite) || w<=0 || h<=0 || margin<0 || margin>72 || ![0,96,150,200,300].includes(dpi) || edge<1) throw Error('Invalid layout');
+    if (![w,h,margin,dpi,edge].every(Number.isFinite) || w<=0 || h<=0 || margin<0 || margin>72 || !(dpi===0 || (Number.isInteger(dpi)&&dpi>=36&&dpi<=600)) || edge<1) throw Error('Invalid layout');
     if (!['original','a4','letter'].includes(paper)) throw Error('Invalid paper');
     const page=paper==='a4'?[595.28,841.89]:paper==='letter'?[612,792]:[w*720/Math.max(w,h),h*720/Math.max(w,h)];
     const scale=Math.min((page[0]-2*margin)/w,(page[1]-2*margin)/h);
@@ -44,6 +44,10 @@ const PrepareCore = (() => {
     }
     throw Error('Choose JPEG or PNG images; HEIC needs conversion or the Mac app. PDF input is not supported');
   }
-  return {layout,pdf,dimensions};
+  function flattenBackground(data,threshold) {
+    if(!Number.isInteger(threshold)||threshold<128||threshold>255)throw Error('Invalid background threshold');
+    for(let i=0;i<data.length;i+=4)if(Math.min(data[i],data[i+1],data[i+2])>=threshold)data[i]=data[i+1]=data[i+2]=255;
+  }
+  return {layout,pdf,dimensions,flattenBackground};
 })();
 if(typeof module!=='undefined') module.exports=PrepareCore;

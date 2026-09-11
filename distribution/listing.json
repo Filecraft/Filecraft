@@ -1,0 +1,23 @@
+{
+  "name": "Prepare",
+  "publisher": "Goni Sulaiman",
+  "summary": "Turn images into smaller PDFs locally.",
+  "category": "Utilities",
+  "license": "Hippocratic License 3.0 core",
+  "website": "https://gonisulaimann.github.io/",
+  "source": "https://github.com/gonisulaimann/Prepare",
+  "support": "https://github.com/gonisulaimann/Prepare/issues",
+  "privacy": {
+    "uploads": false,
+    "analytics": false,
+    "accounts": false,
+    "note": "Processing stays local. Store forms require review against the actual submitted build."
+  },
+  "submissionStatus": "not submitted",
+  "platforms": {
+    "macOS": "native, ad-hoc signed GitHub distribution",
+    "Windows": "offline desktop-browser companion",
+    "Linux": "offline desktop-browser companion",
+    "Android": "engineering target; release gated by device tests"
+  }
+}

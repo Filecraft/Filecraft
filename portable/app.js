@@ -9,6 +9,7 @@
     pages.forEach((p,i)=>{const li=document.createElement('li'),name=document.createElement('span');name.textContent=`${i+1}. ${p.file.name}${p.crop?' · '+p.crop:''} · ${p.rotation*90}°`;li.append(name);
       const split=document.createElement('button');split.type='button';split.textContent='Split spread';split.disabled=busy||!!p.crop||pages.length>=20;split.onclick=()=>{if(busy||p.crop||pages.length>=20)return;invalidate();pages.splice(i,1,{...p,crop:'left'},{...p,crop:'right'});render();message('Split source into left and right halves, before rotation.');};li.append(split);
       for(const [label,delta] of [['up',-1],['down',1]]){const button=document.createElement('button');button.type='button';button.textContent=label==='up'?'↑':'↓';button.setAttribute('aria-label',`Move page ${i+1} ${label}`);button.disabled=busy||i+delta<0||i+delta>=pages.length;button.onclick=()=>{if(busy||i+delta<0||i+delta>=pages.length)return;invalidate();[pages[i],pages[i+delta]]=[pages[i+delta],pages[i]];render();};li.append(button);}
+      for(const action of ['Duplicate','Rotate','Remove']){const button=document.createElement('button');button.type='button';button.textContent=action;button.setAttribute('aria-label',`${action} page ${i+1}`);button.disabled=busy||(action==='Duplicate'&&pages.length>=20);button.onclick=()=>{if(busy||(action==='Duplicate'&&pages.length>=20))return;invalidate();if(action==='Duplicate')pages.splice(i+1,0,{...p});else if(action==='Rotate')p.rotation=(p.rotation+1)%4;else pages.splice(i,1);render();};li.append(button);}
       $('pages').append(li);
     });
     $('settings').disabled=busy;$('cancel').hidden=!busy;
@@ -21,8 +22,8 @@
     busy=true;invalidate();render();const token=generation;
     try{let total=pages.reduce((n,p)=>n+p.file.size,0);const added=[];for(const file of files){if(file.size>20_000_000||(total+=file.size)>100_000_000)throw Error('Limit: 20 MB per image and 100 MB selected input');PrepareCore.dimensions(new Uint8Array(await file.arrayBuffer()));if(token!==generation)throw Error('Cancelled');added.push({file,rotation:0,crop:null});}pages.push(...added);message(`${pages.length} pages ready.`);}catch(e){message(e.message);}finally{busy=false;render();}
   };
-  for(const id of ['limit','profile','paper','margin','dpi'])$(id).oninput=()=>{if(!busy){invalidate();$('preset').value='custom';message('Settings changed. Prepare again.');}};
-  $('preset').onchange=()=>{if(busy)return;const preset=$('preset').value;if(preset==='custom')return;invalidate();$('limit').value=preset==='portal'?'0.5':preset==='photo'?'10':'2';$('profile').value=preset==='portal'?'small':'balanced';$('paper').value=preset==='application'?'a4':'original';$('margin').value=preset==='application'?'24':'0';$('dpi').value='0';message('Preset applied. Prepare again.');};
+  for(const id of ['limit','profile','paper','margin','dpi','background'])$(id).oninput=()=>{if(!busy){invalidate();$('preset').value='custom';message('Settings changed. Prepare again.');}};
+  $('preset').onchange=()=>{if(busy)return;const preset=$('preset').value;if(preset==='custom')return;invalidate();$('limit').value=preset==='portal'?'0.5':preset==='photo'?'10':'2';$('profile').value=preset==='portal'?'small':'balanced';$('paper').value=preset==='application'?'a4':'original';$('margin').value=preset==='application'?'24':'0';$('dpi').value='0';$('background').value='0';message('Preset applied. Prepare again.');};
   $('rotate').onclick=()=>{if(busy)return;invalidate();pages=pages.map(p=>({...p,rotation:(p.rotation+1)%4}));render();message('Rotated all pages. Prepare again.');};
   $('sort').onclick=()=>{if(busy)return;invalidate();pages.sort((a,b)=>a.file.name.localeCompare(b.file.name,undefined,{numeric:true}));render();};
   $('reverse').onclick=()=>{if(busy)return;invalidate();pages.reverse();render();};
@@ -42,13 +43,14 @@
       const ctx=canvas.getContext('2d',{willReadFrequently:settings.profile==='gray'});if(!ctx)throw Error('Canvas is unavailable');
       ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.save();ctx.translate(canvas.width/2,canvas.height/2);ctx.rotate(p.rotation*Math.PI/2);
       const dw=odd?canvas.height:canvas.width,dh=odd?canvas.width:canvas.height;ctx.drawImage(bitmap,sx,0,sw,sh,-dw/2,-dh/2,dw,dh);ctx.restore();bitmap.close();
+      if(settings.background){const data=ctx.getImageData(0,0,canvas.width,canvas.height);PrepareCore.flattenBackground(data.data,settings.background);ctx.putImageData(data,0,0);}
       if(settings.profile==='gray'){const data=ctx.getImageData(0,0,canvas.width,canvas.height);for(let i=0;i<data.data.length;i+=4){const gray=Math.round(.2126*data.data[i]+.7152*data.data[i+1]+.0722*data.data[i+2]);data.data[i]=data.data[i+1]=data.data[i+2]=gray;}ctx.putImageData(data,0,0);}
       canvas.quality=quality;const blob=await blobOf(canvas);check(token);return {jpeg:new Uint8Array(await blob.arrayBuffer()),width:canvas.width,height:canvas.height,layout};
     }finally{bitmap.close();if(canvas){canvas.width=1;canvas.height=1;}}
   }
   $('prepare').onclick=async()=>{
     if(busy||!pages.length)return;invalidate();
-    const settings={paper:$('paper').value,margin:Number($('margin').value),dpi:Number($('dpi').value),profile:$('profile').value},limit=Number($('limit').value)*1_000_000;
+    const settings={paper:$('paper').value,margin:Number($('margin').value),dpi:Number($('dpi').value),profile:$('profile').value,background:Number($('background').value)},limit=Number($('limit').value)*1_000_000;
     if(!Number.isFinite(limit)||limit<10_000||limit>50_000_000||!$('margin').checkValidity()){message('Use a size limit from 0.01 to 50 MB and margins from 0 to 72 pt.');return;}
     busy=true;render();const token=generation,attempts=settings.profile==='small'?[[1600,.65],[1200,.55],[960,.45]]:[[2400,.82],[1800,.72],[1200,.62]];
     try{let output,encoded;

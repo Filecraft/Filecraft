@@ -1,0 +1,902 @@
+[
+  {
+    "id": "F001",
+    "area": "Geometry",
+    "feature": "Arbitrary DPI ceiling",
+    "status": "portable-implemented",
+    "priority": "P0",
+    "architecture": "Pure point-space geometry; never upscale; oriented input dimensions",
+    "acceptance": "Test arbitrary dpi ceiling on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F002",
+    "area": "Geometry",
+    "feature": "Native 150/200/300 DPI ceiling",
+    "status": "mac-implemented",
+    "priority": "P0",
+    "architecture": "Pure point-space geometry; never upscale; oriented input dimensions",
+    "acceptance": "Test native 150/200/300 dpi ceiling on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F003",
+    "area": "Geometry",
+    "feature": "Per-page paper size",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Pure point-space geometry; never upscale; oriented input dimensions",
+    "acceptance": "Test per-page paper size on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F004",
+    "area": "Geometry",
+    "feature": "Per-page margins",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Pure point-space geometry; never upscale; oriented input dimensions",
+    "acceptance": "Test per-page margins on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F005",
+    "area": "Geometry",
+    "feature": "Auto portrait/landscape selection",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Pure point-space geometry; never upscale; oriented input dimensions",
+    "acceptance": "Test auto portrait/landscape selection on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F006",
+    "area": "Geometry",
+    "feature": "Manual crop rectangle",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Pure point-space geometry; never upscale; oriented input dimensions",
+    "acceptance": "Test manual crop rectangle on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F007",
+    "area": "Geometry",
+    "feature": "Perspective quadrilateral correction",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Pure point-space geometry; never upscale; oriented input dimensions",
+    "acceptance": "Test perspective quadrilateral correction on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F008",
+    "area": "Geometry",
+    "feature": "Deskew angle estimation",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Pure point-space geometry; never upscale; oriented input dimensions",
+    "acceptance": "Test deskew angle estimation on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F009",
+    "area": "Geometry",
+    "feature": "Bleed/safe-area overlay",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Pure point-space geometry; never upscale; oriented input dimensions",
+    "acceptance": "Test bleed/safe-area overlay on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F010",
+    "area": "Geometry",
+    "feature": "Two-up page imposition",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Pure point-space geometry; never upscale; oriented input dimensions",
+    "acceptance": "Test two-up page imposition on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F011",
+    "area": "Batch workflow",
+    "feature": "Duplicate selected page",
+    "status": "mac-portable-implemented",
+    "priority": "P0",
+    "architecture": "Identity-based immutable job snapshots; serial queue; cancellable work",
+    "acceptance": "Test duplicate selected page on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F012",
+    "area": "Batch workflow",
+    "feature": "Move selected page to end",
+    "status": "mac-implemented",
+    "priority": "P0",
+    "architecture": "Identity-based immutable job snapshots; serial queue; cancellable work",
+    "acceptance": "Test move selected page to end on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F013",
+    "area": "Batch workflow",
+    "feature": "Per-page removal",
+    "status": "portable-implemented",
+    "priority": "P0",
+    "architecture": "Identity-based immutable job snapshots; serial queue; cancellable work",
+    "acceptance": "Test per-page removal on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F014",
+    "area": "Batch workflow",
+    "feature": "Natural folder import",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Identity-based immutable job snapshots; serial queue; cancellable work",
+    "acceptance": "Test natural folder import on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F015",
+    "area": "Batch workflow",
+    "feature": "Multiple independent output jobs",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Identity-based immutable job snapshots; serial queue; cancellable work",
+    "acceptance": "Test multiple independent output jobs on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F016",
+    "area": "Batch workflow",
+    "feature": "Filename template expansion",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Identity-based immutable job snapshots; serial queue; cancellable work",
+    "acceptance": "Test filename template expansion on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F017",
+    "area": "Batch workflow",
+    "feature": "Watch-folder queue",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Identity-based immutable job snapshots; serial queue; cancellable work",
+    "acceptance": "Test watch-folder queue on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F018",
+    "area": "Batch workflow",
+    "feature": "Drag-drop input zones",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Identity-based immutable job snapshots; serial queue; cancellable work",
+    "acceptance": "Test drag-drop input zones on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F019",
+    "area": "Batch workflow",
+    "feature": "Saved local job presets",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Identity-based immutable job snapshots; serial queue; cancellable work",
+    "acceptance": "Test saved local job presets on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F020",
+    "area": "Batch workflow",
+    "feature": "Command-line batch driver",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Identity-based immutable job snapshots; serial queue; cancellable work",
+    "acceptance": "Test command-line batch driver on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F021",
+    "area": "Image cleanup",
+    "feature": "Near-white threshold whitening",
+    "status": "portable-implemented",
+    "priority": "P0",
+    "architecture": "One bounded raster/tile at a time; originals untouched; explicit opt-in",
+    "acceptance": "Test near-white threshold whitening on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F022",
+    "area": "Image cleanup",
+    "feature": "Live threshold comparison",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "One bounded raster/tile at a time; originals untouched; explicit opt-in",
+    "acceptance": "Test live threshold comparison on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F023",
+    "area": "Image cleanup",
+    "feature": "Manual white balance",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "One bounded raster/tile at a time; originals untouched; explicit opt-in",
+    "acceptance": "Test manual white balance on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F024",
+    "area": "Image cleanup",
+    "feature": "Local contrast adjustment",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "One bounded raster/tile at a time; originals untouched; explicit opt-in",
+    "acceptance": "Test local contrast adjustment on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F025",
+    "area": "Image cleanup",
+    "feature": "Adaptive monochrome threshold",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "One bounded raster/tile at a time; originals untouched; explicit opt-in",
+    "acceptance": "Test adaptive monochrome threshold on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F026",
+    "area": "Image cleanup",
+    "feature": "Denoising with bounded tile buffers",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "One bounded raster/tile at a time; originals untouched; explicit opt-in",
+    "acceptance": "Test denoising with bounded tile buffers on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F027",
+    "area": "Image cleanup",
+    "feature": "Shadow compensation",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "One bounded raster/tile at a time; originals untouched; explicit opt-in",
+    "acceptance": "Test shadow compensation on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F028",
+    "area": "Image cleanup",
+    "feature": "Background color picker",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "One bounded raster/tile at a time; originals untouched; explicit opt-in",
+    "acceptance": "Test background color picker on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F029",
+    "area": "Image cleanup",
+    "feature": "Border cleanup mask",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "One bounded raster/tile at a time; originals untouched; explicit opt-in",
+    "acceptance": "Test border cleanup mask on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F030",
+    "area": "Image cleanup",
+    "feature": "Reversible per-page edit stack",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "One bounded raster/tile at a time; originals untouched; explicit opt-in",
+    "acceptance": "Test reversible per-page edit stack on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F031",
+    "area": "Compression",
+    "feature": "Per-page quality override",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Deterministic bounded attempts; validate actual finished PDF bytes",
+    "acceptance": "Test per-page quality override on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F032",
+    "area": "Compression",
+    "feature": "Text/photo-aware profile suggestion",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Deterministic bounded attempts; validate actual finished PDF bytes",
+    "acceptance": "Test text/photo-aware profile suggestion on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F033",
+    "area": "Compression",
+    "feature": "Lossless PNG embedding for line art",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Deterministic bounded attempts; validate actual finished PDF bytes",
+    "acceptance": "Test lossless png embedding for line art on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F034",
+    "area": "Compression",
+    "feature": "JPEG pass-through when privacy-safe",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Deterministic bounded attempts; validate actual finished PDF bytes",
+    "acceptance": "Test jpeg pass-through when privacy-safe on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F035",
+    "area": "Compression",
+    "feature": "Output byte contribution report",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Deterministic bounded attempts; validate actual finished PDF bytes",
+    "acceptance": "Test output byte contribution report on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F036",
+    "area": "Compression",
+    "feature": "Optimize only largest page",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Deterministic bounded attempts; validate actual finished PDF bytes",
+    "acceptance": "Test optimize only largest page on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F037",
+    "area": "Compression",
+    "feature": "Monochrome bilevel PDF encoding",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Deterministic bounded attempts; validate actual finished PDF bytes",
+    "acceptance": "Test monochrome bilevel pdf encoding on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F038",
+    "area": "Compression",
+    "feature": "Target-byte binary search",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Deterministic bounded attempts; validate actual finished PDF bytes",
+    "acceptance": "Test target-byte binary search on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F039",
+    "area": "Compression",
+    "feature": "User quality-floor control",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Deterministic bounded attempts; validate actual finished PDF bytes",
+    "acceptance": "Test user quality-floor control on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F040",
+    "area": "Compression",
+    "feature": "Embedded image deduplication",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Deterministic bounded attempts; validate actual finished PDF bytes",
+    "acceptance": "Test embedded image deduplication on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F041",
+    "area": "Privacy and security",
+    "feature": "PDF password encryption via audited platform/library",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Platform cryptography or audited implementation only; no custom crypto",
+    "acceptance": "Test pdf password encryption via audited platform/library on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F042",
+    "area": "Privacy and security",
+    "feature": "Owner-permission controls with clear limitations",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Platform cryptography or audited implementation only; no custom crypto",
+    "acceptance": "Test owner-permission controls with clear limitations on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F043",
+    "area": "Privacy and security",
+    "feature": "Optional document title and author",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Platform cryptography or audited implementation only; no custom crypto",
+    "acceptance": "Test optional document title and author on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F044",
+    "area": "Privacy and security",
+    "feature": "Metadata removal report",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Platform cryptography or audited implementation only; no custom crypto",
+    "acceptance": "Test metadata removal report on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F045",
+    "area": "Privacy and security",
+    "feature": "Explicit metadata retention opt-in",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Platform cryptography or audited implementation only; no custom crypto",
+    "acceptance": "Test explicit metadata retention opt-in on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F046",
+    "area": "Privacy and security",
+    "feature": "Redaction by raster destruction",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Platform cryptography or audited implementation only; no custom crypto",
+    "acceptance": "Test redaction by raster destruction on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F047",
+    "area": "Privacy and security",
+    "feature": "Redaction preview warning",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Platform cryptography or audited implementation only; no custom crypto",
+    "acceptance": "Test redaction preview warning on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F048",
+    "area": "Privacy and security",
+    "feature": "Private temporary-directory audit",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Platform cryptography or audited implementation only; no custom crypto",
+    "acceptance": "Test private temporary-directory audit on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F049",
+    "area": "Privacy and security",
+    "feature": "No-network build permission regression",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Platform cryptography or audited implementation only; no custom crypto",
+    "acceptance": "Test no-network build permission regression on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F050",
+    "area": "Privacy and security",
+    "feature": "Dependency vulnerability inventory",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Platform cryptography or audited implementation only; no custom crypto",
+    "acceptance": "Test dependency vulnerability inventory on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F051",
+    "area": "Review and accessibility",
+    "feature": "Keyboard shortcuts reference",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Native semantics and focus order; bounded preview queue",
+    "acceptance": "Test keyboard shortcuts reference on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F052",
+    "area": "Review and accessibility",
+    "feature": "Screen-reader page reorder announcements",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Native semantics and focus order; bounded preview queue",
+    "acceptance": "Test screen-reader page reorder announcements on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F053",
+    "area": "Review and accessibility",
+    "feature": "High contrast native palette",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Native semantics and focus order; bounded preview queue",
+    "acceptance": "Test high contrast native palette on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F054",
+    "area": "Review and accessibility",
+    "feature": "Reduced-motion parity",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Native semantics and focus order; bounded preview queue",
+    "acceptance": "Test reduced-motion parity on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F055",
+    "area": "Review and accessibility",
+    "feature": "Zoom-to-legibility region",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Native semantics and focus order; bounded preview queue",
+    "acceptance": "Test zoom-to-legibility region on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F056",
+    "area": "Review and accessibility",
+    "feature": "Page-by-page before/after difference view",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Native semantics and focus order; bounded preview queue",
+    "acceptance": "Test page-by-page before/after difference view on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F057",
+    "area": "Review and accessibility",
+    "feature": "Printable proof sheet",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Native semantics and focus order; bounded preview queue",
+    "acceptance": "Test printable proof sheet on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F058",
+    "area": "Review and accessibility",
+    "feature": "Keyboard-only save confirmation",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Native semantics and focus order; bounded preview queue",
+    "acceptance": "Test keyboard-only save confirmation on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F059",
+    "area": "Review and accessibility",
+    "feature": "Localized error messages",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Native semantics and focus order; bounded preview queue",
+    "acceptance": "Test localized error messages on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F060",
+    "area": "Review and accessibility",
+    "feature": "RTL layout validation",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Native semantics and focus order; bounded preview queue",
+    "acceptance": "Test rtl layout validation on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F061",
+    "area": "Input and capture",
+    "feature": "Android share-sheet image intake",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "System picker, header preflight, decode caps, no recursive surprises",
+    "acceptance": "Test android share-sheet image intake on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F062",
+    "area": "Input and capture",
+    "feature": "Android camera capture through system intent",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "System picker, header preflight, decode caps, no recursive surprises",
+    "acceptance": "Test android camera capture through system intent on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F063",
+    "area": "Input and capture",
+    "feature": "Clipboard image paste",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "System picker, header preflight, decode caps, no recursive surprises",
+    "acceptance": "Test clipboard image paste on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F064",
+    "area": "Input and capture",
+    "feature": "HEIC portable format investigation",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "System picker, header preflight, decode caps, no recursive surprises",
+    "acceptance": "Test heic portable format investigation on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F065",
+    "area": "Input and capture",
+    "feature": "TIFF multipage input",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "System picker, header preflight, decode caps, no recursive surprises",
+    "acceptance": "Test tiff multipage input on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F066",
+    "area": "Input and capture",
+    "feature": "WebP input validation",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "System picker, header preflight, decode caps, no recursive surprises",
+    "acceptance": "Test webp input validation on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F067",
+    "area": "Input and capture",
+    "feature": "AVIF input validation",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "System picker, header preflight, decode caps, no recursive surprises",
+    "acceptance": "Test avif input validation on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F068",
+    "area": "Input and capture",
+    "feature": "PDF input rasterization with explicit text loss",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "System picker, header preflight, decode caps, no recursive surprises",
+    "acceptance": "Test pdf input rasterization with explicit text loss on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F069",
+    "area": "Input and capture",
+    "feature": "Local scanner import on macOS",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "System picker, header preflight, decode caps, no recursive surprises",
+    "acceptance": "Test local scanner import on macos on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F070",
+    "area": "Input and capture",
+    "feature": "Folder selection with file-count preflight",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "System picker, header preflight, decode caps, no recursive surprises",
+    "acceptance": "Test folder selection with file-count preflight on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F071",
+    "area": "Output and interchange",
+    "feature": "PDF/A investigation with independent validator",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Exclusive/user-selected save; independent parser/render validation",
+    "acceptance": "Test pdf/a investigation with independent validator on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F072",
+    "area": "Output and interchange",
+    "feature": "PDF bookmarks from filenames",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Exclusive/user-selected save; independent parser/render validation",
+    "acceptance": "Test pdf bookmarks from filenames on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F073",
+    "area": "Output and interchange",
+    "feature": "Optional page-number stamps",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Exclusive/user-selected save; independent parser/render validation",
+    "acceptance": "Test optional page-number stamps on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F074",
+    "area": "Output and interchange",
+    "feature": "Visible watermark overlay",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Exclusive/user-selected save; independent parser/render validation",
+    "acceptance": "Test visible watermark overlay on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F075",
+    "area": "Output and interchange",
+    "feature": "Batch ZIP export",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Exclusive/user-selected save; independent parser/render validation",
+    "acceptance": "Test batch zip export on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F076",
+    "area": "Output and interchange",
+    "feature": "Split output by page count",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Exclusive/user-selected save; independent parser/render validation",
+    "acceptance": "Test split output by page count on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F077",
+    "area": "Output and interchange",
+    "feature": "Split output by byte limit",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Exclusive/user-selected save; independent parser/render validation",
+    "acceptance": "Test split output by byte limit on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F078",
+    "area": "Output and interchange",
+    "feature": "Sidecar job manifest export",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Exclusive/user-selected save; independent parser/render validation",
+    "acceptance": "Test sidecar job manifest export on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F079",
+    "area": "Output and interchange",
+    "feature": "Open output in system viewer",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Exclusive/user-selected save; independent parser/render validation",
+    "acceptance": "Test open output in system viewer on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F080",
+    "area": "Output and interchange",
+    "feature": "Android output share sheet",
+    "status": "proposed",
+    "priority": "P2",
+    "architecture": "Exclusive/user-selected save; independent parser/render validation",
+    "acceptance": "Test android output share sheet on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F081",
+    "area": "Platform delivery",
+    "feature": "Android native SAF to PdfDocument workflow",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "OS frameworks or installed browser; no bundled browser engine",
+    "acceptance": "Test android native saf to pdfdocument workflow on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F082",
+    "area": "Platform delivery",
+    "feature": "Android process-death recovery policy",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "OS frameworks or installed browser; no bundled browser engine",
+    "acceptance": "Test android process-death recovery policy on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F083",
+    "area": "Platform delivery",
+    "feature": "Android low-memory-device stress suite",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "OS frameworks or installed browser; no bundled browser engine",
+    "acceptance": "Test android low-memory-device stress suite on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F084",
+    "area": "Platform delivery",
+    "feature": "Mac sandbox/security-scoped URL support",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "OS frameworks or installed browser; no bundled browser engine",
+    "acceptance": "Test mac sandbox/security-scoped url support on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F085",
+    "area": "Platform delivery",
+    "feature": "Mac Developer ID notarization",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "OS frameworks or installed browser; no bundled browser engine",
+    "acceptance": "Test mac developer id notarization on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F086",
+    "area": "Platform delivery",
+    "feature": "Windows native lightweight host feasibility",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "OS frameworks or installed browser; no bundled browser engine",
+    "acceptance": "Test windows native lightweight host feasibility on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F087",
+    "area": "Platform delivery",
+    "feature": "Microsoft Store packaging feasibility",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "OS frameworks or installed browser; no bundled browser engine",
+    "acceptance": "Test microsoft store packaging feasibility on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F088",
+    "area": "Platform delivery",
+    "feature": "Linux desktop launcher and package metadata",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "OS frameworks or installed browser; no bundled browser engine",
+    "acceptance": "Test linux desktop launcher and package metadata on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F089",
+    "area": "Platform delivery",
+    "feature": "ARM Linux execution matrix",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "OS frameworks or installed browser; no bundled browser engine",
+    "acceptance": "Test arm linux execution matrix on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F090",
+    "area": "Platform delivery",
+    "feature": "Offline update checksum verifier",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "OS frameworks or installed browser; no bundled browser engine",
+    "acceptance": "Test offline update checksum verifier on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F091",
+    "area": "Quality and community",
+    "feature": "Public synthetic adversarial corpus",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Synthetic fixtures, pinned tests, measured artifacts",
+    "acceptance": "Test public synthetic adversarial corpus on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F092",
+    "area": "Quality and community",
+    "feature": "EXIF orientation eight-way golden fixtures",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Synthetic fixtures, pinned tests, measured artifacts",
+    "acceptance": "Test exif orientation eight-way golden fixtures on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F093",
+    "area": "Quality and community",
+    "feature": "Unicode filename corpus",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Synthetic fixtures, pinned tests, measured artifacts",
+    "acceptance": "Test unicode filename corpus on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F094",
+    "area": "Quality and community",
+    "feature": "Fuzz PNG/JPEG header parsers",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Synthetic fixtures, pinned tests, measured artifacts",
+    "acceptance": "Test fuzz png/jpeg header parsers on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F095",
+    "area": "Quality and community",
+    "feature": "Property-based layout checks",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Synthetic fixtures, pinned tests, measured artifacts",
+    "acceptance": "Test property-based layout checks on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F096",
+    "area": "Quality and community",
+    "feature": "Cancellation race injection",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Synthetic fixtures, pinned tests, measured artifacts",
+    "acceptance": "Test cancellation race injection on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F097",
+    "area": "Quality and community",
+    "feature": "Long-run repeated-session memory baseline",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Synthetic fixtures, pinned tests, measured artifacts",
+    "acceptance": "Test long-run repeated-session memory baseline on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F098",
+    "area": "Quality and community",
+    "feature": "Reproducible archive provenance",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Synthetic fixtures, pinned tests, measured artifacts",
+    "acceptance": "Test reproducible archive provenance on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F099",
+    "area": "Quality and community",
+    "feature": "Translation contribution pipeline",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Synthetic fixtures, pinned tests, measured artifacts",
+    "acceptance": "Test translation contribution pipeline on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  },
+  {
+    "id": "F100",
+    "area": "Quality and community",
+    "feature": "Cross-platform feature parity dashboard",
+    "status": "proposed",
+    "priority": "P1",
+    "architecture": "Synthetic fixtures, pinned tests, measured artifacts",
+    "acceptance": "Test cross-platform feature parity dashboard on synthetic success, invalid/cancel and resource-bound cases; document platform scope; retain zero-network runtime and package budgets."
+  }
+]

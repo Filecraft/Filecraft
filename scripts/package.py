@@ -9,7 +9,7 @@ import subprocess
 import json
 from release_budget import validate_sizes
 
-version = "0.4.0"
+version = "0.5.0"
 
 root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
@@ -28,7 +28,7 @@ macos.mkdir(parents=True, exist_ok=True)
 shutil.copy2(args.binary, macos / "Prepare")
 info = {"CFBundleExecutable": "Prepare", "CFBundleIdentifier": "org.prepareapp.prepare",
         "CFBundleName": "Prepare", "CFBundleDisplayName": "Prepare", "CFBundlePackageType": "APPL",
-        "CFBundleShortVersionString": version, "CFBundleVersion": "4",
+        "CFBundleShortVersionString": version, "CFBundleVersion": "5",
         "CFBundleIconFile": "AppIcon",
         "CFBundleDocumentTypes": [{"CFBundleTypeName": "Still images", "CFBundleTypeRole": "Viewer",
                                    "LSHandlerRank": "Alternate",
