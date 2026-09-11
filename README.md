@@ -50,6 +50,20 @@ Just native SwiftUI, ImageIO, CoreGraphics and PDFKit, with no package dependenc
 
 This is intentionally a focused image-to-PDF utility, not a general PDF editor.
 
+## Windows and Linux: Portable preview
+
+[Download the offline Portable preview](https://github.com/gonisulaimann/Prepare/releases/tag/v0.5.0-portable-preview.1).
+Extract the whole ZIP and open `Prepare-Portable/index.html` in a current desktop
+Chrome, Edge or Firefox browser. No server or internet needed after download.
+This is a 16,642-byte browser companion, not a native Windows/Linux binary.
+The stable Mac app below remains v0.4.0.
+
+Portable supports JPEG/PNG, compression profiles, DPI ceilings, margins, page
+ordering and left/right spread splitting. Windows/Linux Chromium and Firefox
+[CI checks passed](https://github.com/gonisulaimann/Prepare/actions/runs/34558322793).
+Read the preview release notes for input, browser, privacy and export limitations.
+[Portable source at its tested tag](https://github.com/gonisulaimann/Prepare/tree/v0.5.0-portable-preview.1/portable).
+
 ## Download and install
 
 [Download Prepare 0.4.0 for Apple Silicon](https://github.com/gonisulaimann/Prepare/releases/download/v0.4.0/Prepare-0.4.0-arm64.zip)

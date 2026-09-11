@@ -64,6 +64,9 @@ def check():
     version = version_match.group(1)
     assert f"/v{version}/Prepare-{version}-arm64.zip" in text
     assert "not notarized" in text and "not an OSI-approved" in text
+    assert "/v0.5.0-portable-preview.1/Prepare-0.5.0-portable.zip" in text
+    assert "Windows &amp; Linux" in text and "browser companion" in text
+    assert "preview" in text.lower() and "Extract" in text
     assert (SITE / ".nojekyll").is_file()
     script = (SITE / "site.js").read_text()
     assert len(script.encode()) < 5_000, "Interaction script exceeds 5 KB"
