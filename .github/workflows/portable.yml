@@ -37,6 +37,7 @@ jobs:
         run: python scripts/check-portable-pdf.py
       - name: Verify budgets and package
         run: |
+          python scripts/sync_engine.py --check
           python scripts/test_portable_budget.py
           python scripts/package_portable.py
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

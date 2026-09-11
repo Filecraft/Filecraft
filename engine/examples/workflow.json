@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "steps": [
+    {
+      "op": "rotate",
+      "pageIds": [
+        "page-1"
+      ],
+      "degrees": 90
+    },
+    {
+      "op": "duplicate",
+      "pageIds": [
+        "page-1"
+      ]
+    }
+  ]
+}

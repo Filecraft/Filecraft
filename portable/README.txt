@@ -1,4 +1,4 @@
-Prepare Portable 0.5.0 — Goni Sulaiman
+Prepare Portable 0.6.0-beta.1 — Goni Sulaiman
 
 QUICK START
 Extract the whole ZIP. Open Prepare-Portable/index.html in a current desktop
@@ -16,6 +16,16 @@ Duplicate, rotate or remove individual pages before preparing. Split divides
 the EXIF-oriented source into left then right halves before user rotation.
 Review every page and check the legibility box to unlock Save PDF copy.
 The browser controls where the copy is saved; use a new filename.
+
+READINESS BETA
+The shared engine powers page reorder/rotate/duplicate/remove undo and redo,
+plus offline JSON requirement profile import/export. Importing images, splitting
+a spread, removing the final page or clearing starts a new history. No autosave.
+Checks distinguish pass, fail and unknown. Full PDF structural validation is
+not available in this browser bundle, so overall readiness remains UNKNOWN
+unless a known requirement fails. A small file is not proof of readability.
+Imported profiles do not silently change export settings or prevent a knowingly
+noncompliant save. Review the rule results. All files remain local.
 
 PRIVACY / LIMITS
 Everything runs in this page on your computer. No analytics, network requests,

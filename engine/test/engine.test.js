@@ -1,0 +1,22 @@
+ 'use strict';
+const {test} = require('node:test');
+const assert = require('node:assert/strict');
+const E = require('../document-engine.js');
+const profile = {version:1,id:'local-example',constraints:{formats:['png'],bytes:{max:500},pageCount:{min:1,max:2},dimensions:{unit:'px',minWidth:10,maxWidth:100,minHeight:10,maxHeight:200},orientation:'portrait',filename:{extensions:['png'],maxLength:80,asciiOnly:false}}};
+const input = {format:'png',bytes:100,filename:'résumé.png',pageCount:1,structuralValidation:'pass',pages:[{id:'p1',width:50,height:100,unit:'px',rotation:0}]};
+test('strict profiles and immutable tri-state readiness', () => {
+ const p=E.validateProfile(profile); const d=E.createDocument(input);
+ assert.equal(E.evaluate(d,p).status,'READY'); assert.ok(Object.isFrozen(d.pages[0]));
+ assert.equal(E.evaluate(E.createDocument({...input,structuralValidation:'unknown'}),p).status,'UNKNOWN');
+ const unknown=E.evaluate(E.createDocument({...input,bytes:null,pages:[],pageCount:null}),p);
+ assert.equal(unknown.status,'UNKNOWN'); assert.ok(unknown.checks.some(c=>c.code==='BYTES'&&c.state==='unknown'));
+ assert.equal(E.evaluate(E.createDocument({...input,bytes:501}),p).status,'NOT_READY');
+ assert.ok(E.evaluate(d,p).checks.every(c=>c.code&&c.params&&Array.isArray(c.remediation)));
+ for(const bad of [{...profile,version:2},{...profile,command:'rm'},{...profile,constraints:{script:'evil'}},{...profile,constraints:{filename:{pattern:'(a+)+$'}}},{...profile,constraints:{bytes:{min:4,max:2}}},JSON.parse('{"version":1,"id":"x","constraints":{},"__proto__":{"polluted":true}}')]) assert.throws(()=>E.validateProfile(bad),e=>e.code==='INVALID_PROFILE');
+ assert.throws(()=>E.parseJSON(' '.repeat(E.LIMITS.jsonBytes+1)),e=>e.code==='INPUT_LIMIT');
+ assert.throws(()=>E.parseJSON('{'),e=>e.code==='INVALID_JSON');
+ assert.throws(()=>E.createDocument({...input,pages:Array(E.LIMITS.pages+1).fill(input.pages[0])}));
+ assert.throws(()=>E.createDocument({...input,filename:'x'.repeat(256)}));
+ assert.throws(()=>E.createDocument({...input,pages:[{...input.pages[0],rotation:45}]}));
+});
+module.exports={profile,input};

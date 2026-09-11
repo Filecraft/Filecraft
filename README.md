@@ -13,7 +13,7 @@
     <img src="https://img.shields.io/badge/macOS-14%2B-183e33" alt="macOS 14 or newer">
     <a href="https://github.com/gonisulaimann/Prepare/actions/workflows/portable.yml"><img src="https://github.com/gonisulaimann/Prepare/actions/workflows/portable.yml/badge.svg" alt="Windows and Linux browser checks"></a>
     <a href="https://github.com/gonisulaimann/Prepare/actions/workflows/android.yml"><img src="https://github.com/gonisulaimann/Prepare/actions/workflows/android.yml/badge.svg" alt="Experimental Android checks"></a>
-    <a href="https://github.com/gonisulaimann/Prepare/actions/workflows/android.yml"><img src="https://github.com/gonisulaimann/Prepare/actions/workflows/android.yml/badge.svg" alt="Android experimental emulator checks"></a>
+    <a href="https://github.com/gonisulaimann/Prepare/actions/workflows/engine.yml"><img src="https://github.com/gonisulaimann/Prepare/actions/workflows/engine.yml/badge.svg" alt="Shared engine cross-platform checks"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Hippocratic_3.0_core-657b58" alt="Hippocratic License 3.0 core"></a>
   </p>
 </div>
@@ -51,9 +51,24 @@ desktop browser on Windows/Linux. Android is a separate native engineering targe
 - **Bounded work.** Serial image buffers, bounded decode sizes, at most five encoding
   attempts, progress reporting and cooperative cancellation.
 
-This is intentionally a focused image-to-PDF utility, not a general PDF editor.
+The stable converter remains focused on image-to-PDF preparation. The next-generation
+readiness engine below expands the architecture without pretending arbitrary PDF
+editing is already supported.
 
-## Platform matrix — v0.5.0
+## Readiness foundation — 0.6 beta
+
+A dependency-free [shared engine and CLI](engine/README.md) now evaluates versioned
+offline profiles, produces pass/fail/unknown checks, and runs bounded reversible
+page-model workflows. Portable uses that same engine for undo/redo and JSON
+profile import/export. Native converters are not yet migrated to it.
+
+With Node 22+ installed: `node engine/cli.js inspect "scan.png"`. No npm install.
+The CLI inspects headers and hashes bytes; it does not decode images or certify
+PDF structure. Workflow commands edit a model, not a PDF file. Unknown evidence
+is never silently promoted to READY. See [engine architecture](docs/ENGINE-ARCHITECTURE.md),
+[product stages](docs/PRODUCT-ROADMAP.md), and [identity research](docs/IDENTITY-RESEARCH.md).
+
+## Platform matrix — stable v0.5.0
 
 | Platform | Artifact | Scope |
 |---|---|---|

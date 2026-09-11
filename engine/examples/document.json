@@ -1,0 +1,16 @@
+{
+  "format": "png",
+  "bytes": 100,
+  "filename": "example.png",
+  "pageCount": 1,
+  "structuralValidation": "unknown",
+  "pages": [
+    {
+      "id": "page-1",
+      "width": 640,
+      "height": 480,
+      "unit": "px",
+      "rotation": 0
+    }
+  ]
+}

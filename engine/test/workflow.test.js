@@ -1,0 +1,37 @@
+ 'use strict';
+const {test}=require('node:test'), assert=require('node:assert/strict'), E=require('../document-engine.js');
+const doc=()=>E.createDocument({format:'pdf',bytes:100,filename:'a.pdf',pageCount:2,structuralValidation:'pass',pages:[{id:'a',width:10,height:20,unit:'pt',rotation:0},{id:'b',width:30,height:40,unit:'pt',rotation:0}]});
+test('immutable bounded actions and reversible history invalidate file evidence',()=>{
+ const start=E.createHistory(doc());
+ const dup=E.applyAction(start,{op:'duplicate',pageIds:['a']});
+ assert.equal(start.present.pages.length,2);assert.equal(dup.present.pages.length,3);
+ assert.equal(dup.present.pages[1].sourceId,'a');assert.notEqual(dup.present.pages[1].id,'a');
+ assert.equal(dup.present.bytes,null);assert.equal(dup.present.structuralValidation,'unknown');
+ assert.deepEqual(E.undo(dup).present,start.present); assert.deepEqual(E.redo(E.undo(dup)).present,dup.present);
+ const order=dup.present.pages.map(p=>p.id).reverse();
+ const reordered=E.applyAction(dup,{op:'reorder',pageIds:order});assert.deepEqual(reordered.present.pages.map(p=>p.id),order);
+ const rotated=E.applyAction(reordered,{op:'rotate',pageIds:['a'],degrees:90});assert.equal(rotated.present.pages.find(p=>p.id==='a').rotation,90);
+ const extracted=E.applyAction(rotated,{op:'extract',pageIds:['b','a']});assert.deepEqual(extracted.present.pages.map(p=>p.id),['b','a']);
+ const deleted=E.applyAction(extracted,{op:'delete',pageIds:['a']});assert.equal(deleted.present.pageCount,1);
+ assert.throws(()=>E.applyAction(deleted,{op:'delete',pageIds:['b']}));
+ assert.throws(()=>E.applyAction(start,{op:'reorder',pageIds:['a','a']}));
+ assert.throws(()=>E.applyAction(start,{op:'rotate',pageIds:['x'],degrees:90}));
+ assert.throws(()=>E.applyAction(start,{op:'rotate',pageIds:['a'],degrees:45}));
+ assert.throws(()=>E.applyAction(start,{op:'shell',command:'touch /tmp/no'}));
+ assert.throws(()=>E.applyAction(start,{op:'extract',pageIds:['a'],path:'elsewhere'}));
+ let h=start;for(let i=0;i<E.LIMITS.history+5;i++)h=E.applyAction(h,{op:'rotate',pageIds:['a'],degrees:90});
+ assert.equal(h.past.length,E.LIMITS.history); assert.ok(Object.isFrozen(h));
+ const branched=E.applyAction(E.undo(h),{op:'delete',pageIds:['b']});assert.equal(branched.future.length,0);
+ let full=start;while(full.present.pages.length<E.LIMITS.pages)full=E.applyAction(full,{op:'duplicate',pageIds:[full.present.pages[0].id]});
+ assert.throws(()=>E.applyAction(full,{op:'duplicate',pageIds:['a']}),e=>e.code==='PAGE_LIMIT');
+});
+test('workflow prevalidation, bounded steps, cancellation and dry-run',async()=>{
+ const w={version:1,steps:[{op:'rotate',pageIds:['a'],degrees:90},{op:'extract',pageIds:['a']}]};
+ const result=await E.runWorkflow(doc(),w);assert.equal(result.document.pages.length,1);assert.equal(result.dryRun,true);assert.equal(result.stepsCompleted,2);
+ assert.throws(()=>E.validateWorkflow({...w,steps:[{op:'exec',command:'x'}]}),e=>e.code==='INVALID_WORKFLOW');
+ assert.throws(()=>E.validateWorkflow({...w,steps:Array(E.LIMITS.steps+1).fill(w.steps[0])}));
+ const ac=new AbortController();ac.abort();await assert.rejects(E.runWorkflow(doc(),w,{signal:ac.signal}),e=>e.code==='CANCELLED');
+ const mid=new AbortController();await assert.rejects(E.runWorkflow(doc(),w,{signal:mid.signal,yieldControl:async()=>mid.abort()}),e=>e.code==='CANCELLED');
+ assert.equal(doc().pages[0].rotation,0);
+ assert.throws(()=>E.applyAction(E.createHistory(E.createDocument({...doc(),pageCount:null})),w.steps[0]),e=>e.code==='INCOMPLETE_DOCUMENT');
+});
