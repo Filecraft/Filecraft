@@ -5,7 +5,7 @@
   <p>Scans and photos → a size-constrained PDF. Entirely on your device.</p>
   <p>
     <a href="https://gonisulaimann.github.io/">Website</a> ·
-    <a href="https://github.com/gonisulaimann/Prepare/releases/latest">Download</a> ·
+    <a href="https://gonisulaimann.github.io/download/">Download</a> ·
     <a href="CONTRIBUTING.md">Contribute</a>
   </p>
   <p>
@@ -23,10 +23,27 @@ Prepare turns up to 20 images into one ordered, reviewed PDF under your chosen
 byte limit—or tells you when it cannot fit within its quality floor.
 
 No account. No uploads. No analytics. No subscription. No AI service.
-Native Apple frameworks on Mac; dependency-free HTML/JavaScript in an existing
-desktop browser on Windows/Linux. Android is a separate native engineering target.
+Native Apple frameworks on Mac; local HTML/JavaScript in an existing desktop
+browser on Windows/Linux. The image companion has no runtime libraries; PDF
+operations bundle pdf-lib. Android is a separate native engineering target.
 
 ![Prepare showing native page controls and source-versus-PDF review](docs/assets/screenshot.png)
+
+## PDF workflows — 0.7.0-beta.1
+
+A separate offline [PDF Workbench](workbench/README.txt) and [PDF CLI](pdf/README.md)
+now copy real PDF pages: merge, extract, reorder, duplicate and rotate while
+retaining text/vector content. The browser and Node tool share the same local
+adapter, bundling MIT-licensed pdf-lib with its attribution. No runtime package
+install or document upload is required. The CLI requires Node 22+ separately.
+
+Use ordinary unencrypted PDFs without forms, annotations or signatures.
+A byte ceiling rejects oversize output; this is not a compression engine.
+Output is parsed again and geometry checked, but visual review and full PDF
+conformance remain unverified. These are beta tools, not new native binaries.
+The stable image converters and prior releases remain available unchanged.
+
+[Download and platform prerequisites](https://gonisulaimann.github.io/download/)
 
 ## What makes the Mac app useful
 
@@ -52,8 +69,8 @@ desktop browser on Windows/Linux. Android is a separate native engineering targe
   attempts, progress reporting and cooperative cancellation.
 
 The stable converter remains focused on image-to-PDF preparation. The next-generation
-readiness engine below expands the architecture without pretending arbitrary PDF
-editing is already supported.
+readiness engine and bounded PDF page adapter expand the architecture; arbitrary
+PDF editing, interactive forms and full format certification are not supported.
 
 ## Readiness foundation — 0.6 beta
 

@@ -9,5 +9,7 @@ License author: Coraline Ada Ehmke / Organization for Ethical Source.
 This is ethical-source, source-available software. The Hippocratic License
 restricts harmful uses and is not an OSI-approved open-source license.
 
-The application and its original artwork use only Apple system frameworks;
-no third-party code is bundled. Apple framework rights remain with Apple.
+The native macOS application uses Apple system frameworks; Apple framework
+rights remain with Apple. The PDF Workbench and PDF CLI additionally bundle
+pdf-lib under its separate MIT license. See pdf/THIRD-PARTY.md and its vendor
+license. Original Prepare code remains under Hippocratic License 3.0 core.

@@ -3,6 +3,28 @@
 All notable changes are recorded here. Prepare uses semantic versions while
 remaining pre-1.0: file-format and API compatibility are not yet guaranteed.
 
+## 0.7.0-beta.1
+
+- Real PDF page operations share one local browser/Node adapter: merge, extract,
+  reorder, duplicate and rotate; text/vector pages are copied rather than rasterized.
+- Separate offline PDF Workbench with disposable worker jobs, cancellation,
+  source-preserving exports, strict profiles, page history and output reparse.
+- PDF CLI writes exclusively to a new path and bounds input/process work.
+- Vendored pdf-lib keeps its MIT attribution; original code stays Hippocratic.
+- Image Portable adds detailed measured/expected readiness explanations and a
+  chained source-lineage regression. Native stable versions remain unchanged.
+- CI actions are SHA-pinned and migrated to Node24 runtime implementations.
+- PDF tools remain beta: no forms, signatures, annotations, encryption, OCR,
+  sanitization or compression guarantee; full conformance/visual checks unknown.
+
+## 0.6.0-beta.1
+
+- Dependency-free shared readiness engine and source inspector CLI.
+- Strict offline requirement profiles, tri-state evidence, reversible model
+  operations, Portable undo/redo and light/dark presentation.
+- Header-only inspection and model-only CLI workflows are explicitly scoped.
+- Native Mac and Android releases remain at 0.5.0.
+
 ## 0.5.0
 
 - Mac: explicit 150/200/300 DPI ceilings, identity-safe duplicate and move-last

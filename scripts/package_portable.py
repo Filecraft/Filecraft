@@ -4,7 +4,7 @@ import hashlib
 import json
 import zipfile
 
-VERSION='0.6.0-beta.1'
+VERSION='0.7.0-beta.1'
 FILES=['index.html','style.css','core.js','app.js','document-engine.js','readiness-ui.js','README.txt']
 def validate_portable(expanded,archive):
     if not 0<expanded<200_000 or not 0<archive<100_000:

@@ -4,3 +4,6 @@
 *.zip binary
 # Preserve the official license text byte-for-byte.
 LICENSE whitespace=-blank-at-eol
+
+# Keep upstream license and vendor hashes byte-identical on every checkout.
+pdf/vendor/* -text -whitespace
