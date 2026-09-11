@@ -22,7 +22,7 @@ class ExtensionPackages(unittest.TestCase):
             self.assertNotIn('update_url',m)
     def test_clean_rebuild_is_byte_identical_and_excludes_stale_files(self):
         import hashlib,subprocess,sys
-        archives=[ROOT/'build'/f'Prepare-0.9.0-beta.1-extension-{b}.zip' for b in ('chromium','firefox')]
+        archives=[ROOT/'build'/f'Filecraft-0.10.0-beta.1-extension-{b}.zip' for b in ('chromium','firefox')]
         before=[hashlib.sha256(p.read_bytes()).hexdigest() for p in archives]
         for browser in ('chromium','firefox'):
             (ROOT/'build/extension'/browser/'unintended-secret.txt').write_text('synthetic stale content')
@@ -32,6 +32,6 @@ class ExtensionPackages(unittest.TestCase):
             with zipfile.ZipFile(archive) as z:self.assertNotIn('unintended-secret.txt',z.namelist())
     def test_zip_integrity_and_inventory(self):
         for browser in ('chromium','firefox'):
-            with zipfile.ZipFile(ROOT/'build'/f'Prepare-0.9.0-beta.1-extension-{browser}.zip') as z:
+            with zipfile.ZipFile(ROOT/'build'/f'Filecraft-0.10.0-beta.1-extension-{browser}.zip') as z:
                 self.assertIsNone(z.testzip());self.assertIn('manifest.json',z.namelist())
                 self.assertTrue(all('..' not in Path(n).parts for n in z.namelist()))

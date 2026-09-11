@@ -9,7 +9,7 @@ source and notice hashes. This is not proof of every embedded pako version;
 upstream's lock also lists 1.0.10. The UMD omits that readable zlib header, so
 ship the supplementary notice with the other vendor licenses.
 
-Original Prepare work in the 0.9 development line uses Apache-2.0; no upstream
+Original Filecraft work in the 0.9 development line uses Apache-2.0; no upstream
 code is relicensed. `workbench/worker-bundle.js` is mixed-origin generated code.
 Earlier release licenses remain unchanged; see `../docs/LICENSING.md`.
 The minified UMD itself is byte-for-byte upstream; runtime guards live in document.js.

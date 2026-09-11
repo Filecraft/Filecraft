@@ -20,7 +20,7 @@ def command():
 
 class App:
     def __init__(self,root):
-        self.root=root;root.title('Prepare — local document suite');root.geometry('1040x780');root.minsize(840,680)
+        self.root=root;root.title('Filecraft — local document suite');root.geometry('1040x780');root.minsize(840,680)
         self.preview_identity=tk.StringVar(value='No preview rendered.');self.preview_request={}
         self.last_receipt=None;self.profile=None;self.option_widgets={}
         self.max_bytes=tk.StringVar();self.max_pages=tk.StringVar();self.requirement_status=tk.StringVar(value='Optional personal requirements; not portal certification.')

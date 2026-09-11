@@ -16,11 +16,11 @@ def build():
         if folder.is_symlink():raise ValueError('Refusing a symlink extension staging directory')
         if folder.exists():shutil.rmtree(folder)
         folder.mkdir(parents=True,exist_ok=False)
-        manifest={'manifest_version':3,'name':'Prepare — local document workspace','version':'0.9.0','description':'Prepare a PDF copy for your requirements. Reorder pages, verify output bytes and save a receipt. No uploads.','action':{'default_title':'Open Prepare workspace','default_icon':{'16':'icons/16.png','32':'icons/32.png'}},'icons':{str(n):f'icons/{n}.png' for n in (16,32,48,128)},'permissions':[],'host_permissions':[],'content_security_policy':{'extension_pages':"default-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"}}
+        manifest={'manifest_version':3,'name':'Filecraft — local document workspace','version':VERSION.split('-')[0],'description':'Prepare a PDF copy for your requirements. Reorder pages, verify output bytes and save a receipt. No uploads.','action':{'default_title':'Open Filecraft workspace','default_icon':{'16':'icons/16.png','32':'icons/32.png'}},'icons':{str(n):f'icons/{n}.png' for n in (16,32,48,128)},'permissions':[],'host_permissions':[],'content_security_policy':{'extension_pages':"default-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"}}
         if browser=='chromium':manifest['background']={'service_worker':'background.js'}
         else:
             manifest['background']={'scripts':['background.js']}
-            manifest['browser_specific_settings']={'gecko':{'id':'prepare-workspace@gonisulaimann.github.io','strict_min_version':'142.0','data_collection_permissions':{'required':['none']}}}
+            manifest['browser_specific_settings']={'gecko':{'id':'workspace@filecraft.github.io','strict_min_version':'142.0','data_collection_permissions':{'required':['none']}}}
         (folder/'manifest.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8')
         (folder/'background.js').write_text("'use strict';\nconst api=globalThis.browser||globalThis.chrome;\napi.action.onClicked.addListener(()=>api.tabs.create({url:api.runtime.getURL('workspace/index.html')}));\n",encoding='utf-8')
         workspace=folder/'workspace';workspace.mkdir(exist_ok=True)
@@ -38,7 +38,7 @@ def build():
         (folder/'vendor').mkdir(exist_ok=True)
         for p in (ROOT/'pdf/vendor').iterdir():
             if p.name.startswith('LICENSE') or p.name in ('PROVENANCE.json','README.md'):shutil.copyfile(p,folder/'vendor'/p.name)
-        archive=ROOT/'build'/f'Prepare-{VERSION}-extension-{browser}.zip'
+        archive=ROOT/'build'/f'Filecraft-{VERSION}-extension-{browser}.zip'
         with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
             for p in sorted(folder.rglob('*')):
                 if p.is_file():

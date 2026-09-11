@@ -124,7 +124,7 @@
       evidence=documentModel(info.pages.map((p,i)=>({id:'result-'+i,width:p.width,height:p.height,unit:'pt',rotation:p.rotation||0})),bytes.length);
       checks();const evaluated=E.evaluate(evidence,profile);
       if(evaluated.status==='NOT_READY'){status('Output does not satisfy your profile. No download retained.');return;}
-      const receipt={schema:'prepare-receipt',version:1,engineVersion:'0.9.0-beta.1',inputs:await Promise.all(files.map(async f=>({sha256:await hash(f.bytes),bytes:f.bytes.length}))),output:{sha256:await hash(bytes),bytes:bytes.length,pageCount:info.pageCount,format:'pdf'},profile,readiness:{status:evaluated.status,checks:evaluated.checks.map(c=>({code:c.code,state:c.state}))},visualReviewVerified:false,authenticityVerified:false};
+      const receipt={schema:'prepare-receipt',version:1,engineVersion:'0.10.0-beta.1',inputs:await Promise.all(files.map(async f=>({sha256:await hash(f.bytes),bytes:f.bytes.length}))),output:{sha256:await hash(bytes),bytes:bytes.length,pageCount:info.pageCount,format:'pdf'},profile,readiness:{status:evaluated.status,checks:evaluated.checks.map(c=>({code:c.code,state:c.state}))},visualReviewVerified:false,authenticityVerified:false};
       receiptURL=URL.createObjectURL(new Blob([JSON.stringify(receipt,null,2)+'\n'],{type:'application/json'}));$('receipt-download').href=receiptURL;
       outputURL=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));$('download').href=outputURL;$('result').hidden=false;
       status(`Output parsed · ${bytes.length.toLocaleString()} bytes · ${info.pageCount} pages. Review in a PDF reader before submission.`);

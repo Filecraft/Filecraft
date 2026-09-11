@@ -1,6 +1,6 @@
 # Dependency and provenance policy
 
-Original Prepare work in the 0.9 development line uses Apache-2.0. Third-party
+Original Filecraft work in the 0.9 development line uses Apache-2.0. Third-party
 components retain separate grants; earlier releases keep their supplied
 licenses. See [LICENSING.md](LICENSING.md), root LICENSE and NOTICE.
 
@@ -39,7 +39,7 @@ licenses. See [LICENSING.md](LICENSING.md), root LICENSE and NOTICE.
 
 Native dependencies include PDFium's codec/font/rendering components and
 Pillow's native codecs. Keep complete upstream texts, not only this summary.
-Prepare uses the FreeType Project (https://freetype.org/) through applicable
+Filecraft uses the FreeType Project (https://freetype.org/) through applicable
 bundled dependencies; FreeType is copyright its respective authors. Detailed
 copyrights and terms are retained in dependency license files.
 

@@ -1,4 +1,4 @@
-"""Prepare desktop entrypoint and bounded JSON worker transport."""
+"""Filecraft desktop entrypoint and bounded JSON worker transport."""
 import json
 import os
 import sys

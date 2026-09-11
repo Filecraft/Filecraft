@@ -2,7 +2,7 @@
 from pathlib import Path
 from html.parser import HTMLParser
 ROOT=Path(__file__).resolve().parents[1]
-DEST='https://gonisulaimann.github.io/'
+DEST='https://filecraft.github.io/'
 class Redirect(HTMLParser):
     def __init__(self):super().__init__();self.canonical=None;self.refresh=None;self.links=[]
     def handle_starttag(self,tag,attrs):

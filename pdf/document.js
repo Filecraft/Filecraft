@@ -1,4 +1,4 @@
-/* Prepare PDF — original project code under Apache-2.0; upstream parts retain their notices. */
+/* Filecraft PDF — original project code under Apache-2.0; upstream parts retain their notices. */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory(require('./vendor/pdf-lib.min.js'));
   else root.PreparePDF = factory(root.PDFLib);

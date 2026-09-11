@@ -1,7 +1,7 @@
 Prepare
 Copyright (c) 2026 Goni Sulaiman and Prepare contributors.
 
-Original Prepare work in this source tree is licensed under the Apache License,
+Original Filecraft work in this source tree is licensed under the Apache License,
 Version 2.0. The complete, unmodified license is in LICENSE.
 Canonical text: https://www.apache.org/licenses/LICENSE-2.0.txt
 
@@ -16,7 +16,7 @@ pdf/vendor/PROVENANCE.json. Desktop distributions include separate notices for
 Python, Tcl/Tk, PDFium, Pillow/codecs, OpenSSL, ReportLab/fonts and dependencies;
 see their licenses directory and docs/DEPENDENCIES.md.
 
-Prepare uses the FreeType Project (https://freetype.org/) through applicable
+Filecraft uses the FreeType Project (https://freetype.org/) through applicable
 bundled dependencies. FreeType is copyright its respective authors. Full
 upstream attributions and license terms remain in the bundled dependency texts.
 Apple and Android platform rights remain with their respective owners.

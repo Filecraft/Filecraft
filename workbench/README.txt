@@ -1,4 +1,4 @@
-Prepare Workspace 0.9.0-beta.1
+Filecraft Workspace 0.10.0-beta.1
 
 START
 Extract this entire folder. Open index.html in a current desktop Chrome,
@@ -61,5 +61,5 @@ Historical releases through 0.8 retain their original Hippocratic terms.
 Bundled pdf-lib: separately MIT licensed. See THIRD-PARTY.txt and
 vendor/LICENSE and the other vendor/LICENSE.* files. No dependency download happens at runtime.
 
-Help: https://gonisulaimann.github.io/getting-started/
-Source: https://github.com/gonisulaimann/Prepare
+Help: https://filecraft.github.io/getting-started/
+Source: https://github.com/Filecraft/Filecraft

@@ -1,4 +1,4 @@
-# Prepare Desktop 0.9.0-beta.1 (development)
+# Filecraft Desktop 0.10.0-beta.1 (development)
 
 A larger, offline desktop suite alongside the tiny image app and browser tools.
 Native Tk controls, a separate process for conversion/rendering, no HTTP server,
@@ -7,16 +7,16 @@ replaced. Save into local folders: OS file providers can sync independently.
 
 ## Start
 
-Extract the complete archive before launching Prepare-Desktop (Windows:
-Prepare-Desktop.exe). Keep the _internal directory beside the executable.
-Linux: mark Prepare-Desktop executable if your extractor lost permissions, then
+Extract the complete archive before launching Filecraft-Desktop (Windows:
+Filecraft-Desktop.exe). Keep the _internal directory beside the executable.
+Linux: mark Filecraft-Desktop executable if your extractor lost permissions, then
 run it on a desktop with X11/XWayland. macOS: this beta is not notarized. Do not
 disable Gatekeeper; inspect/build the source if policy blocks the download.
 Windows builds are unsigned and may trigger reputation warnings.
 
 Source qualification: Python 3.13 with Tk, `pip install -r desktop/requirements.txt`, then
 `python desktop/launch.py`. Development packaging also needs PyInstaller 6.22.2.
-Original Prepare work now uses Apache-2.0; earlier published binaries retain
+Original Filecraft work now uses Apache-2.0; earlier published binaries retain
 their original licenses. Dependencies remain separately licensed; preserve the
 complete bundled `licenses/` directory, including PREPARE-NOTICE. See
 [licensing scope](../docs/LICENSING.md) and [dependencies](../docs/DEPENDENCIES.md).
@@ -75,10 +75,10 @@ Save receipt after export writes a separate JSON file exclusively. It contains
 hashes, sizes and your chosen rules, not full source paths/passwords. Profile IDs
 and descriptions are user-entered and may themselves contain private details.
 
-CLI: `Prepare-Desktop prepare input.png --target pdf --output prepared.pdf
+CLI: `Filecraft-Desktop prepare input.png --target pdf --output prepared.pdf
 --max-bytes 2000000` (one command line). `--cli` before the command is also
 accepted. JSON output includes `result.receipt`; save that object as receipt.json
-and run `Prepare-Desktop verify prepared.pdf --receipt receipt.json`. Match returns
+and run `Filecraft-Desktop verify prepared.pdf --receipt receipt.json`. Match returns
 0; mismatch 2; processing error 1. The receipt is unsigned/editable: byte identity
 is not authenticity or institutional acceptance. `formats input.png` lists actual
 available targets. CLI uses the same bounded separate worker as the UI.

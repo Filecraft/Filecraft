@@ -12,7 +12,7 @@ import sys
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='0.9.0-beta.1'
+VERSION='0.10.0-beta.1'
 
 
 def openssl_versions():
@@ -105,27 +105,27 @@ def notices(folder):
     if not found:raise RuntimeError('Tcl/Tk redistribution license not found; do not publish this bundle.')
     openssl_notices(folder)
     (folder/'DEPENDENCIES.json').write_text(json.dumps(inventory,indent=2),encoding='utf-8')
-    shutil.copyfile(ROOT/'LICENSE',folder/'PREPARE-LICENSE')
-    shutil.copyfile(ROOT/'NOTICE',folder/'PREPARE-NOTICE')
-    shutil.copyfile(ROOT/'docs/LICENSING.md',folder/'PREPARE-LICENSING.md')
-    shutil.copyfile(ROOT/'docs/DEPENDENCIES.md',folder/'PREPARE-DEPENDENCIES.md')
-    shutil.copyfile(ROOT/'docs/ACKNOWLEDGMENTS.md',folder/'PREPARE-ACKNOWLEDGMENTS.md')
+    shutil.copyfile(ROOT/'LICENSE',folder/'FILECRAFT-LICENSE')
+    shutil.copyfile(ROOT/'NOTICE',folder/'FILECRAFT-NOTICE')
+    shutil.copyfile(ROOT/'docs/LICENSING.md',folder/'FILECRAFT-LICENSING.md')
+    shutil.copyfile(ROOT/'docs/DEPENDENCIES.md',folder/'FILECRAFT-DEPENDENCIES.md')
+    shutil.copyfile(ROOT/'docs/ACKNOWLEDGMENTS.md',folder/'FILECRAFT-ACKNOWLEDGMENTS.md')
 
 def build():
     system=platform.system();arch=platform.machine().lower()
     work=ROOT/'build'/'desktop-package';out=work/'dist'
     docs=work/'notices';notices(docs)
-    args=[sys.executable,'-m','PyInstaller','--noconfirm','--clean','--onedir','--name','Prepare-Desktop','--distpath',str(out),'--workpath',str(work/'objects'),'--specpath',str(work),'--paths',str(ROOT/'desktop'),'--collect-all','pypdfium2','--collect-all','pypdfium2_raw','--collect-data','reportlab','--collect-all','PIL','--add-data',str(docs)+os.pathsep+'third-party']
+    args=[sys.executable,'-m','PyInstaller','--noconfirm','--clean','--onedir','--name','Filecraft-Desktop','--distpath',str(out),'--workpath',str(work/'objects'),'--specpath',str(work),'--paths',str(ROOT/'desktop'),'--collect-all','pypdfium2','--collect-all','pypdfium2_raw','--collect-data','reportlab','--collect-all','PIL','--add-data',str(docs)+os.pathsep+'third-party']
     # Keep console bootloader: stdin/out are required for the isolated worker.
     # Native GUI suppresses child consoles on Windows via CREATE_NO_WINDOW.
     args.append(str(ROOT/'desktop'/'launch.py'))
     subprocess.run(args,check=True,cwd=ROOT)
-    bundle=out/'Prepare-Desktop';executable=bundle/('Prepare-Desktop.exe' if system=='Windows' else 'Prepare-Desktop')
+    bundle=out/'Filecraft-Desktop';executable=bundle/('Filecraft-Desktop.exe' if system=='Windows' else 'Filecraft-Desktop')
     subprocess.run([str(executable),'--version'],check=True)
     shutil.copyfile(ROOT/'desktop'/'README.md',bundle/'README.txt')
     shutil.copytree(docs,bundle/'licenses',dirs_exist_ok=True)
     prune_unused_fonts(bundle)
-    archive=ROOT/'build'/f'Prepare-{VERSION}-desktop-{system.lower()}-{arch}.zip'
+    archive=ROOT/'build'/f'Filecraft-{VERSION}-desktop-{system.lower()}-{arch}.zip'
     with zipfile.ZipFile(archive,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=6) as z:
         for p in sorted(bundle.rglob('*')):
             if p.is_symlink():

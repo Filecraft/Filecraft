@@ -1,5 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.prepare.app.tests" android:versionCode="1" android:versionName="1">
-    <uses-sdk android:minSdkVersion="28" android:targetSdkVersion="36"/>
-    <application android:label="Prepare synthetic tests" android:debuggable="true" android:allowBackup="false"/>
-    <instrumentation android:name="com.prepare.app.EngineTests" android:targetPackage="com.prepare.app" android:functionalTest="true" android:label="Prepare engine tests"/>
-</manifest>

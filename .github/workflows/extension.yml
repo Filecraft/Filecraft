@@ -26,5 +26,5 @@ jobs:
         with:
           name: browser-workspace-extension
           path: |
-            build/Prepare-*-extension-*.zip*
+            build/Filecraft-*-extension-*.zip*
             build/extension-evidence/

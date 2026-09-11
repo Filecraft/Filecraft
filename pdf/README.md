@@ -1,4 +1,4 @@
-# Prepare PDF core
+# Filecraft PDF core
 
 Dependency-local Node 22+ and browser PDF page operations. No runtime npm install,
 network access, server, shell execution, or document upload. Project code retains

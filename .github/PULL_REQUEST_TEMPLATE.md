@@ -1,3 +1,7 @@
+## AI assistance
+
+Identify tools/models used and what you independently checked. Follow AGENTS.md.
+
 ## What and why
 
 Closes #

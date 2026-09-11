@@ -1,13 +1,13 @@
 # Store submission material — not published
 
-Name: Prepare — local document workspace
+Name: Filecraft — local document workspace
 Summary: Prepare a PDF copy for your requirements. Reorder pages, verify output
 bytes and save a receipt. No uploads.
 Category: Productivity
-Version: 0.9.0 (package display/release: 0.9.0-beta.1)
-Homepage: https://gonisulaimann.github.io/extension/
-Support: https://github.com/gonisulaimann/Prepare/issues
-Privacy: https://gonisulaimann.github.io/privacy/
+Version: 0.9.0 (package display/release: 0.10.0-beta.1)
+Homepage: https://filecraft.github.io/extension/
+Support: https://github.com/Filecraft/Filecraft/issues
+Privacy: https://filecraft.github.io/privacy/
 
 ## Description
 
@@ -17,7 +17,7 @@ extract, duplicate or rotate pages, then check the copy against personal size,
 page, dimension or filename rules. Save the copy and an optional JSON receipt.
 Later, compare a saved copy's SHA-256 and byte count with its receipt.
 
-Prepare does not read websites, forms, browser history or downloads automatically.
+Filecraft does not read websites, forms, browser history or downloads automatically.
 It does not upload your documents, include analytics or fetch conversion code.
 All transformation code ships in the package. No host or optional permissions
 are requested. The toolbar opens an extension-owned tab using tabs.create;

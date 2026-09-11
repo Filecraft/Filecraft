@@ -18,7 +18,7 @@ with tempfile.TemporaryDirectory(prefix='prepare-firefox-') as tmp:
     from selenium.webdriver.firefox.service import Service
     driver=webdriver.Firefox(options=options,service=Service(service_args=['--allow-system-access']))
     try:
-        addon=driver.install_addon(str(ROOT/'build/Prepare-0.9.0-beta.1-extension-firefox.zip'),temporary=True)
+        addon=driver.install_addon(str(ROOT/'build/Filecraft-0.10.0-beta.1-extension-firefox.zip'),temporary=True)
         driver.set_context('chrome')
         mappings=json.loads(driver.execute_script("return Services.prefs.getStringPref('extensions.webextensions.uuids')"))
         driver.set_context('content')

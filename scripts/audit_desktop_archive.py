@@ -12,9 +12,9 @@ for arg in sys.argv[1:]:
         names=z.namelist();assert z.testzip() is None
         assert all(not n.startswith('/') and '..' not in Path(n).parts for n in names)
         assert not any(Path(n).name.lower().startswith('darkgarden') for n in names)
-        license_name=next(n for n in names if n.endswith('/licenses/PREPARE-LICENSE'))
+        license_name=next(n for n in names if n.endswith('/licenses/FILECRAFT-LICENSE'))
         assert z.read(license_name)==(ROOT/'LICENSE').read_bytes()
-        assert any(n.endswith('/licenses/PREPARE-NOTICE') for n in names)
+        assert any(n.endswith('/licenses/FILECRAFT-NOTICE') for n in names)
         assert any(n.endswith('Vera.ttf') for n in names)
         assert any(n.endswith('bitstream-vera-license.txt') for n in names)
         source=next(n for n in names if n.endswith('SOURCE-ATTRIBUTION.txt'))

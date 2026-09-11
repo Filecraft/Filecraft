@@ -1,4 +1,4 @@
-# Prepare browser workspace
+# Filecraft browser workspace
 
 A full local workspace beside your application tab, not an upload interceptor.
 Choose PDF files explicitly, set your own size/page requirements, merge, reorder,

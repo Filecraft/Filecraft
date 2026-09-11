@@ -35,10 +35,10 @@ def main():
     for source in (ROOT/'pdf/vendor').iterdir():
         if source.name.startswith('LICENSE') or source.name in ('README.md','PROVENANCE.json'):
             payload['vendor/'+source.name]=source.read_bytes()
-    output=ROOT/'build'/f'Prepare-{VERSION}-pdf-workbench.zip';output.parent.mkdir(exist_ok=True)
+    output=ROOT/'build'/f'Filecraft-{VERSION}-pdf-workbench.zip';output.parent.mkdir(exist_ok=True)
     with zipfile.ZipFile(output,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as archive:
         for name,data in sorted(payload.items()):
-            info=zipfile.ZipInfo('Prepare-PDF-Workbench/'+name,date_time=(2020,1,1,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED;info.external_attr=0o100644<<16;archive.writestr(info,data)
+            info=zipfile.ZipInfo('Filecraft-Workspace/'+name,date_time=(2020,1,1,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED;info.external_attr=0o100644<<16;archive.writestr(info,data)
     assert sum(map(len,payload.values()))<2000000,'Expanded workbench exceeds 2 MB'
     assert output.stat().st_size<1000000,'ZIP exceeds 1 MB'
     with zipfile.ZipFile(output) as z:assert z.testzip() is None

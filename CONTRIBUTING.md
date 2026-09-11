@@ -28,7 +28,7 @@ I use macOS 14+ and Swift 6. I ship Apple Silicon builds; Intel native builds
 are not release-tested. I don't add third-party Swift packages.
 
 ```sh
-git clone --depth 1 https://github.com/gonisulaimann/Prepare.git
+git clone --depth 1 https://github.com/Filecraft/Filecraft.git
 cd Prepare
 swift run Prepare
 swift run PrepareChecks --ui-contract

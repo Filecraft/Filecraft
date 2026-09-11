@@ -4,9 +4,9 @@
   "summary": "Prepare a local copy for your requirements; verify bytes and keep a receipt.",
   "category": "Utilities",
   "license": "Apache-2.0 for current project-owned source; historical artifacts retain original terms",
-  "website": "https://gonisulaimann.github.io/",
-  "source": "https://github.com/gonisulaimann/Prepare",
-  "support": "https://github.com/gonisulaimann/Prepare/issues",
+  "website": "https://filecraft.github.io/",
+  "source": "https://github.com/Filecraft/Filecraft",
+  "support": "https://github.com/Filecraft/Filecraft/issues",
   "privacy": {
     "uploads": false,
     "analytics": false,

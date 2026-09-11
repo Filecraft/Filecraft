@@ -2,7 +2,7 @@
 
 Releases are deliberate maintainer actions, not automatic publications on push.
 The macOS CI workflow checks source and packaging. The official website is
-https://gonisulaimann.github.io/ and publishes `main:/` from the dedicated
+https://filecraft.github.io/ and publishes `main:/` from the dedicated
 `gonisulaimann/gonisulaimann.github.io` repository. This app repository keeps
 a legacy landing-page redirect; do not edit its old assets to update the live site.
 

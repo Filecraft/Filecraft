@@ -1,5 +1,0 @@
-build/
-.toolchain/
-*.keystore
-local.properties
-__pycache__/

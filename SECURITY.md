@@ -1,7 +1,7 @@
 # Security and privacy
 
 Report vulnerabilities privately:
-https://github.com/gonisulaimann/Prepare/security/advisories/new
+https://github.com/Filecraft/Filecraft/security/advisories/new
 
 Include the affected surface/version, steps and a minimal synthetic sample.
 Do not upload confidential documents. No response-time or bounty promise is made.

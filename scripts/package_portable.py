@@ -12,7 +12,7 @@ def validate_portable(expanded,archive):
 
 def main():
     root=Path(__file__).resolve().parents[1]
-    output=root/'build'/f'Prepare-{VERSION}-portable.zip'
+    output=root/'build'/f'Filecraft-{VERSION}-portable.zip'
     output.parent.mkdir(exist_ok=True)
     payload={name:(root/'portable'/name).read_bytes() for name in FILES}
     payload.update({name:(root/name).read_bytes() for name in ['LICENSE','NOTICE']})

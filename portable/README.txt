@@ -10,7 +10,7 @@ browser, which is a separate prerequisite and not included in the size budget.
 
 Add JPEG/PNG images, choose a preset, sort/reorder/rotate or split a spread,
 set paper/margins/custom 36–600 DPI ceiling (0 = automatic) and a byte limit,
-then Prepare PDF. Optional near-white cleanup turns pixels above a threshold
+then Filecraft PDF. Optional near-white cleanup turns pixels above a threshold
 white; it is not semantic background removal and may erase faint content.
 Duplicate, rotate or remove individual pages before preparing. Split divides
 the EXIF-oriented source into left then right halves before user rotation.
@@ -47,11 +47,11 @@ mobile browsers are not supported by this companion. Grayscale uses equal RGB
 channels, unlike the Mac app's dedicated DeviceGray encoding.
 
 SOURCE / LICENSE
-https://github.com/gonisulaimann/Prepare
-https://gonisulaimann.github.io/
+https://github.com/Filecraft/Filecraft
+https://filecraft.github.io/
 Current original source: Apache-2.0, included as LICENSE. NOTICE contains
 attribution. Historical 0.5 downloads retain their original Hippocratic terms.
 Development tests use dependencies, but none are in this release folder.
 I maintain Prepare independently. Read CONTRIBUTING.md and CODE_OF_CONDUCT.md
 in the repository before joining in; report security problems privately at
-https://github.com/gonisulaimann/Prepare/security/advisories/new
+https://github.com/Filecraft/Filecraft/security/advisories/new

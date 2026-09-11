@@ -1,84 +1,76 @@
-# Prepare
+# Filecraft
 
-Make the right copy. Know what changed.
+### Make the right copy. Know what changed.
 
-Prepare is a local document-preparation workspace built around a useful loop:
-**Import → Understand → Prepare → Validate → Verify → Export.**
+Local document preparation for Windows, macOS, Linux and the browser.
+Set requirements, prepare a separate copy, verify the result and keep a receipt.
+No account. No document upload. No subscription gate.
 
-Set your requirements, make a separate copy, inspect the result and keep a
-hash-bound receipt. Mechanical checks are evidence—not a promise of portal
-acceptance, visual fidelity, accessibility or safety.
+**[Download the current release](https://filecraft.github.io/download/)** ·
+[Try the local workspace](https://filecraft.github.io/workspace/) ·
+[Documentation](https://filecraft.github.io/documentation/) ·
+[Release archive](https://filecraft.github.io/releases/)
 
-[Website](https://gonisulaimann.github.io/) ·
-[Downloads](https://gonisulaimann.github.io/download/) ·
-[Local PDF workspace](https://gonisulaimann.github.io/workspace/) ·
-[Documentation](https://gonisulaimann.github.io/documentation/)
+English · [Français](docs/i18n/README.fr.md) · [Español](docs/i18n/README.es.md)
 
-## Choose a surface
+## One workflow, not five utilities
 
-| Surface | Actual scope | Status |
-| --- | --- | --- |
-| Desktop | Images, text-first documents, PDF operations/previews, optional local OCR/media, ZIP/GZ; personal requirements and receipts | [0.9.0-beta.1 released](https://github.com/gonisulaimann/Prepare/releases/tag/v0.9.0-beta.1); four native platform builds qualified |
-| Web / offline workspace | PDF merge, order, extraction, rotation, profiles, receipts and byte verification | Browser workflow; not desktop parity |
-| Extension | The local PDF workspace in a dedicated browser tab, no host permissions | Chromium/Edge developer-mode package; Firefox temporary-install package; not store-published |
-| CLI | Desktop worker commands: `formats`, `prepare`, `verify` | Same bounded worker and original-preserving export |
-| Android | Historical image-to-PDF utility | Unsigned 0.5 experiment; no desktop-suite parity |
-| iOS / iPadOS | No native application published | Web access is not native app support |
+Import → Understand → Prepare → Validate → Verify → Export
 
-The small [stable 0.5 image tools](https://github.com/gonisulaimann/Prepare/releases/tag/v0.5.0)
-and [0.8 desktop beta](https://github.com/gonisulaimann/Prepare/releases/tag/v0.8.0-beta.1)
-remain available under their original licenses and feature scope.
+- Personal requirements gate desktop exports. Failed checks do not publish a copy.
+- PDF operations/previews, images, text-first documents, ZIP/GZ packaging and optional
+  local OCR/media engines share an original-preserving worker.
+- Receipts bind measured output bytes to SHA-256 and your requirements.
+- The PDF web/extension workspace merges, extracts, orders and rotates pages locally.
+- Desktop CLI uses the same engine; no GUI or local HTTP server is required.
 
-## What is different
+Receipts are unsigned evidence—not proof of authenticity, safety, accessibility,
+visual fidelity or portal acceptance. Office conversion is text-first. Arbitrary
+file packaging is not universal conversion. See [limits](desktop/README.md).
 
-- Requirements are part of preparation, not an afterthought. Failed desktop
-  requirements block output publication; unknown evidence stays unknown.
-- Originals and competing destination files are not overwritten by desktop
-  exports. Browser downloads follow your browser’s save/overwrite behavior.
-- Receipts bind output size and SHA-256 to observed facts and personal rules.
-  They are editable and unsigned; matching bytes do not authenticate a document.
-- No accounts, document uploads, telemetry, remote conversion or cloud fallback.
-  Hosting requests and cloud-synced storage remain separate boundaries.
+## Install
 
-## Run from source
+Use the [download page](https://filecraft.github.io/download/) for the actual
+published version, architecture, size, checksum and installation instructions.
+Windows/Linux x64, Apple Silicon and Intel Mac packages are qualified through
+native CI. Binaries are unsigned/not notarized; follow your organization’s policy.
+Browser extensions are developer-mode/temporary-install previews, not store listings.
+Mobile development is retired; historical releases are preserved in the archive.
 
-Desktop: Python 3.13 with Tk, then:
+## Develop and automate
+
+Python 3.13 with Tk:
 
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install -r desktop/requirements.txt
 .venv/bin/python desktop/launch.py
-.venv/bin/python desktop/launch.py prepare input.png --target pdf \
-  --output prepared.pdf --max-bytes 2000000
+.venv/bin/python desktop/launch.py prepare input.png --target pdf --output copy.pdf --max-bytes 2000000
 ```
 
-On Windows use the equivalent `.venv\Scripts\python.exe` path. CLI preparation
-returns JSON containing a `receipt` object; save that object separately, then:
+On Windows use `.venv\Scripts\python.exe`. Local OCR needs Tesseract; media needs
+FFmpeg. Optional engines are not silently downloaded at runtime.
 
 ```sh
-.venv/bin/python desktop/launch.py verify prepared.pdf --receipt receipt.json
+PYTHONPATH=desktop .venv/bin/python -m unittest discover -s desktop/tests -v
+npm --prefix portable ci
+npm --prefix portable test
+python3 extension/package.py
 ```
 
-Browser: open `workbench/index.html` with its sibling files intact.
-Extension: [build/install and qualification](extension/README.md).
+[Architecture](docs/ENGINE-ARCHITECTURE.md) · [Contribute](CONTRIBUTING.md) ·
+[Security](SECURITY.md) · [AI contribution rules](AGENTS.md)
 
-## Important boundaries
+## AI development disclosure
 
-Office conversion is text-first, not layout-preserving. ZIP/GZ packaging is not
-universal conversion. Lossless optimization may grow files; lossy rasterization
-changes fidelity. OCR and media need separately installed Tesseract/FFmpeg.
-Desktop packages are unsigned/not notarized. Prepare is not a sanitizer or a
-complete hostile-file sandbox. Do not disable OS security protections to run it.
+This software is developed with AI assistance. The maintainer identifies the
+model as OpenAI’s frontier model GPT-6 Astra. The maintainer-supplied estimated
+token cost is **$256.09**; supplied counts are inconsistent and **not audited**.
+[Full metrics and caveats](docs/AI-DISCLOSURE.md).
+This is not a claim that Filecraft ships a fine-tuned neural processing engine.
 
-[Exact desktop matrix](desktop/README.md) · [Security](SECURITY.md) ·
-[Research and product decision](docs/PRODUCT-DECISION-09.md) ·
-[Architecture](docs/ENGINE-ARCHITECTURE.md) · [Contributing](CONTRIBUTING.md)
+## License and continuity
 
-## License
-
-Current project-owned source: **Apache-2.0**. Third-party components retain their
-upstream licenses and notices. Historical artifacts through 0.8.0-beta.1 retain
-the Hippocratic 3.0 license under which they were released; history is not rewritten.
-
-[Transition and provenance](docs/LICENSING.md) · [LICENSE](LICENSE) ·
-[NOTICE](NOTICE) · [Dependencies](docs/DEPENDENCIES.md)
+Original code: Apache-2.0. Dependencies retain their own notices. Filecraft continues
+Prepare through a repository transfer, preserving history and historical releases.
+The personal website is untouched. [Migration and compatibility](docs/MIGRATION.md).

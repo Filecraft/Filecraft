@@ -1,0 +1,18 @@
+site_name: Filecraft
+docs_dir: .
+site_url: https://filecraft.github.io/documentation/
+repo_url: https://github.com/Filecraft/Filecraft
+site_dir: ../build/technical-docs
+use_directory_urls: true
+nav:
+  - Overview: GUIDE.md
+  - Migration: MIGRATION.md
+  - AI disclosure: AI-DISCLOSURE.md
+  - Architecture: ENGINE-ARCHITECTURE.md
+  - Design: DESIGN-SYSTEM.md
+  - Licensing: LICENSING.md
+  - Dependencies: DEPENDENCIES.md
+exclude_docs: |
+  /index.html
+  /requirements.txt
+  /mkdocs.yml
