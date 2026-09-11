@@ -6,12 +6,22 @@ from pathlib import Path
 from PIL import Image
 
 class GUITests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        import tkinter as tk
+        cls.root=tk.Tk()
+        cls.root.withdraw()
+    @classmethod
+    def tearDownClass(cls):
+        cls.root.destroy()
+    def tearDown(self):
+        for callback in self.root.tk.splitlist(self.root.tk.call('after','info')):
+            self.root.after_cancel(callback)
+        for widget in self.root.winfo_children():widget.destroy()
     def test_dropdown_and_actual_async_export(self):
         import tkinter as tk
         from prepare_suite.gui import App
-        try:root=tk.Tk()
-        except tk.TclError as exc:self.skipTest(str(exc))
-        root.withdraw()
+        root=self.root
         try:
             app=App(root)
             with tempfile.TemporaryDirectory() as td:
@@ -26,15 +36,13 @@ class GUITests(unittest.TestCase):
                 self.assertTrue(output.exists(),app.status.get())
                 self.assertIn('Saved',app.status.get())
                 self.assertTrue(source.exists())
-        finally:root.destroy()
+        finally:pass
 
     def test_pdf_source_and_output_previews(self):
         import tkinter as tk
         from prepare_suite.gui import App
         from pypdf import PdfWriter
-        try:root=tk.Tk()
-        except tk.TclError as exc:self.skipTest(str(exc))
-        root.withdraw()
+        root=self.root
         try:
             app=App(root)
             with tempfile.TemporaryDirectory() as td:
@@ -54,6 +62,6 @@ class GUITests(unittest.TestCase):
                 while app.busy and time.monotonic()<until:root.update();time.sleep(.02)
                 self.assertIn('Preview rendered',app.status.get())
                 if app.preview_dir:app.preview_dir.cleanup()
-        finally:root.destroy()
+        finally:pass
 
 if __name__=='__main__':unittest.main()

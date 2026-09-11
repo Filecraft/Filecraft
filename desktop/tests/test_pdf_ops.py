@@ -219,6 +219,7 @@ class PdfOpsTests(unittest.TestCase):
         with Image.open(preview) as image:
             self.assertEqual(image.size, (200, 301))
 
+    @unittest.skipUnless(__import__("shutil").which("tesseract"), "optional local Tesseract not installed")
     def test_ocr_recognizes_image_only_pages_in_selected_order(self):
         scan = self.output('scan.pdf')
         self.ops.convert(str(self.source), scan, 'pdf', {'action': 'rasterize', 'dpi': 200})
@@ -355,6 +356,7 @@ class PdfOpsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '100'):
             self.ops.convert(str(self.source), self.output('many.pdf'), 'pdf', {'pages': [0] * 101})
 
+    @unittest.skipUnless(__import__("shutil").which("tesseract"), "optional local Tesseract not installed")
     def test_blank_ocr_reports_absence_of_searchable_text(self):
         blank = self.root / 'blank.pdf'
         writer = PdfWriter()
