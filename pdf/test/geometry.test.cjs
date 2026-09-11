@@ -22,5 +22,5 @@ test('inherited geometry and rotation survive selected-page copying',async()=>{
 });
 test('reload validation supports outputs above the per-input bound',async()=>{
  const d=await lib.PDFDocument.create();const p=d.addPage([200,400]);p.node.set(lib.PDFName.of('Contents'),d.context.register(d.context.stream(new Uint8Array(11*1024*1024).fill(32))));
- const input=await d.save({useObjectStreams:false});const output=await api.transform([input],[{source:0,page:0,rotation:0},{source:0,page:0,rotation:90}]);assert.ok(output.length>api.limits.maxInputBytes);assert.equal((await lib.PDFDocument.load(output)).getPageCount(),2);
+ const input=await d.save({useObjectStreams:false});const verified=await api.transformVerified([input],[{source:0,page:0,rotation:0},{source:0,page:0,rotation:90}]);const output=verified.bytes;assert.ok(output.length>api.limits.maxInputBytes);assert.equal(verified.info.pageCount,2);assert.equal(verified.info.byteLength,output.length);assert.equal(verified.info.pages[1].rotation,90);assert.equal((await lib.PDFDocument.load(output)).getPageCount(),2);
 });
