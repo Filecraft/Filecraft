@@ -30,7 +30,7 @@ try:
         subprocess.run([str(adb), "uninstall", package], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     for stem in ("prepare", "prepare-tests"):
         run(adb, "install", "-r", "-t", B / (stem + "-TEST-ONLY.apk"))
-    output = run(adb, "shell", "am", "instrument", "-w", "com.prepare.app.tests/com.prepare.app.EngineTests", capture=True).stdout
+    output = run(adb, "shell", "am", "instrument", "-w", "-r", "com.prepare.app.tests/com.prepare.app.EngineTests", capture=True).stdout
     print(output)
     (B / "instrumentation.txt").write_text(output)
     if "OK (" not in output or "INSTRUMENTATION_CODE: -1" not in output or "FAIL" in output:
