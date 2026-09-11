@@ -5,6 +5,7 @@ let package = Package(name: "Prepare", platforms: [.macOS(.v14)], products: [
     .executable(name: "PrepareChecks", targets: ["PrepareChecks"])
 ], targets: [
     .target(name: "PrepareCore"),
-    .executableTarget(name: "Prepare", dependencies: ["PrepareCore"]),
-    .executableTarget(name: "PrepareChecks", dependencies: ["PrepareCore"])
+    .target(name: "PrepareWorkspace", dependencies: ["PrepareCore"]),
+    .executableTarget(name: "Prepare", dependencies: ["PrepareCore", "PrepareWorkspace"]),
+    .executableTarget(name: "PrepareChecks", dependencies: ["PrepareCore", "PrepareWorkspace"])
 ])

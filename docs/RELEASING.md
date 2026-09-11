@@ -9,7 +9,11 @@ from `main`; there is no JavaScript build toolchain or website dependency tree.
    checks. Record machine, compiler, fixture workload and real measured values.
 3. Run `python3 scripts/check-site.py`, then preview `docs/` at narrow and wide
    widths. Check keyboard focus, anchors, download URLs and reduced motion.
+   Run `node scripts/test-site.cjs` and `python3 scripts/test_release_budget.py`.
 4. `bash scripts/package.sh`; inspect the bundle version and arm64 architecture.
+   Packaging rejects a binary ≥2,000,000 bytes, app ≥3,000,000 bytes, or ZIP
+   ≥1,500,000 bytes. Inspect `build/release-size.json`. Do not loosen budgets
+   silently. Keep marketing images outside the app bundle.
 5. Run `codesign --verify --strict build/Prepare.app`. Launch the app and test
    add, reorder, rotate, margins, compare, cancellation and new-file export.
 6. Unzip into a temporary directory and repeat signature and bundle checks.

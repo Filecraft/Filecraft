@@ -17,13 +17,16 @@ jobs:
       - name: Toolchain
         run: swift --version
       - name: Debug behavioral checks
-        run: swift run PrepareChecks
+        run: swift run PrepareChecks --ui-contract
       - name: Release behavioral checks
-        run: swift run -c release PrepareChecks
+        run: swift run -c release PrepareChecks --ui-contract --stress
       - name: Compiler warnings are errors
-        run: swift build -c release -Xswiftc -warnings-as-errors
+        run: swift build -c release -Xswiftc -warnings-as-errors -Xswiftc -strict-concurrency=complete
       - name: Check website
-        run: python3 scripts/check-site.py
+        run: |
+          python3 scripts/check-site.py
+          node scripts/test-site.cjs
+          python3 scripts/test_release_budget.py
       - name: Package native build
         run: bash scripts/package.sh
       - name: Verify signed bundle

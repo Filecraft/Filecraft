@@ -4,193 +4,7 @@ import PDFKit
 import UniformTypeIdentifiers
 import PrepareCore
 
-private struct PreviewRequest: Sendable {
-    let generation: UUID
-    let page: PreparationPage
-    let settings: PageSettings
-    let output: Data?
-    let index: Int
-}
-
-private struct PagePreview: Sendable {
-    let source: Data
-    let output: Data?
-}
-
-@MainActor
-final class Workspace: ObservableObject {
-    @Published private(set) var selection = PageSelection()
-    @Published var progress: PreparationProgress?
-    @Published var cancelling = false
-    @Published var megabytes = "2" { didSet { if oldValue != megabytes { invalidate() } } }
-    @Published var paper: PaperFormat = .original { didSet { if oldValue != paper { invalidate() } } }
-    @Published var margin = "0" { didSet { if oldValue != margin { invalidate() } } }
-    @Published var result: Prepared?
-    @Published var busy = false
-    @Published var message = ""
-    @Published var reviewed = false
-    @Published fileprivate var preview: PagePreview?
-    @Published private(set) var previewLoading = false
-    @Published private(set) var previewError = ""
-    private var task: Task<Void, Never>?
-    private var worker: Task<Prepared, Error>?
-    private var generation = UUID()
-    // One active decode and one replaceable pending request: rapid edits never
-    // create an unbounded queue of image decodes or retained output documents.
-    private var previewTask: Task<Void, Never>?
-    private var previewWorker: Task<PagePreview, Error>?
-    private var pendingPreview: PreviewRequest?
-    private var previewGeneration = UUID()
-
-    var inputs: [PageEntry] { selection.entries }
-    var byteLimit: Int? {
-        guard let number = Double(megabytes), number.isFinite, number >= 0.01, number <= 100 else { return nil }
-        return Int(number * 1_000_000)
-    }
-    var settings: PageSettings? {
-        guard let points = Double(margin), points.isFinite, (0...72).contains(points) else { return nil }
-        let value = PageSettings(paper: paper, margin: points)
-        guard (try? value.validate()) != nil else { return nil }
-        return value
-    }
-    func invalidate() {
-        result = nil; reviewed = false; message = ""
-        requestPreview()
-    }
-    func add(_ urls: [URL]) {
-        guard !busy else { return }
-        guard inputs.count + urls.count <= 20 else { message = "Choose at most 20 pages. Remove some images first."; return }
-        let selectedID = selection.selectedID
-        selection = PageSelection(entries: inputs + urls.map { PageEntry(url: $0) })
-        if let selectedID { selection.select(selectedID) }
-        invalidate()
-    }
-    func choose() {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.jpeg, .png, .heic]
-        panel.allowsMultipleSelection = true
-        panel.canChooseDirectories = false
-        panel.message = "Select still images. Existing PDFs are not supported."
-        if panel.runModal() == .OK { add(panel.urls) }
-    }
-    func select(_ id: UUID) {
-        guard selection.selectedID != id else { return }
-        selection.select(id); requestPreview()
-    }
-    func step(_ offset: Int) {
-        let previous = selection.selectedID
-        selection.step(offset)
-        if previous != selection.selectedID { requestPreview() }
-    }
-    func rotate(_ id: UUID) {
-        guard !busy else { return }
-        selection.select(id); selection.rotateSelected(); invalidate()
-    }
-    func remove(_ id: UUID) {
-        guard !busy else { return }
-        selection.remove(id); invalidate()
-    }
-    func move(_ id: UUID, to target: UUID) {
-        guard !busy else { return }
-        selection.move(id, to: target); invalidate()
-    }
-    func requestPreview() {
-        stopPreview()
-        guard !busy, let entry = selection.selected, let index = selection.selectedIndex,
-              let settings else { return }
-        previewLoading = true
-        pendingPreview = PreviewRequest(generation: previewGeneration, page: entry.page,
-                                        settings: settings, output: result?.data, index: index)
-        startNextPreview()
-    }
-    private func startNextPreview() {
-        guard previewTask == nil, let request = pendingPreview else { return }
-        pendingPreview = nil
-        let job = Task.detached(priority: .userInitiated) {
-            try Task.checkCancellation()
-            let source = try SourcePreview.render(page: request.page, settings: request.settings)
-            try Task.checkCancellation()
-            let output = try request.output.map { try ReviewDocument.page(data: $0, at: request.index) }
-            try Task.checkCancellation()
-            return PagePreview(source: source, output: output)
-        }
-        previewWorker = job
-        previewTask = Task { [weak self] in
-            let outcome = await job.result
-            guard let self else { return }
-            if self.previewGeneration == request.generation {
-                switch outcome {
-                case .success(let pair): self.preview = pair
-                case .failure(let error):
-                    if !(error is CancellationError) { self.previewError = error.localizedDescription }
-                }
-                self.previewLoading = false
-            }
-            self.previewWorker = nil; self.previewTask = nil
-            self.startNextPreview()
-        }
-    }
-    private func stopPreview() {
-        previewGeneration = UUID(); pendingPreview = nil
-        previewWorker?.cancel()
-        preview = nil; previewLoading = false; previewError = ""
-    }
-    func prepare() {
-        guard !busy, let limit = byteLimit, let settings, !inputs.isEmpty else { return }
-        result = nil; reviewed = false; message = ""
-        stopPreview(); busy = true
-        progress = nil; cancelling = false
-        let pages = inputs.map(\.page); let id = UUID(); generation = id
-        let owner = self
-        let job = Task.detached(priority: .userInitiated) {
-            try Preparation.run(pages: pages, settings: settings, maxBytes: limit) { event in
-                Task { @MainActor in
-                    guard owner.generation == id, owner.busy else { return }
-                    owner.progress = event
-                }
-            }
-        }
-        worker = job
-        task = Task { [weak self] in
-            do {
-                let prepared = try await job.value
-                guard let self, self.generation == id else { return }
-                self.busy = false; self.worker = nil; self.task = nil
-                if self.cancelling {
-                    self.cancelling = false; self.message = "Preparation cancelled."
-                } else {
-                    self.result = prepared
-                    self.message = "Fits the limit. Inspect every page before saving."
-                }
-                self.requestPreview()
-            } catch {
-                guard let self, self.generation == id else { return }
-                self.message = error is CancellationError ? "Preparation cancelled." : error.localizedDescription
-                self.busy = false; self.cancelling = false; self.worker = nil; self.task = nil
-                self.requestPreview()
-            }
-        }
-    }
-    func cancel() {
-        guard busy else { return }
-        cancelling = true; worker?.cancel(); message = "Stopping after the current image…"
-    }
-    func shutdown() {
-        generation = UUID(); worker?.cancel(); task?.cancel()
-        stopPreview()
-    }
-    func save() {
-        guard let result, reviewed else { return }
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [.pdf]
-        panel.nameFieldStringValue = "Prepared.pdf"
-        panel.message = "Choose a new filename. Prepare never overwrites an existing file."
-        if panel.runModal() == .OK, let url = panel.url {
-            do { try Preparation.save(result, to: url); message = "Saved a separate copy: " + url.lastPathComponent }
-            catch { message = "Not saved: " + error.localizedDescription + " Choose a new filename." }
-        }
-    }
-}
+import PrepareWorkspace
 
 struct DocumentPreview: NSViewRepresentable {
     let data: Data
@@ -219,10 +33,16 @@ struct DocumentPreview: NSViewRepresentable {
     }
 }
 
+@MainActor
+private final class WorkbenchPresentation: ObservableObject {
+    @Published var showClearConfirmation = false
+}
+
 struct ContentView: View {
     @ObservedObject var model: Workspace
-    private func size(_ bytes: Int) -> String { String(format: "%.2f MB", Double(bytes) / 1_000_000) }
+    @StateObject private var presentation = WorkbenchPresentation()
     private let accent = Color(red: 0.16, green: 0.38, blue: 0.32)
+    private func size(_ bytes: Int) -> String { String(format: "%.2f MB", Double(bytes) / 1_000_000) }
 
     private var pageList: some View {
         ScrollView {
@@ -261,174 +81,242 @@ struct ContentView: View {
                         .help(entry.url.lastPathComponent + " — select to review; drag to reorder")
                 }
             }
-        }.frame(height: 148)
+        }.frame(height: 116)
     }
 
-    private var controls: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "doc.badge.gearshape").font(.title).foregroundStyle(accent)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Prepare").font(.system(size: 28, weight: .semibold, design: .rounded))
-                    Text("A smaller file. A simpler handoff.").font(.caption).foregroundStyle(.secondary)
-                }
+    private var sidebar: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Prepare", systemImage: "doc.badge.gearshape")
+                    .font(.system(size: 27, weight: .semibold, design: .rounded)).foregroundStyle(accent)
+                Text("Images to a ready-to-share PDF.").font(.callout).foregroundStyle(.secondary)
+                Label("On your Mac · Nothing uploaded", systemImage: "lock.shield")
+                    .font(.caption).foregroundStyle(.secondary)
             }
-            Label("On your Mac · Nothing uploaded", systemImage: "lock.shield").font(.caption).foregroundStyle(.secondary)
             Divider()
-            HStack {
-                Text("1  Choose images").font(.headline)
-                Spacer()
-                Button("Add images…", action: model.choose).disabled(model.busy)
-                    .keyboardShortcut("o", modifiers: .command)
-                    .help("Add JPEG, PNG or HEIC images. You can also drop files here.")
+            VStack(alignment: .leading, spacing: 9) {
+                Text("Workflow preset").font(.headline)
+                ForEach(WorkflowPreset.allCases, id: \.self) { preset in
+                    Button { model.applyPreset(preset) } label: {
+                        HStack(spacing: 9) {
+                            Image(systemName: model.activePreset == preset ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(model.activePreset == preset ? accent : Color.secondary)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(preset.title).font(.callout.weight(.medium))
+                                Text(presetDetail(preset)).font(.caption).foregroundStyle(.secondary)
+                            }
+                            Spacer(minLength: 0)
+                        }.padding(10).frame(maxWidth: .infinity, alignment: .leading)
+                            .background(model.activePreset == preset ? accent.opacity(0.1) : Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 9))
+                            .contentShape(Rectangle())
+                    }.buttonStyle(.plain).disabled(model.busy)
+                        .accessibilityLabel("Apply " + preset.title)
+                        .accessibilityValue(model.activePreset == preset ? "Selected" : "Not selected")
+                }
+                Text(model.activePreset == nil ? "Custom settings · choose a starting point above" : "Starting point only · adjust below")
+                    .font(.caption).foregroundStyle(.secondary)
             }
-            if model.inputs.isEmpty {
-                VStack(spacing: 8) {
-                    Image(systemName: "photo.on.rectangle.angled").font(.system(size: 28)).foregroundStyle(accent)
-                    Text("Start with your scans or photos").font(.headline)
-                    Text("JPEG, PNG or HEIC · up to 20 pages\nDrop files here or use Add images.")
-                        .font(.caption).multilineTextAlignment(.center).foregroundStyle(.secondary)
-                }.frame(maxWidth: .infinity, minHeight: 148)
-                    .background(accent.opacity(0.06), in: RoundedRectangle(cornerRadius: 12))
-            } else { pageList }
-            Text("2  Set page layout & size").font(.headline)
-            Picker("Paper", selection: $model.paper) {
-                Text("Original").tag(PaperFormat.original)
-                Text("A4").tag(PaperFormat.a4)
-                Text("US Letter").tag(PaperFormat.usLetter)
-            }.disabled(model.busy).accessibilityLabel("Output paper size")
-            HStack {
-                Text("Margin")
-                TextField("0–72", text: $model.margin).textFieldStyle(.roundedBorder).frame(width: 52)
-                    .accessibilityLabel("Page margin in points, zero to seventy-two")
-                Stepper("Margin", value: Binding(get: {
-                    model.settings?.margin ?? 0
-                }, set: { model.margin = String(format: "%.0f", $0) }), in: 0...72, step: 1)
-                    .labelsHidden().accessibilityLabel("Adjust page margin in points")
-                Text("pt · 72 = 1 inch").font(.caption).foregroundStyle(.secondary)
-                Spacer(minLength: 0)
-            }.disabled(model.busy)
+            VStack(alignment: .leading, spacing: 9) {
+                Text("Compression profile").font(.headline)
+                Picker("Compression profile", selection: $model.profile) {
+                    ForEach(CompressionProfile.allCases, id: \.self) { profile in Text(profile.title).tag(profile) }
+                }.pickerStyle(.segmented).labelsHidden().disabled(model.busy)
+                    .accessibilityLabel("Compression profile")
+                Text(profileDetail).font(.caption).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Text("Maximum PDF size").font(.callout)
+                    Spacer(minLength: 4)
+                    TextField("MB", text: $model.megabytes).textFieldStyle(.roundedBorder).frame(width: 56)
+                        .accessibilityLabel("Maximum PDF size in decimal megabytes").disabled(model.busy)
+                    Text("MB").foregroundStyle(.secondary)
+                }
+                if model.byteLimit == nil { Text("Enter 0.01–100 MB.").foregroundStyle(.red).font(.caption) }
+            }
+            DisclosureGroup("Advanced layout") {
+                VStack(alignment: .leading, spacing: 10) {
+                    Picker("Paper", selection: $model.paper) {
+                        Text("Original aspect").tag(PaperFormat.original)
+                        Text("A4").tag(PaperFormat.a4)
+                        Text("US Letter").tag(PaperFormat.usLetter)
+                    }.accessibilityLabel("Output paper size")
+                    HStack {
+                        Text("Margin")
+                        Spacer()
+                        TextField("0–72", text: $model.margin).textFieldStyle(.roundedBorder).frame(width: 52)
+                            .accessibilityLabel("Page margin in points")
+                        Stepper("Margin", value: Binding(get: { model.settings?.margin ?? 0 },
+                            set: { model.margin = String(format: "%.0f", $0) }), in: 0...72, step: 1)
+                            .labelsHidden().accessibilityLabel("Adjust page margin")
+                        Text("pt").foregroundStyle(.secondary)
+                    }
+                    Text(model.paper == .original ? "Original aspect uses a 720 pt page edge, not original resolution or scan DPI." : "Fits portrait paper without cropping. 72 pt = 1 inch.")
+                        .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                }.padding(.top, 10).disabled(model.busy)
+            }.font(.callout.weight(.medium))
             if model.settings == nil { Text("Enter a margin from 0 to 72 points.").foregroundStyle(.red).font(.caption) }
-            Text(model.paper == .original ? "Original keeps image aspect ratio (720 pt longest edge), not scan DPI." : "Images fit on portrait paper without cropping or stretching.")
-                .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-            HStack {
-                Text("Maximum PDF size")
-                Spacer()
-                TextField("MB", text: $model.megabytes).textFieldStyle(.roundedBorder).frame(width: 60)
-                    .accessibilityLabel("Maximum PDF size in decimal megabytes").disabled(model.busy)
-                Text("MB").foregroundStyle(.secondary)
-            }
-            if model.byteLimit == nil { Text("Enter a size from 0.01 to 100 MB.").foregroundStyle(.red).font(.caption) }
-            HStack {
+            VStack(spacing: 10) {
                 Button(action: model.prepare) {
                     Label(model.busy ? "Preparing…" : "Prepare PDF", systemImage: "wand.and.stars")
-                        .frame(maxWidth: .infinity).padding(.vertical, 3)
+                        .frame(maxWidth: .infinity).padding(.vertical, 5)
                 }.buttonStyle(.borderedProminent).tint(accent)
                     .keyboardShortcut("r", modifiers: .command)
                     .disabled(model.inputs.isEmpty || model.byteLimit == nil || model.settings == nil || model.busy)
                 if model.busy {
+                    if let p = model.progress {
+                        ProgressView(value: Double(p.page), total: Double(p.totalPages))
+                        Text("Pass \(p.pass) of at most \(model.profile.maximumPasses) · Page \(p.page)/\(p.totalPages)")
+                            .font(.caption).foregroundStyle(.secondary).monospacedDigit()
+                    } else { ProgressView("Checking images…") }
                     Button(model.cancelling ? "Cancelling…" : "Cancel", action: model.cancel)
                         .disabled(model.cancelling).keyboardShortcut(.cancelAction)
                 }
             }
-            if model.busy {
-                if let p = model.progress {
-                    ProgressView(value: Double(p.page), total: Double(p.totalPages))
-                    Text("Pass \(p.pass) of at most 5 · Page \(p.page) of \(p.totalPages)")
-                        .font(.caption).foregroundStyle(.secondary).monospacedDigit()
-                } else { ProgressView("Checking images…") }
-            }
-            if !model.message.isEmpty {
-                Text(model.message).font(.callout).textSelection(.enabled).fixedSize(horizontal: false, vertical: true)
-            }
-            Text("Originals are never overwritten. Transparency becomes white. No PDF input, OCR or accessible-text conversion.")
+            Text("Originals stay untouched. Transparency becomes white. No PDF input, OCR or accessible-text conversion.")
                 .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
         }
     }
-
+    private func presetDetail(_ preset: WorkflowPreset) -> String {
+        switch preset {
+        case .portal500KB: "Small File · original aspect · no margins"
+        case .application2MB: "Balanced · A4 · 24 pt margins"
+        case .photoOriginal: "Balanced · 10 MB · no margins"
+        }
+    }
+    private var profileDetail: String {
+        switch model.profile {
+        case .balanced: "Color, with more detail to start. Up to 2400 px."
+        case .smallFile: "Color, starting at 1600 px and lower JPEG quality. Check small text closely."
+        case .grayscale: "Converts output to gray tones. Source stays in original color for comparison."
+        }
+    }
+    private var actionToolbar: some View {
+        HStack(spacing: 10) {
+            Button(action: model.choose) { Label("Add images…", systemImage: "plus") }
+                .keyboardShortcut("o", modifiers: .command).disabled(model.busy)
+                .help("JPEG, PNG or HEIC · up to 20 pages. You can also drop files here.")
+            Spacer(minLength: 0)
+            Menu {
+                Button("Sort by filename") { model.batch(.sortByFilename) }
+                    .disabled(model.inputs.count < 2)
+                Button("Reverse order") { model.batch(.reverse) }
+                    .disabled(model.inputs.count < 2)
+            } label: { Label("Order", systemImage: "arrow.up.arrow.down") }
+                .menuStyle(.borderlessButton).fixedSize().disabled(model.busy || model.inputs.count < 2)
+                .accessibilityLabel("Page order actions")
+            Button { model.batch(.rotateAll) } label: { Label("Rotate all", systemImage: "rotate.right") }
+                .disabled(model.busy || model.inputs.isEmpty).help("Rotate every page 90° clockwise")
+            Button("Clear pages…", role: .destructive) { presentation.showClearConfirmation = true }
+                .disabled(model.busy || model.inputs.isEmpty)
+        }.controlSize(.regular)
+    }
     private var navigation: some View {
-        HStack {
+        HStack(spacing: 10) {
             Button { model.step(-1) } label: { Image(systemName: "chevron.left") }
                 .disabled((model.selection.selectedIndex ?? 0) == 0)
                 .keyboardShortcut("[", modifiers: .command).accessibilityLabel("Previous page")
-            Text("Page \((model.selection.selectedIndex ?? 0) + 1) of \(model.inputs.count)")
-                .monospacedDigit().font(.callout)
+            Text(model.inputs.isEmpty ? "No pages" : "Page \((model.selection.selectedIndex ?? 0) + 1) of \(model.inputs.count)")
+                .monospacedDigit().font(.callout.weight(.medium))
             Button { model.step(1) } label: { Image(systemName: "chevron.right") }
                 .disabled((model.selection.selectedIndex ?? 0) >= model.inputs.count - 1)
                 .keyboardShortcut("]", modifiers: .command).accessibilityLabel("Next page")
+            Text(model.selection.selected?.url.lastPathComponent ?? "")
+                .font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
             Spacer(minLength: 0)
         }
     }
-
     private func previewPane(_ title: String, data: Data?, placeholder: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title).font(.subheadline.weight(.semibold))
             if let data {
                 DocumentPreview(data: data, label: "\(title), page \((model.selection.selectedIndex ?? 0) + 1)")
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
             } else {
                 VStack(spacing: 10) {
                     if model.previewLoading || model.busy { ProgressView() }
+                    Image(systemName: title.hasPrefix("Source") ? "photo" : "doc.richtext").font(.title).foregroundStyle(accent.opacity(0.65))
                     Text(placeholder).font(.callout).multilineTextAlignment(.center).foregroundStyle(.secondary)
                 }.padding(12).frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(.quaternary.opacity(0.25), in: RoundedRectangle(cornerRadius: 8))
+                    .background(accent.opacity(0.04), in: RoundedRectangle(cornerRadius: 10))
+                    .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.primary.opacity(0.08)))
             }
         }.frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)
     }
-
     private var review: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("3  Compare & review").font(.headline)
-            if !model.inputs.isEmpty {
-                navigation
-                Text(model.selection.selected?.url.lastPathComponent ?? "")
-                    .font(.caption).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+            HStack(alignment: .firstTextBaseline) {
+                Text("Review workbench").font(.title2.weight(.semibold))
+                Spacer()
+                Text("\(model.inputs.count)/20 pages").font(.caption).monospacedDigit().foregroundStyle(.secondary)
             }
-            if let result = model.result {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(result.data.count < result.originalBytes ? "Reduced from \(size(result.originalBytes)) to \(size(result.data.count))" : "Prepared \(size(result.data.count)) from \(size(result.originalBytes)) of images")
-                        .font(.headline)
-                    Text("\(result.pageCount) pages · \(result.data.count.formatted()) bytes · within your limit")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-            }
-            HStack(alignment: .top, spacing: 12) {
-                previewPane("Source · downsampled", data: model.preview?.source,
-                            placeholder: model.inputs.isEmpty ? "Add images to begin" : model.previewLoading ? "Loading selected page…" : "Source preview unavailable")
-                previewPane("Exact output page", data: model.preview?.output,
-                            placeholder: model.busy ? "Preparing locally…" : model.result == nil ? "Prepare PDF to compare" : "Loading selected page…")
-            }.frame(maxHeight: .infinity)
+            actionToolbar
+            if model.inputs.isEmpty {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Start with your scans or photos").font(.headline)
+                    Text("Drop JPEG, PNG or HEIC files here. Choose a preset, then prepare and inspect every page.")
+                        .font(.callout).foregroundStyle(.secondary)
+                }.padding(14).frame(maxWidth: .infinity, alignment: .leading)
+                    .background(accent.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+            } else { pageList }
+            Divider()
+            navigation
+            HStack(alignment: .top, spacing: 14) {
+                previewPane("Source · original color", data: model.preview?.source,
+                    placeholder: model.inputs.isEmpty ? "Add images to begin" : model.previewLoading ? "Loading selected page…" : "Source preview unavailable")
+                previewPane("Exact output · \(model.result?.profile.title ?? model.profile.title)", data: model.preview?.output,
+                    placeholder: model.busy ? "Preparing locally…" : model.result == nil ? "Prepare PDF to compare" : "Loading selected page…")
+            }.frame(minHeight: 210, maxHeight: .infinity)
             if !model.previewError.isEmpty {
                 Text(model.previewError).font(.caption).foregroundStyle(.red).fixedSize(horizontal: false, vertical: true)
             }
-            Text("Source is downsampled to ≤ \(SourcePreview.longestEdge) px, not full resolution. Both panes follow the page selector; pinch to zoom and inspect small text.")
+            Text("Source is downsampled to ≤ \(SourcePreview.longestEdge) px, not full resolution. Both panes show the same page. Pinch to zoom.")
                 .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            exportFooter
+        }
+    }
+    private var exportFooter: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Divider()
             if let result = model.result {
-                Text("Output edge ≤ \(result.longestEdge) px. Compression can reduce detail. Website acceptance and readability are not guaranteed.")
-                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                Toggle("I checked every page for legibility", isOn: $model.reviewed)
-                    .toggleStyle(.checkbox).disabled(model.preview?.output == nil)
                 HStack {
+                    Label(size(result.data.count), systemImage: "checkmark.circle.fill")
+                        .font(.title3.weight(.semibold)).foregroundStyle(accent)
+                    Text("of \(size(model.byteLimit ?? 0)) limit").font(.callout).foregroundStyle(.secondary)
                     Spacer()
-                    Button("Save a copy…", action: model.save).disabled(!model.reviewed)
-                        .keyboardShortcut("s", modifiers: [.command, .shift])
-                        .help("Save the reviewed PDF to a new path. Existing files are never replaced.")
+                    Text("\(result.data.count.formatted()) bytes").font(.caption).monospacedDigit().foregroundStyle(.secondary)
                 }
+                Text("\(result.profile.title) · edge ≤ \(result.longestEdge) px · from \(size(result.originalBytes)) of images. Compression can reduce detail; acceptance is not guaranteed.")
+                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            }
+            if !model.message.isEmpty {
+                Text(model.message).font(.callout).textSelection(.enabled).fixedSize(horizontal: false, vertical: true)
+            }
+            HStack(spacing: 12) {
+                Toggle("I checked every page for legibility", isOn: $model.reviewed)
+                    .toggleStyle(.checkbox).disabled(model.preview?.output == nil || model.result == nil)
+                Spacer(minLength: 0)
+                Button("Save a copy…", action: model.save)
+                    .disabled(model.result == nil || !model.reviewed || model.busy)
+                    .keyboardShortcut("s", modifiers: [.command, .shift])
+                    .help("Save a separate PDF. Existing files are never replaced.")
             }
         }
     }
-
     var body: some View {
         HSplitView {
-            ScrollView { controls.padding(18) }
-                .frame(minWidth: 350, idealWidth: 380, maxWidth: 430)
-            review.padding(18).frame(minWidth: 400)
-        }
-        .frame(minWidth: 850, minHeight: 620)
-        .dropDestination(for: URL.self) { urls, _ in
-            guard !model.busy else { return false }; model.add(urls); return true
-        }
-        .onDisappear { model.shutdown() }
+            ScrollView { sidebar.padding(20) }
+                .frame(minWidth: 290, idealWidth: 310, maxWidth: 350)
+                .background(Color(nsColor: .controlBackgroundColor))
+            review.padding(20).frame(minWidth: 620)
+        }.frame(minWidth: 950, minHeight: 740)
+            .confirmationDialog("Clear all pages?", isPresented: $presentation.showClearConfirmation, titleVisibility: .visible) {
+                Button("Clear pages", role: .destructive) { model.batch(.clear) }
+                Button("Keep pages", role: .cancel) {}
+            } message: { Text("Removes this workspace and its prepared PDF. Original image files are not deleted.") }
+            .dropDestination(for: URL.self) { urls, _ in
+                guard !model.busy else { return false }; model.add(urls); return true
+            }
+            .onDisappear { model.shutdown() }
     }
 }
 
@@ -449,6 +337,6 @@ struct PrepareApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var delegate
     var body: some Scene {
         Window("Prepare", id: "workspace") { ContentView(model: delegate.workspace) }
-            .defaultSize(width: 1000, height: 700)
+            .defaultSize(width: 1120, height: 820)
     }
 }

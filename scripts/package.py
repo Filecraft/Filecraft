@@ -6,8 +6,10 @@ import os
 import plistlib
 import shutil
 import subprocess
+import json
+from release_budget import validate_sizes
 
-version = "0.3.0"
+version = "0.4.0"
 
 root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
@@ -26,7 +28,7 @@ macos.mkdir(parents=True, exist_ok=True)
 shutil.copy2(args.binary, macos / "Prepare")
 info = {"CFBundleExecutable": "Prepare", "CFBundleIdentifier": "org.prepareapp.prepare",
         "CFBundleName": "Prepare", "CFBundleDisplayName": "Prepare", "CFBundlePackageType": "APPL",
-        "CFBundleShortVersionString": version, "CFBundleVersion": "3",
+        "CFBundleShortVersionString": version, "CFBundleVersion": "4",
         "CFBundleIconFile": "AppIcon",
         "CFBundleDocumentTypes": [{"CFBundleTypeName": "Still images", "CFBundleTypeRole": "Viewer",
                                    "LSHandlerRank": "Alternate",
@@ -52,6 +54,12 @@ archive = root / "build" / f"Prepare-{version}-{architecture}.zip"
 if archive.exists():
     archive.unlink()
 subprocess.run(["ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", str(app), str(archive)], check=True)
+sizes = dict(binary=(macos / "Prepare").stat().st_size,
+             app=sum(p.stat().st_size for p in app.rglob("*") if p.is_file()),
+             archive=archive.stat().st_size)
+validate_sizes(**sizes)
+(root / "build" / "release-size.json").write_text(json.dumps(dict(version=version, **sizes), indent=2) + "\n")
+print(f"PASS: byte budgets {sizes}")
 digest = hashlib.sha256(archive.read_bytes()).hexdigest()
 archive.with_suffix(".zip.sha256").write_text(f"{digest}  {archive.name}\n")
 print(f"App: {app}\nArchive: {archive}\nSHA256: {digest}")

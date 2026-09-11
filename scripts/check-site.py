@@ -27,7 +27,8 @@ class Page(HTMLParser):
         if tag == "html":
             assert attrs.get("lang") == "en"
         if tag == "script":
-            raise AssertionError("Website must remain script-free")
+            assert attrs.get("src") == "site.js" and "defer" in attrs, "Only the local deferred guide script is allowed"
+            self.links.append(attrs["src"])
         if tag in {"img", "link"}:
             target = attrs.get("src") if tag == "img" else attrs.get("href")
             if target:
@@ -64,6 +65,11 @@ def check():
     assert f"/v{version}/Prepare-{version}-arm64.zip" in text
     assert "not notarized" in text and "not an OSI-approved" in text
     assert (SITE / ".nojekyll").is_file()
+    script = (SITE / "site.js").read_text()
+    assert len(script.encode()) < 5_000, "Interaction script exceeds 5 KB"
+    assert not re.search(r"fetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon|localStorage|document\.cookie", script)
+    assert sum((SITE / name).stat().st_size for name in ["index.html", "style.css", "site.js"]) < 50_000
+    assert "data-preset=\"portal\"" in text and "aria-live=\"polite\"" in text
     print(f"PASS: website assets, {len(page.links)} links, anchors, accessibility basics, offline policy and v{version} download path")
 
 

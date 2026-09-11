@@ -19,13 +19,15 @@ PDFKit review + downsampled source comparison → explicit review → new file
   Validation, page ordering, layout/rotation and bounded encoding. No UI.
 - `Prepare`: SwiftUI/AppKit workspace, file panels and PDFKit preview. Image
   preparation runs off the main actor. UI edits invalidate reviewed output.
+- `PrepareWorkspace`: testable main-actor state, preset application, busy guards,
+  invalidation and bounded asynchronous preview requests.
 - `PrepareChecks`: generated fixtures, rendered-pixel assertions, PDF round
   trips, input rejection, metadata checks, cancellation and overwrite guards.
 
 ## Size fitting
 
 MB means 1,000,000 bytes. UI accepts 0.01–100 MB. Core accepts positive byte
-limits up to 100,000,000. Five candidates are tried in descending quality:
+limits up to 100,000,000. Balanced and Grayscale try five candidates in descending quality:
 
 | Maximum image edge | JPEG quality |
 | ---: | ---: |
@@ -34,6 +36,11 @@ limits up to 100,000,000. Five candidates are tried in descending quality:
 | 1600 px | 0.65 |
 | 1200 px | 0.55 |
 | 960 px | 0.45 |
+
+Small File uses only the last three rows, starting at 1600 px / 0.65.
+Grayscale uses a DeviceGray canvas and embeds grayscale JPEG images; the
+review source remains in original color. A Small File or Grayscale choice
+is not a promise that every input becomes smaller than another profile.
 
 The first complete PDF no larger than the target is returned. Otherwise the
 engine reports that it cannot fit within its floor. This is a bounded search,

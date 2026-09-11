@@ -9,6 +9,7 @@ public struct PreparationProgress: Sendable {
     public let totalPages: Int
 }
 public struct Prepared: Sendable {
+    public let profile: CompressionProfile
     public let originalBytes: Int
 
     public let data: Data
@@ -32,10 +33,10 @@ public enum Preparation {
         try result.data.write(to: url, options: .withoutOverwriting)
     }
     // Bounded attempts and input limits, not a promise of visual fidelity.
-    public static func run(inputs: [URL], maxBytes: Int, progress: @Sendable (PreparationProgress) -> Void = { _ in }) throws -> Prepared {
-        try run(pages: inputs.map { PreparationPage(url: $0) }, maxBytes: maxBytes, progress: progress)
+    public static func run(inputs: [URL], profile: CompressionProfile = .balanced, maxBytes: Int, progress: @Sendable (PreparationProgress) -> Void = { _ in }) throws -> Prepared {
+        try run(pages: inputs.map { PreparationPage(url: $0) }, profile: profile, maxBytes: maxBytes, progress: progress)
     }
-    public static func run(pages: [PreparationPage], settings: PageSettings = PageSettings(), maxBytes: Int, progress: @Sendable (PreparationProgress) -> Void = { _ in }) throws -> Prepared {
+    public static func run(pages: [PreparationPage], settings: PageSettings = PageSettings(), profile: CompressionProfile = .balanced, maxBytes: Int, progress: @Sendable (PreparationProgress) -> Void = { _ in }) throws -> Prepared {
         try settings.validate()
         let inputs = pages.map(\.url)
         guard !inputs.isEmpty, inputs.count <= 20, (1...100_000_000).contains(maxBytes) else {
@@ -46,19 +47,19 @@ public enum Preparation {
             let (_, size) = try ImageInput.validatedSource(url)
             originalBytes += size
         }
-        let attempts: [(Int, Double)] = [(2400,0.85), (2000,0.75), (1600,0.65), (1200,0.55), (960,0.45)]
+        let attempts = profile.attempts
         for (index, attempt) in attempts.enumerated() {
             let (edge, quality) = attempt
             try Task.checkCancellation()
-            let data = try autoreleasepool { try render(pages: pages, settings: settings, edge: edge, quality: quality, pass: index + 1, progress: progress) }
+            let data = try autoreleasepool { try render(pages: pages, settings: settings, profile: profile, edge: edge, quality: quality, pass: index + 1, progress: progress) }
             try Task.checkCancellation()
             if data.count <= maxBytes {
-                return Prepared(originalBytes: originalBytes, data: data, pageCount: inputs.count, longestEdge: edge, quality: quality)
+                return Prepared(profile: profile, originalBytes: originalBytes, data: data, pageCount: inputs.count, longestEdge: edge, quality: quality)
             }
         }
         throw PrepareError.cannotFit
     }
-    private static func render(pages: [PreparationPage], settings: PageSettings, edge: Int, quality: Double, pass: Int, progress: @Sendable (PreparationProgress) -> Void) throws -> Data {
+    private static func render(pages: [PreparationPage], settings: PageSettings, profile: CompressionProfile, edge: Int, quality: Double, pass: Int, progress: @Sendable (PreparationProgress) -> Void) throws -> Data {
         let output = NSMutableData()
         guard let consumer = CGDataConsumer(data: output as CFMutableData),
               let pdf = CGContext(consumer: consumer, mediaBox: nil, nil) else {
@@ -72,9 +73,12 @@ public enum Preparation {
             try autoreleasepool {
                 let image = try ImageInput.thumbnail(url, edge: edge)
                 // Flatten transparency over white and omit source metadata.
+                // A single-component gray buffer produces a genuinely grayscale JPEG,
+                // not an RGB image merely decorated with a display-only filter.
+                let gray = profile == .grayscale
                 guard let canvas = CGContext(data: nil, width: image.width, height: image.height,
-                     bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(),
-                     bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else {
+                     bitsPerComponent: 8, bytesPerRow: 0, space: gray ? CGColorSpaceCreateDeviceGray() : CGColorSpaceCreateDeviceRGB(),
+                     bitmapInfo: gray ? CGImageAlphaInfo.none.rawValue : CGImageAlphaInfo.noneSkipLast.rawValue) else {
                     throw PrepareError.invalidInput("Could not allocate an image buffer.")
                 }
                 let imageRect = CGRect(x: 0, y: 0, width: image.width, height: image.height)

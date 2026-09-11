@@ -3,6 +3,27 @@
 All notable changes are recorded here. Prepare uses semantic versions while
 remaining pre-1.0: file-format and API compatibility are not yet guaranteed.
 
+## 0.4.0 — 2026-09-11
+
+### Added
+
+- Balanced, Small File and true Grayscale compression profiles.
+- Portal 500 KB, Application 2 MB/A4 and Photo 10 MB presets.
+- Natural filename sort, reverse order, rotate all and confirmed clear.
+- Resizable native settings sidebar and dedicated review workbench.
+- Tested Workspace module separating UI from workflow coordination.
+- Rendered grayscale/DeviceGray, profile floor, preset and batch regressions.
+- Dependency-free editorial-green website with interactive preset guide,
+  reduced-motion support and real v0.4 app imagery.
+- Enforced size budgets: binary <2 MB, app files <3 MB, release ZIP <1.5 MB.
+
+### Distribution
+
+Apple Silicon ZIP: 667,989 bytes; app files: 1,532,774 bytes. System frameworks
+and Swift/Xcode toolchain are not included. Retains macOS 14 minimum,
+local-only processing and Hippocratic License 3.0 core. Ad-hoc signed,
+not notarized. Existing canonical Pages URL retained after handle research.
+
 ## 0.3.0 — 2026-09-11
 
 First public release; Hippocratic License 3.0 core.

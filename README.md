@@ -29,6 +29,12 @@ Just native SwiftUI, ImageIO, CoreGraphics and PDFKit, with no package dependenc
 
 - **A real byte budget.** Set 0.01–100 decimal MB. The finished PDF, not a size
   estimate, must fit before Prepare offers it for export.
+- **Useful starting points.** Portal 500 KB, Application 2 MB with A4/24 pt
+  margins, and Photo 10 MB. All remain editable.
+- **Three compression profiles.** Balanced, Small File and true Grayscale.
+  Source comparison retains original color.
+- **Batch controls.** Natural filename sort, reverse order, rotate all and
+  confirmed clear, without losing the selected page.
 - **Pages in your order.** Drag to reorder or use move buttons. Rotate each
   page in 90° steps after the image's EXIF orientation is applied.
 - **Paper that suits the handoff.** Image-aspect, A4 and US Letter layouts,
@@ -39,14 +45,14 @@ Just native SwiftUI, ImageIO, CoreGraphics and PDFKit, with no package dependenc
   files are rejected, including the source images.
 - **Metadata stays behind.** Source metadata dictionaries, including EXIF/GPS,
   are not copied. Transparency is flattened onto white.
-- **Bounded work.** Serial image buffers, bounded decode sizes, five encoding
+- **Bounded work.** Serial image buffers, bounded decode sizes, at most five encoding
   attempts, progress reporting and cooperative cancellation.
 
 This is intentionally a focused image-to-PDF utility, not a general PDF editor.
 
 ## Download and install
 
-[Download Prepare 0.3.0 for Apple Silicon](https://github.com/gonisulaimann/Prepare/releases/download/v0.3.0/Prepare-0.3.0-arm64.zip)
+[Download Prepare 0.4.0 for Apple Silicon](https://github.com/gonisulaimann/Prepare/releases/download/v0.4.0/Prepare-0.4.0-arm64.zip)
 
 Requires macOS 14 or later. Expand the ZIP and drag `Prepare.app` to Applications.
 Intel and universal release binaries are not provided or release-tested.
@@ -60,7 +66,7 @@ Intel and universal release binaries are not provided or release-tested.
 Verify a download in the directory containing both release assets:
 
 ```sh
-shasum -a 256 -c Prepare-0.3.0-arm64.zip.sha256
+shasum -a 256 -c Prepare-0.4.0-arm64.zip.sha256
 ```
 
 The checksum detects accidental corruption; it is not an independent publisher
@@ -69,10 +75,11 @@ needed for a local ad-hoc build.
 
 Downloading and using Prepare is subject to the [Hippocratic License 3.0 core](LICENSE).
 
-## The workflow
+## How to use
 
 1. Add or drop JPEG, PNG or HEIC still images, or use Finder **Open With → Prepare**.
-2. Arrange pages, set rotations, pick paper and margins.
+2. Pick a workflow preset or customize the compression profile, byte limit,
+   paper and margins. Arrange pages individually or use batch actions.
 3. Enter your maximum PDF size and choose **Prepare PDF**.
 4. Inspect each output page, using comparison mode when useful. Changing any
    layout, order or compression setting invalidates the previous result.
@@ -103,13 +110,20 @@ The app has no networking code. Files selected from a syncing folder can still
 sync through that provider. Prepare is not an anonymizer, redaction tool or
 secure-erasure utility. Read the complete [security and privacy policy](SECURITY.md).
 
+The v0.4.0 Apple Silicon ZIP is **668 KB** (667,989 bytes); the installed app
+files total **1.53 MB**. System frameworks and the Swift toolchain are excluded.
+See [v0.4 verification](docs/VERIFICATION-0.4.md) and
+[domain findings](docs/DOMAIN.md).
+
 ## Build from source
 
 Requires macOS 14+ and Swift 6 (Xcode command-line tools). No third-party Swift
-packages, cloud credentials or web build tools are needed.
+packages, cloud credentials or web build tools are needed for the app. Apple’s
+Swift toolchain is a separate, much larger download if it is not installed.
+Use the shallow clone below to avoid downloading release history.
 
 ```sh
-git clone https://github.com/gonisulaimann/Prepare.git
+git clone --depth 1 https://github.com/gonisulaimann/Prepare.git
 cd Prepare
 swift run Prepare
 ```
@@ -121,18 +135,20 @@ bash scripts/package.sh
 open build/Prepare.app
 ```
 
-Outputs: `build/Prepare.app`, `build/Prepare-0.3.0-arm64.zip` and its `.sha256`
+Outputs: `build/Prepare.app`, `build/Prepare-0.4.0-arm64.zip` and its `.sha256`
 (on an Apple Silicon build host). The package includes the full license,
 notice and original app icon. Packaging uses an ad-hoc signature by default.
 
 ## Test
 
 ```sh
-swift run PrepareChecks
-swift run -c release PrepareChecks
+swift run PrepareChecks --ui-contract
+swift run -c release PrepareChecks --ui-contract
 swift build -c release -Xswiftc -warnings-as-errors
 swift run -c release PrepareChecks --stress
 python3 scripts/check-site.py
+node scripts/test-site.cjs
+python3 scripts/test_release_budget.py
 ```
 
 `PrepareChecks` is an executable integration harness, not an XCTest target.
@@ -148,7 +164,8 @@ universal performance promises here.
 
 ```text
 Sources/Prepare/        SwiftUI workspace and PDFKit review
-Sources/PrepareCore/    Validation, ordering, layout and bounded PDF encoding
+Sources/PrepareCore/    Validation, ordering, presets, profiles and bounded PDF encoding
+Sources/PrepareWorkspace/ Testable main-actor state and bounded preview coordination
 Sources/PrepareChecks/ Synthetic integration and regression checks
 scripts/               App packaging, icon generation and website checks
 docs/                  Dependency-free GitHub Pages website and technical docs
