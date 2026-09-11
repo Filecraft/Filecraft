@@ -16,7 +16,7 @@ licenses. See [LICENSING.md](LICENSING.md), root LICENSE and NOTICE.
   source notice; Apache-2.0 plus Microsoft attribution for tslib. Preserve
   `pdf/vendor/LICENSE*` and provenance with the generated worker and source ZIP.
   No runtime CDN fetch. Supplementary notice versions do not prove every
-  embedded dependency version; see [vendor notes](../pdf/vendor/README.md).
+  embedded dependency version; see [vendor notes](https://github.com/Filecraft/Filecraft/blob/main/pdf/vendor/README.md).
 - Python desktop: direct pins in `desktop/requirements.txt`; actual collected
   distributions/versions in each package's `licenses/DEPENDENCIES.json`.
 

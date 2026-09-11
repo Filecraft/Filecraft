@@ -16,7 +16,7 @@ def targets(extension):
 
 def convert(source,output,target,options):
     engine=executable()
-    if not engine:raise ValueError('Install local FFmpeg for media conversion; Prepare never downloads it automatically.')
+    if not engine:raise ValueError('Install local FFmpeg for media conversion; Filecraft never downloads it automatically.')
     ext=Path(source).suffix.lower()
     if target not in targets(ext):raise ValueError('Unsupported media conversion.')
     codecs={'wav':['-vn','-c:a','pcm_s16le'],'flac':['-vn','-c:a','flac'],'mp3':['-vn','-c:a','libmp3lame','-b:a','160k'],'ogg':['-vn','-c:a','libvorbis','-q:a','4'],'mp4':['-c:v','libx264','-preset','fast','-crf','24','-c:a','aac','-movflags','+faststart'],'webm':['-c:v','libvpx-vp9','-deadline','realtime','-cpu-used','6','-c:a','libopus']}

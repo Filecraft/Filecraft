@@ -12,7 +12,7 @@ WORKFLOW
 2. Arrange the numbered source pages using Up/Down, Rotate, Duplicate,
    Remove and Reverse. Undo/Redo retain up to 32 page changes.
 3. Set a byte ceiling and page limit, or import a version-1 JSON profile
-   compatible with Prepare's shared readiness engine.
+   compatible with Filecraft’s shared readiness engine.
 4. Create PDF copy. The output is parsed again and page geometry checked.
 5. Read the checks. UNKNOWN is not PASS. Acknowledge the review requirement,
    save under a NEW name, then open the saved PDF in a trusted PDF reader
@@ -56,7 +56,7 @@ non-synced files and a trusted browser. Original inputs are never written.
 The browser controls downloads and overwrite prompts: choose a new name.
 
 LICENSE / DEPENDENCIES
-Current original Prepare code: Apache-2.0. See LICENSE and NOTICE.
+Current original Filecraft code: Apache-2.0. See LICENSE and NOTICE.
 Historical releases through 0.8 retain their original Hippocratic terms.
 Bundled pdf-lib: separately MIT licensed. See THIRD-PARTY.txt and
 vendor/LICENSE and the other vendor/LICENSE.* files. No dependency download happens at runtime.

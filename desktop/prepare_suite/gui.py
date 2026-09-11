@@ -30,7 +30,7 @@ class App:
         self.page=tk.StringVar(value='1');self.annotation=tk.StringVar();self.fields=tk.StringVar(value='{}')
         self.status=tk.StringVar(value='Choose a local file. Originals are never overwritten.')
         outer=ttk.Frame(root,padding=20);outer.pack(fill='both',expand=True)
-        ttk.Label(outer,text='Prepare',font=('TkDefaultFont',26,'bold')).pack(anchor='w')
+        ttk.Label(outer,text='Filecraft',font=('TkDefaultFont',26,'bold')).pack(anchor='w')
         ttk.Label(outer,text=f'Desktop {__version__}  ·  Local processing  ·  No accounts or uploads').pack(anchor='w',pady=(0,14))
         bar=ttk.Frame(outer);bar.pack(fill='x')
         self.open_button=ttk.Button(bar,text='Choose file…',command=self.choose);self.open_button.pack(side='left')

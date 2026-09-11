@@ -20,4 +20,4 @@ The maintainer supplied this dashboard transcription. Values are preserved exact
 
 These figures contain inconsistencies: the supplied input token count alone exceeds the supplied total token count. The meaning of “Model metrics 1M,” reporting interval, currency and billing adjustments were not independently established. This is a static, maintainer-supplied disclosure—not live telemetry, a verified invoice, or a cost/performance guarantee. No visitor analytics are collected to update it.
 
-AI-generated changes still require human accountability, source/license review, regression tests and independent verification. See [AI contribution guidelines](../AGENTS.md).
+AI-generated changes still require human accountability, source/license review, regression tests and independent verification. See [AI contribution guidelines](https://github.com/Filecraft/Filecraft/blob/main/AGENTS.md).

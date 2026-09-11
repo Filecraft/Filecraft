@@ -20,7 +20,7 @@ remote code, telemetry, native messaging, accounts or uploads.
 
 Toolbar action opens workspace/index.html. Files stay in that tab's memory;
 closing it discards the session. Save copies before closing. Browser download
-location/overwrite prompts and browser/OS sync are outside Prepare's control.
+location/overwrite prompts and browser/OS sync are outside Filecraft’s control.
 Use local non-synced folders for sensitive work. No automatic updates outside
 normal browser store/update behavior when a signed store version exists.
 

@@ -12,8 +12,8 @@ network permission. The unsigned APK is developer material, not a consumer app.
 Geometry and byte-budget concepts are shared, not an identical binary engine.
 Platform codecs, page defaults, cancellation latency and previews differ. Each
 platform has separate rendered-output, input-bound and packaging tests; do not
-infer parity from a roadmap item. See [Android scope](../android/README.md),
-[Portable scope](../portable/README.txt) and [v0.5 evidence](VERIFICATION-0.5.md).
+infer parity from a roadmap item. See [Android scope](https://github.com/Filecraft/Filecraft/tree/v0.9.0-beta.1/android),
+[Portable scope](https://github.com/Filecraft/Filecraft/blob/main/portable/README.txt) and [v0.5 evidence](VERIFICATION-0.5.md).
 
 ## Earlier native architecture notes
 
@@ -82,4 +82,4 @@ user rotation. Standard PDF metadata can remain.
 7. Source comparison is downsampled, not a pixel-identical quality oracle.
 8. No user data leaves the application through application network code.
 
-See [SECURITY.md](../SECURITY.md) for assumptions and limitations.
+See [SECURITY.md](https://github.com/Filecraft/Filecraft/blob/main/SECURITY.md) for assumptions and limitations.

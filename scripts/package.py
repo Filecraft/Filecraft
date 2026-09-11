@@ -50,7 +50,7 @@ if identity != "-":
 subprocess.run(command + [str(app)], check=True)
 subprocess.run(["codesign", "--verify", "--strict", str(app)], check=True)
 architecture = subprocess.check_output(["lipo", "-archs", str(macos / "Prepare")], text=True).strip().replace(" ", "-")
-archive = root / "build" / f"Filecraft-{version}-{architecture}.zip"
+archive = root / "build" / f"Prepare-{version}-{architecture}.zip"
 if archive.exists():
     archive.unlink()
 subprocess.run(["ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", str(app), str(archive)], check=True)

@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 def main(argv=None):
-    parser=argparse.ArgumentParser(prog='prepare',description='Prepare a local copy; verify bytes, not acceptance.')
+    parser=argparse.ArgumentParser(prog='filecraft',description='Prepare a local copy; verify bytes, not acceptance.')
     sub=parser.add_subparsers(dest='action',required=True)
     prep=sub.add_parser('prepare');prep.add_argument('source');prep.add_argument('--output',required=True);prep.add_argument('--target',required=True)
     prep.add_argument('--profile');prep.add_argument('--max-bytes',type=int);prep.add_argument('--max-pages',type=int)

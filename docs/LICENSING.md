@@ -6,7 +6,7 @@ Beginning with the **0.9 development line**, owner-controlled original Prepare
 source is offered under the Apache License, Version 2.0. The first intended
 release carrying this change is **0.9.0-beta.1**; this document does not claim
 that release has already been published. The complete legal terms are in
-[LICENSE](../LICENSE); attribution is in [NOTICE](../NOTICE).
+[LICENSE](https://github.com/Filecraft/Filecraft/blob/main/LICENSE); attribution is in [NOTICE](https://github.com/Filecraft/Filecraft/blob/main/NOTICE).
 
 This is a prospective source-tree change authorized by the project owner, not
 an assertion that the maintainer owns every byte. Third-party components,
@@ -31,7 +31,7 @@ the unpublished MIT prototype describe their time, not current policy.
 
 ## Third-party exceptions and redistribution
 
-- PDF components: [third-party notes](../pdf/THIRD-PARTY.md), original
+- PDF components: [third-party notes](https://github.com/Filecraft/Filecraft/blob/main/pdf/THIRD-PARTY.md), original
   `pdf/vendor/LICENSE*` files and hash/source records in `PROVENANCE.json`.
   The supplementary pako/zlib source header is retained separately; UMD bytes
   are unchanged. Include those files with mixed/generated browser bundles.

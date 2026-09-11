@@ -59,7 +59,7 @@ are rejected. It does NOT claim every extension can become every other format.
   the filename, page and input SHA-256 and clear after export.
 
 OCR requires separately installed Tesseract and its language data. Media requires
-separately installed FFmpeg. Prepare detects but never installs or downloads them.
+separately installed FFmpeg. Filecraft detects but never installs or downloads them.
 These are real local engines, not cloud fallbacks. All other listed conversions
 are bundled. Additional engines retain their own licenses.
 
