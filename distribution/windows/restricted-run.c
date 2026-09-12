@@ -3,6 +3,7 @@
 #define _UNICODE
 #include <windows.h>
 #include <sddl.h>
+#include <aclapi.h>
 #include <stdio.h>
 #include <wchar.h>
 static int fail(const wchar_t *where){fwprintf(stderr,L"%ls failed: %lu\n",where,GetLastError());return 1;}
@@ -22,6 +23,16 @@ int wmain(int argc,wchar_t **argv){
  DWORD length=0;GetTokenInformation(restricted,TokenUser,NULL,0,&length);
  TOKEN_USER *user=(TOKEN_USER*)LocalAlloc(LPTR,length);wchar_t *sid=NULL;
  if(!user||!GetTokenInformation(restricted,TokenUser,user,length,&length)||!ConvertSidToStringSidW(user->User.Sid,&sid))return fail(L"Token user");
+ DWORD aclLength=0;GetTokenInformation(restricted,TokenDefaultDacl,NULL,0,&aclLength);
+ TOKEN_DEFAULT_DACL *defaults=(TOKEN_DEFAULT_DACL*)LocalAlloc(LPTR,aclLength);
+ if(!defaults||!GetTokenInformation(restricted,TokenDefaultDacl,defaults,aclLength,&aclLength))return fail(L"Read default DACL");
+ EXPLICIT_ACCESSW access={0};access.grfAccessPermissions=GENERIC_ALL;access.grfAccessMode=GRANT_ACCESS;access.grfInheritance=NO_INHERITANCE;
+ access.Trustee.TrusteeForm=TRUSTEE_IS_SID;access.Trustee.TrusteeType=TRUSTEE_IS_USER;access.Trustee.ptstrName=(LPWSTR)user->User.Sid;
+ PACL updated=NULL;DWORD aclError=SetEntriesInAclW(1,&access,defaults->DefaultDacl,&updated);
+ if(aclError!=ERROR_SUCCESS){SetLastError(aclError);return fail(L"Merge default DACL");}
+ TOKEN_DEFAULT_DACL next={updated};
+ if(!SetTokenInformation(restricted,TokenDefaultDacl,&next,sizeof(next)))return fail(L"Write default DACL");
+ LocalFree(updated);LocalFree(defaults);
  wchar_t sddl[512];swprintf_s(sddl,512,L"D:(A;;GA;;;%ls)S:(ML;;NW;;;ME)",sid);
  PSECURITY_DESCRIPTOR descriptor=NULL;
  if(!ConvertStringSecurityDescriptorToSecurityDescriptorW(sddl,SDDL_REVISION_1,&descriptor,NULL))return fail(L"Child security descriptor");

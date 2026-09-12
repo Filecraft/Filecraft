@@ -28,7 +28,11 @@ function Run-Python([string[]]$Arguments) {
     $info.RedirectStandardOutput=$true
     $info.RedirectStandardError=$true
     foreach ($arg in $Arguments) { $info.ArgumentList.Add($arg) }
-    $process=[Diagnostics.Process]::Start($info)
+    try { $process=[Diagnostics.Process]::Start($info) } catch {
+        Write-Output ("Python start exception " + $_.Exception.ToString())
+        Write-Output ("Python start stack " + $_.ScriptStackTrace)
+        throw
+    }
     $stdout=$process.StandardOutput.ReadToEndAsync()
     $stderr=$process.StandardError.ReadToEndAsync()
     if (-not $process.WaitForExit(300000)) { $process.Kill($true);throw 'Python qualification timeout' }
