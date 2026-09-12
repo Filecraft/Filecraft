@@ -13,7 +13,16 @@ $test=(Join-Path $PSScriptRoot 'test-install.ps1').Replace("'","''")
 $inst=$Installer.Replace("'","''")
 $res=$result.Replace("'","''")
 $log=(Join-Path $evidence 'native.log').Replace("'","''")
-$python=(Get-Command python).Source.Replace("'","''")
+# Hosted toolcache ACLs can exclude the stripped token. Copy only the QA
+# interpreter into a test-owned directory; do not change system tool ACLs.
+$qaPython=Join-Path $repo 'build\qa-python'
+Copy-Item -Recurse (Split-Path (Get-Command python).Source) $qaPython
+$user=[Security.Principal.WindowsIdentity]::GetCurrent().Name
+& icacls $qaPython /grant "${user}:(OI)(CI)F" /T /Q | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'QA interpreter ACL failed' }
+& icacls $qaPython /setintegritylevel '(OI)(CI)M' /T /Q | Out-Null
+if ($LASTEXITCODE -ne 0) { throw 'QA interpreter integrity failed' }
+$python=(Join-Path $qaPython 'python.exe').Replace("'","''")
 @"
 `$ErrorActionPreference='Stop'
 try {

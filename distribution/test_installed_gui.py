@@ -58,6 +58,13 @@ def main():
             import pygetwindow as gw
             return any(w.visible for w in gw.getWindowsWithTitle(title))
         return subprocess.run(['xdotool','search','--onlyvisible','--name',title],capture_output=True).returncode==0
+    def clear_filename():
+        ui.hotkey('alt','n')
+        if sys.platform=='win32':ui.hotkey('ctrl','a')
+        else:
+            # Tk/X11 Ctrl+A means beginning-of-line, NOT select-all.
+            ui.press('home');ui.keyDown('shift');ui.press('end');ui.keyUp('shift')
+        ui.press('backspace')
     def dialog(title):
         wait(lambda:dialog_visible(title),title)
         time.sleep(1) # Mapped dialog precedes native focus initialization.
@@ -71,12 +78,12 @@ def main():
                 print('GUI coordinates',dict(origin=origin,choose=choose,save=save),flush=True)
                 ui.click(origin[0]+choose[0],origin[1]+choose[1])
                 dialog('Choose a local file')
-                ui.hotkey('alt','n');ui.hotkey('ctrl','a');ui.write(str(source),interval=.01);ui.press('enter')
+                clear_filename();ui.write(str(source),interval=.01);ui.press('enter')
                 wait(lambda:not dialog_visible('Choose a local file'),'file picker accepted')
                 time.sleep(1)
                 ui.screenshot().save(a.evidence/'import.png')
                 ui.click(origin[0]+save[0],origin[1]+save[1]);dialog('Save a new copy')
-                ui.hotkey('alt','n');ui.hotkey('ctrl','a');ui.write(str(destination),interval=.05);ui.screenshot().save(a.evidence/'filled-save.png');ui.press('enter')
+                clear_filename();ui.write(str(destination),interval=.05);ui.screenshot().save(a.evidence/'filled-save.png');ui.press('enter')
                 wait(destination.exists,'GUI export',60)
                 with Image.open(destination) as image:assert image.size==(80,60);image.verify()
                 with Image.open(destination) as exported,Image.open(source) as original:
