@@ -77,6 +77,25 @@ project does not attempt to bypass these controls. An Intel artifact must be
 qualified on Intel hardware or, if it is only exercised under Rosetta, that
 must be stated in the evidence.
 
+## macOS GUI harness
+
+`distribution/macos/test-installed-gui.py` is the missing macOS counterpart to
+`distribution/test_installed_gui.py`. It mounts the DMG under test, backs up and
+replaces the installed application, verifies signature integrity, bundle id and
+`lipo` architecture, checks the frozen runtime, launches the installed bundle,
+derives this version's button positions from its own layout, drives the file
+picker and save panel with events addressed to that process only, checks the
+exported pixels, an untouched original, a clean quit and a relaunch, and writes
+`result.json` beside the run.
+
+Status of that harness: the mount, install, signature, architecture, frozen
+runtime, launch, window-detection and calibration stages were executed
+successfully against the arm64 candidate DMG
+(`result.json` recorded `post_event_access: false`). The synthetic-input stage
+has **not** been executed yet on any host, because this environment has no
+event-posting grant. Its evidence must be recorded before any Mac artifact is
+published, and until then `gui_export_tested` stays false.
+
 ## Must not be claimed
 
 The candidate is unsigned and not notarized (macOS ad-hoc only); Gatekeeper is
