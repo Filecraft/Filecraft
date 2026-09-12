@@ -17,7 +17,9 @@ $python=(Get-Command python).Source.Replace("'","''")
 @"
 `$ErrorActionPreference='Stop'
 try {
-    & '$test' -Installer '$inst' -Python '$python' -AllowDisposableRunner *> '$log'
+    Start-Transcript -Path '$log' -Force | Out-Null
+    & '$test' -Installer '$inst' -Python '$python' -AllowDisposableRunner
+    Stop-Transcript | Out-Null
     Set-Content '$res' '0'
 } catch {
     `$_ | Out-String | Add-Content '$log'

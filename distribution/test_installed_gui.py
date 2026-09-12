@@ -49,8 +49,9 @@ def main():
             r=subprocess.run(['xdotool','search','--onlyvisible','--name','^Filecraft \\| local document suite$'],capture_output=True,text=True)
             if r.returncode==0:
                 win=r.stdout.splitlines()[0];subprocess.run(['xdotool','windowfocus',win],check=True)
-                values=dict(line.split('=',1) for line in subprocess.check_output(['xdotool','getwindowgeometry','--shell',win],text=True).splitlines() if '=' in line)
-                return int(values['X']),int(values['Y'])
+                import re
+                info=subprocess.check_output(['xwininfo','-id',win],text=True)
+                return tuple(int(re.search(r'Absolute upper-left '+axis+r':\s*(-?\d+)',info).group(1)) for axis in ('X','Y'))
         return None
     def dialog_visible(title):
         if sys.platform=='win32':
