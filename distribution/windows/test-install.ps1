@@ -24,6 +24,7 @@ function Run-Python([string[]]$Arguments) {
     $info = [Diagnostics.ProcessStartInfo]::new()
     $info.FileName=$Python
     $info.UseShellExecute=$false
+    $info.CreateNoWindow=$true
     $info.RedirectStandardOutput=$true
     $info.RedirectStandardError=$true
     foreach ($arg in $Arguments) { $info.ArgumentList.Add($arg) }
