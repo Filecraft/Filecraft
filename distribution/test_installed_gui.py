@@ -52,16 +52,28 @@ def main():
                 values=dict(line.split('=',1) for line in subprocess.check_output(['xdotool','getwindowgeometry','--shell',win],text=True).splitlines() if '=' in line)
                 return int(values['X']),int(values['Y'])
         return None
+    def dialog_visible(title):
+        if sys.platform=='win32':
+            import pygetwindow as gw
+            return any(w.visible for w in gw.getWindowsWithTitle(title))
+        return subprocess.run(['xdotool','search','--onlyvisible','--name',title],capture_output=True).returncode==0
+    def dialog(title):
+        wait(lambda:dialog_visible(title),title)
+        ui.screenshot().save(a.evidence/(title.replace(' ','-')+'.png'))
     processes=[]
     try:
         for launch in range(2):
             proc=subprocess.Popen([a.executable]);processes.append(proc)
             origin=wait(locate,'installed window');ui.screenshot().save(a.evidence/f'launch-{launch}.png')
             if launch==0:
-                ui.click(origin[0]+choose[0],origin[1]+choose[1]);time.sleep(1)
-                ui.hotkey('alt','n');ui.write(str(source),interval=.01);ui.press('enter');time.sleep(1)
+                print('GUI coordinates',dict(origin=origin,choose=choose,save=save),flush=True)
+                ui.click(origin[0]+choose[0],origin[1]+choose[1])
+                dialog('Choose a local file')
+                ui.hotkey('alt','n');ui.hotkey('ctrl','a');ui.write(str(source),interval=.01);ui.press('enter')
+                wait(lambda:not dialog_visible('Choose a local file'),'file picker accepted')
+                time.sleep(1)
                 ui.screenshot().save(a.evidence/'import.png')
-                ui.click(origin[0]+save[0],origin[1]+save[1]);time.sleep(1)
+                ui.click(origin[0]+save[0],origin[1]+save[1]);dialog('Save a new copy')
                 ui.hotkey('alt','n');ui.hotkey('ctrl','a');ui.write(str(destination),interval=.01);ui.press('enter')
                 wait(destination.exists,'GUI export',60)
                 with Image.open(destination) as image:assert image.size==(80,60);image.verify()
@@ -74,6 +86,7 @@ def main():
         (a.evidence/'result.json').write_text(json.dumps(dict(passed=True,executable=a.executable,imported=str(source),exported=str(destination),original_unchanged=True,quit_relaunch=True),indent=2))
         print('PASS installed GUI open/import/export/quit/relaunch; original preserved')
     finally:
+        ui.screenshot().save(a.evidence/'final-state.png')
         for proc in processes:
             if proc.poll() is None:proc.terminate()
 if __name__=='__main__':main()

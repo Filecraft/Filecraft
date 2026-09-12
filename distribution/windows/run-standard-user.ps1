@@ -25,20 +25,8 @@ try {
     exit 1
 }
 "@ | Set-Content -Encoding utf8 $script
-$name='Filecraft-StandardUser-'+[guid]::NewGuid().ToString('N')
-$action=New-ScheduledTaskAction -Execute (Get-Command pwsh).Source -Argument "-NoProfile -ExecutionPolicy RemoteSigned -File `"$script`"" -WorkingDirectory $repo
-$principal=New-ScheduledTaskPrincipal -UserId ([Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive -RunLevel Limited
-try {
-    Register-ScheduledTask -TaskName $name -Action $action -Principal $principal | Out-Null
-    Start-ScheduledTask -TaskName $name
-    $deadline=(Get-Date).AddMinutes(10)
-    while (-not (Test-Path $result)) {
-        if ((Get-Date) -gt $deadline) { throw 'Standard-user interactive qualification timed out' }
-        Start-Sleep -Seconds 2
-    }
-    Get-Content (Join-Path $evidence 'native.log')
-    if ((Get-Content $result).Trim() -ne '0') { throw 'Standard-user qualification failed' }
-} finally {
-    Stop-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue
-    Unregister-ScheduledTask -TaskName $name -Confirm:$false -ErrorAction SilentlyContinue
-}
+$runner=Join-Path $repo 'build\restricted-run.exe'
+& $runner (Get-Command pwsh).Source $script
+$code=$LASTEXITCODE
+if (Test-Path (Join-Path $evidence 'native.log')) { Get-Content (Join-Path $evidence 'native.log') }
+if ($code -ne 0 -or -not (Test-Path $result) -or (Get-Content $result).Trim() -ne '0') { throw 'Restricted standard-user qualification failed' }

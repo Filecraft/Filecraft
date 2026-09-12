@@ -12,9 +12,10 @@ Beta.2 corrects one observed first-run layout bug and introduces installer packa
 - Windows x64: Inno Setup per-user installer, Start menu entries and uninstaller.
 - Ubuntu 24.04 amd64: DEB, desktop entry and `/usr/bin/filecraft`.
 
-The Windows lifecycle runs using an existing interactive user's limited token.
-The test rejects an elevated token. A scheduled task is test infrastructure only;
-it is removed in `finally` and is not part of the installer. The Ubuntu GUI gate
+The Windows lifecycle runs using a restricted, medium-integrity token derived
+from the existing interactive user. Admin groups and privileges are removed;
+the test independently rejects admin membership. The CI-only token launcher is
+not part of the installer and never weakens UAC or machine security policy. The Ubuntu GUI gate
 uses Xvfb, X11 and Openbox. Both exercise OS-input import/export, then quit and
 relaunch. All installers undergo installed-runtime conversion tests, same-version
 reinstall checks where implemented, and content/permission inspection.

@@ -61,6 +61,7 @@ jobs:
         shell: cmd
         run: |
           call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          cl /nologo /W4 /O2 distribution/windows/restricted-run.c /Febuild/restricted-run.exe /Fobuild/restricted-run.obj advapi32.lib
           python distribution/windows/build.py --bundle build/desktop-package/dist/Filecraft-Desktop --output build/consumer --iscc "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
       - name: Windows install, GUI export, reinstall, uninstall
         if: runner.os == 'Windows'
