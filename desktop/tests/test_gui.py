@@ -18,6 +18,32 @@ class GUITests(unittest.TestCase):
         for callback in self.root.tk.splitlist(self.root.tk.call('after','info')):
             self.root.after_cancel(callback)
         for widget in self.root.winfo_children():widget.destroy()
+    def test_initial_empty_layout_hides_irrelevant_options_and_shows_export(self):
+        from prepare_suite.gui import App
+        app=App(self.root)
+        self.root.deiconify()
+        try:
+            self.root.update()
+            self.assertEqual(app.source,'')
+            self.assertEqual(app.target.get(),'')
+            self.assertEqual(app.status.get(),'Choose a local file. Originals are never overwritten.')
+            self.assertEqual(app.preview_identity.get(),'No preview rendered.')
+            visible={'Preview / image page','Image quality (1–95)'}
+            for label,widgets in app.option_widgets.items():
+                with self.subTest(option=label):
+                    for widget in widgets:
+                        self.assertEqual(widget.winfo_manager(),'grid' if label in visible else '')
+                        self.assertEqual(bool(widget.winfo_ismapped()),label in visible)
+            self.assertTrue(app.save_button.winfo_ismapped())
+            x=app.save_button.winfo_rootx()-self.root.winfo_rootx()
+            y=app.save_button.winfo_rooty()-self.root.winfo_rooty()
+            self.assertGreaterEqual(x,0)
+            self.assertGreaterEqual(y,0)
+            self.assertLessEqual(x+app.save_button.winfo_width(),self.root.winfo_width())
+            self.assertLessEqual(y+app.save_button.winfo_height(),self.root.winfo_height())
+        finally:
+            self.root.withdraw()
+
     def test_pdf_fit_selection_and_actual_export(self):
         from prepare_suite.gui import App
         from pypdf import PdfWriter

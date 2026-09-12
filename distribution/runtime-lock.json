@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "product": "Filecraft",
+  "version": "0.10.0-beta.1",
+  "tag": "v0.10.0-beta.1",
+  "release": "https://github.com/Filecraft/Filecraft/releases/tag/v0.10.0-beta.1",
+  "published": "2026-09-12T00:09:07Z",
+  "runtime_source": "6a706c978a520f0e4b7442b583361a20b4cfe08e",
+  "assets": [
+    {
+      "filename": "Filecraft-0.10.0-beta.1-desktop-darwin-arm64.zip",
+      "url": "https://github.com/Filecraft/Filecraft/releases/download/v0.10.0-beta.1/Filecraft-0.10.0-beta.1-desktop-darwin-arm64.zip",
+      "bytes": 28222355,
+      "sha256": "6b1e20f3dafee5a9a9f9b24a2f2037838495f42f2ef1c4b2d728db67a807fb54"
+    },
+    {
+      "filename": "Filecraft-0.10.0-beta.1-desktop-darwin-x86_64.zip",
+      "url": "https://github.com/Filecraft/Filecraft/releases/download/v0.10.0-beta.1/Filecraft-0.10.0-beta.1-desktop-darwin-x86_64.zip",
+      "bytes": 29633933,
+      "sha256": "396bef3e2c11522e30217c48b181ea06900e409f1aa469847fa0641a2169f20a"
+    },
+    {
+      "filename": "Filecraft-0.10.0-beta.1-desktop-linux-x86_64.zip",
+      "url": "https://github.com/Filecraft/Filecraft/releases/download/v0.10.0-beta.1/Filecraft-0.10.0-beta.1-desktop-linux-x86_64.zip",
+      "bytes": 50216624,
+      "sha256": "5c769384c7455989ba44f371b066a95e284ba482cb2708e05a78aa79943b9fc6"
+    },
+    {
+      "filename": "Filecraft-0.10.0-beta.1-desktop-windows-amd64.zip",
+      "url": "https://github.com/Filecraft/Filecraft/releases/download/v0.10.0-beta.1/Filecraft-0.10.0-beta.1-desktop-windows-amd64.zip",
+      "bytes": 32426255,
+      "sha256": "3b0c34b8e7f0d88cb96ddd628d3f25d5938749c788aa25fc62d95fe590d79b49"
+    },
+    {
+      "filename": "Filecraft-0.10.0-beta.1-extension-chromium.zip",
+      "url": "https://github.com/Filecraft/Filecraft/releases/download/v0.10.0-beta.1/Filecraft-0.10.0-beta.1-extension-chromium.zip",
+      "bytes": 249338,
+      "sha256": "05061a771241c28cb47d4875bc2544c8d1d703cb73cf7bad2be245e75745800a"
+    },
+    {
+      "filename": "Filecraft-0.10.0-beta.1-extension-firefox.zip",
+      "url": "https://github.com/Filecraft/Filecraft/releases/download/v0.10.0-beta.1/Filecraft-0.10.0-beta.1-extension-firefox.zip",
+      "bytes": 249430,
+      "sha256": "36c9e2b43652fc8f3ec1684b114ee7134bf27d69e18a654f182177caccf5f7a3"
+    },
+    {
+      "filename": "Filecraft-0.10.0-beta.1-pdf-workbench.zip",
+      "url": "https://github.com/Filecraft/Filecraft/releases/download/v0.10.0-beta.1/Filecraft-0.10.0-beta.1-pdf-workbench.zip",
+      "bytes": 247187,
+      "sha256": "195fb6b854c3eb5c8f7ccaabe8558912197609f56a2421544d89ff10f90894d2"
+    }
+  ]
+}
