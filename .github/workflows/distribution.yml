@@ -1,0 +1,108 @@
+name: Consumer distribution qualification
+on:
+  push:
+    branches: ['distribution/**']
+    paths: ['distribution/**', 'desktop/**', 'product.json', '.github/workflows/distribution.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: distribution-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel, windows-2022, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.13'
+      - name: Build dependencies
+        run: python -m pip install -r desktop/requirements.txt pyinstaller==6.22.2
+      - name: Intel crypto isolation
+        if: matrix.os == 'macos-15-intel'
+        run: OPENSSL_STATIC=1 python -m pip install --no-cache-dir --force-reinstall --no-binary cryptography cryptography==50.0.1
+      - name: Packaging regressions
+        run: python -m unittest discover -s distribution/tests -v
+      - name: Linux native display dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb python3-tk xdotool scrot openbox libxss1 libxft2 libfontconfig1
+      - name: Native desktop regression Linux
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python -m unittest discover -s desktop/tests -v
+        env:
+          PYTHONPATH: desktop
+      - name: Native desktop regression Windows/macOS
+        if: runner.os != 'Linux'
+        run: python -m unittest discover -s desktop/tests -v
+        env:
+          PYTHONPATH: desktop
+      - name: Freeze exact candidate source
+        run: python desktop/package.py
+      - name: macOS packaging dependencies
+        if: runner.os == 'macOS'
+        run: python -m pip install --require-hashes -r distribution/requirements-macos.txt
+      - name: Build and mount DMG
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          python distribution/macos/package.py --bundle build/desktop-package/dist/Filecraft-Desktop --output build/consumer
+          for dmg in build/consumer/*.dmg; do python distribution/macos/test-install.py "$dmg"; done
+      - name: Installed GUI QA dependencies
+        if: runner.os != 'macOS'
+        run: python -m pip install pyautogui==0.9.54 pygetwindow==0.0.9
+      - name: Build Windows installer
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          python distribution/windows/build.py --bundle build/desktop-package/dist/Filecraft-Desktop --output build/consumer --iscc "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+      - name: Windows install, GUI export, reinstall, uninstall
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = (Get-ChildItem build/consumer/*-setup.exe).FullName
+          ./distribution/windows/run-standard-user.ps1 -Installer $installer
+      - name: Ubuntu package and installed GUI qualification
+        env:
+          XDG_SESSION_TYPE: x11
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          python distribution/linux/build.py --bundle build/desktop-package/dist/Filecraft-Desktop --output build/consumer
+          xvfb-run -a -s '-screen 0 1440x1000x24' sh -c 'openbox >/tmp/filecraft-openbox.log 2>&1 & python distribution/linux/test-install.py --artifact build/consumer/*.deb --allow-disposable-runner'
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        if: always()
+        with:
+          name: consumer-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            build/consumer/*
+            build/distribution-evidence/*
+            build/standard-user/*
+            build/Filecraft-*-desktop-*.zip*
+          if-no-files-found: error
+  manifest:
+    needs: native
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: consumer-*
+          path: build/collected
+      - name: Assemble only qualified final metadata
+        shell: bash
+        run: |
+          python distribution/collect.py build/collected build/release
+          version=$(python -c "import json;print(json.load(open('product.json'))['version'])")
+          python distribution/manifest.py build/release --version "$version" --source "$GITHUB_SHA" --run-url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: qualified-consumer-manifest
+          path: build/release/release-manifest.json
+          if-no-files-found: error

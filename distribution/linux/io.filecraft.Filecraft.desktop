@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Filecraft
+Comment=Prepare local files and keep your originals
+Exec=/usr/bin/filecraft
+TryExec=/usr/bin/filecraft
+Icon=filecraft
+Terminal=false
+Categories=Utility;Graphics;
+StartupNotify=false

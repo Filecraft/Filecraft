@@ -12,7 +12,7 @@ import sys
 import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='0.10.0-beta.1'
+VERSION=json.loads((ROOT/'product.json').read_text())['version']
 
 
 def openssl_versions():

@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": 1,
+      "url": "https://jrsoftware.org/ishelp/topic_setup_privilegesrequired.htm",
+      "title": "",
+      "accessed": "2026-09-12"
+    },
+    {
+      "id": 2,
+      "url": "https://jrsoftware.org/ishelp/topic_setup_appid.htm",
+      "title": "",
+      "accessed": "2026-09-12"
+    },
+    {
+      "id": 3,
+      "url": "https://learn.microsoft.com/en-us/windows/msix/package/signing-package-overview",
+      "title": "",
+      "accessed": "2026-09-12"
+    },
+    {
+      "id": 4,
+      "url": "https://manpages.ubuntu.com/manpages/noble/en/man1/dpkg-deb.1.html",
+      "title": "",
+      "accessed": "2026-09-12"
+    },
+    {
+      "id": 5,
+      "url": "https://packages.ubuntu.com/noble/libtk8.6",
+      "title": "",
+      "accessed": "2026-09-12"
+    },
+    {
+      "id": 6,
+      "url": "https://learn.microsoft.com/en-us/windows/win32/procthread/process-creation-flags",
+      "title": "",
+      "accessed": "2026-09-12"
+    }
+  ]
+}

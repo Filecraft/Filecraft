@@ -85,6 +85,7 @@ class App:
         for var in (self.target,self.action,self.max_bytes,self.max_pages,self.pages,self.rotation,self.dpi,self.quality,self.password,self.output_password,self.language,self.annotation,self.fields):
             var.trace_add('write',self.invalidate_export)
         self.page.trace_add('write',self.page_changed)
+        self.update_options()
     def row(self,label,var,values=None,secret=False):
         n=len(self.options.grid_slaves())//2
         label_widget=ttk.Label(self.options,text=label)
