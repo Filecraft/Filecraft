@@ -20,6 +20,21 @@ $SentinelDir = Join-Path $env:LOCALAPPDATA ('Filecraft-packaging-test-' + [guid]
 New-Item -ItemType Directory -Path $SentinelDir | Out-Null
 $Sentinel = Join-Path $SentinelDir 'user-data.txt'
 Set-Content $Sentinel 'synthetic user data; must survive uninstall'
+function Run-Python([string[]]$Arguments) {
+    $info = [Diagnostics.ProcessStartInfo]::new()
+    $info.FileName=$Python
+    $info.UseShellExecute=$false
+    $info.RedirectStandardOutput=$true
+    $info.RedirectStandardError=$true
+    foreach ($arg in $Arguments) { $info.ArgumentList.Add($arg) }
+    $process=[Diagnostics.Process]::Start($info)
+    $stdout=$process.StandardOutput.ReadToEndAsync()
+    $stderr=$process.StandardError.ReadToEndAsync()
+    if (-not $process.WaitForExit(300000)) { $process.Kill($true);throw 'Python qualification timeout' }
+    Write-Output $stdout.Result
+    Write-Output $stderr.Result
+    if ($process.ExitCode -ne 0) { throw "Python qualification exit $($process.ExitCode)" }
+}
 function Run-Setup {
     $p = Start-Process -FilePath $Installer -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/SP-' -Wait -PassThru
     if ($p.ExitCode -ne 0) { throw "Installer exit $($p.ExitCode)" }
@@ -30,8 +45,7 @@ function Run-Setup {
         $file = Join-Path $App $entry.Name
         if ((Get-FileHash $file -Algorithm SHA256).Hash.ToLower() -ne $entry.Value) { throw "Installed byte mismatch: $($entry.Name)" }
     }
-    & $Python "$Repo\desktop\check_frozen.py" "$App\Filecraft-Desktop.exe"
-    if ($LASTEXITCODE -ne 0) { throw 'Installed frozen runtime failed real conversion checks' }
+    Run-Python @("$Repo\desktop\check_frozen.py", "$App\Filecraft-Desktop.exe")
 }
 function Check-Gui {
     $launcher = Start-Process -FilePath "$App\Filecraft.exe" -PassThru
@@ -51,8 +65,7 @@ function Check-Gui {
 try {
     Run-Setup
     Check-Gui
-    & $Python "$Repo\distribution\test_installed_gui.py" --executable "$App\Filecraft.exe" --evidence "$Repo\build\distribution-evidence"
-    if ($LASTEXITCODE -ne 0) { throw "Installed GUI import/export failed" }
+    Run-Python @("$Repo\distribution\test_installed_gui.py", "--executable", "$App\Filecraft.exe", "--evidence", "$Repo\build\distribution-evidence")
     Check-Gui # Relaunch after normal quit.
     Run-Setup # Same-version reinstall: stable identity, no duplicate install.
     Check-Gui

@@ -60,6 +60,7 @@ def main():
         return subprocess.run(['xdotool','search','--onlyvisible','--name',title],capture_output=True).returncode==0
     def dialog(title):
         wait(lambda:dialog_visible(title),title)
+        time.sleep(1) # Mapped dialog precedes native focus initialization.
         ui.screenshot().save(a.evidence/(title.replace(' ','-')+'.png'))
     processes=[]
     try:
@@ -75,7 +76,7 @@ def main():
                 time.sleep(1)
                 ui.screenshot().save(a.evidence/'import.png')
                 ui.click(origin[0]+save[0],origin[1]+save[1]);dialog('Save a new copy')
-                ui.hotkey('alt','n');ui.hotkey('ctrl','a');ui.write(str(destination),interval=.01);ui.press('enter')
+                ui.hotkey('alt','n');ui.hotkey('ctrl','a');ui.write(str(destination),interval=.05);ui.screenshot().save(a.evidence/'filled-save.png');ui.press('enter')
                 wait(destination.exists,'GUI export',60)
                 with Image.open(destination) as image:assert image.size==(80,60);image.verify()
                 with Image.open(destination) as exported,Image.open(source) as original:
