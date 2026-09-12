@@ -6,7 +6,8 @@ Local document preparation for Windows, macOS, Linux and the browser.
 Set requirements, try bounded PDF auto-fit candidates, verify the result and keep a receipt.
 No account. No document upload. No subscription gate.
 
-**[Download the current release](https://filecraft.github.io/download/)** ·
+[Download for Windows — 0.10 beta](https://github.com/Filecraft/Filecraft/releases/download/v0.10.0-beta.1/Filecraft-0.10.0-beta.1-desktop-windows-amd64.zip) ·
+[All platforms](https://filecraft.github.io/download/) ·
 [Try the local workspace](https://filecraft.github.io/workspace/) ·
 [Documentation](https://filecraft.github.io/documentation/) ·
 [Release archive](https://filecraft.github.io/releases/)
