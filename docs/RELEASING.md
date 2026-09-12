@@ -21,6 +21,9 @@ Never publish to or modify `gonisulaimann/gonisulaimann.github.io`. The protecte
 
 ## Signing and runtime boundaries
 
+See the [maintainer signing guide](SIGNING.md) for prerequisites and verification.
+Signing is not configured for the current release.
+
 Desktop beta binaries are unsigned/not notarized. No Developer ID, notarization, Windows certificate, app-store approval or hostile-file sandbox is implied. Do not recommend disabling operating-system protection. Keep complete extracted runtimes together. Tesseract and FFmpeg are optional separate local engines, not silently downloaded dependencies.
 
 Chromium/Edge extensions use unpacked developer-mode installation; unsigned Firefox packages use temporary installation. Store access, signing, terms and review are separate gates. Safari packaging is not qualified.

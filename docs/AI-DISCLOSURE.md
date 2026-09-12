@@ -2,9 +2,9 @@
 
 Filecraft is developed with AI assistance. The maintainer identifies the development model as **OpenAI's frontier model GPT-6 Astra**. This describes the development process, not an AI feature inside Filecraft. Filecraft does not ship a trained neural processing engine, and local document processing does not send files to this model.
 
-## Maintainer-supplied model metrics — not audited
+## Maintainer-supplied model metrics (not audited)
 
-The maintainer supplied this dashboard transcription. Values are preserved exactly rather than silently repaired:
+The maintainer supplied this dashboard transcription. The values below are unchanged:
 
 | Supplied label | Supplied value |
 | --- | --- |
@@ -18,6 +18,6 @@ The maintainer supplied this dashboard transcription. Values are preserved exact
 | Output tokens | 876.04K |
 | Average per request (output) | 441 avg per request |
 
-These figures contain inconsistencies: the supplied input token count alone exceeds the supplied total token count. The meaning of “Model metrics 1M,” reporting interval, currency and billing adjustments were not independently established. This is a static, maintainer-supplied disclosure—not live telemetry, a verified invoice, or a cost/performance guarantee. No visitor analytics are collected to update it.
+These maintainer-supplied figures contain inconsistencies: the supplied input token count alone exceeds the supplied total token count. The meaning of “Model metrics 1M,” reporting interval, currency and billing adjustments were not independently established. This static disclosure comes from the maintainer. It is not live telemetry, a verified invoice, or a cost/performance guarantee. No visitor analytics are collected to update it.
 
 AI-generated changes still require human accountability, source/license review, regression tests and independent verification. See [AI contribution guidelines](https://github.com/Filecraft/Filecraft/blob/main/AGENTS.md).

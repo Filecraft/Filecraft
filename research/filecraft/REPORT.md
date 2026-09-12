@@ -27,7 +27,7 @@ The distinguishing proposition is **“prepared against your requirements, with 
 - [Stirling-PDF #4428](https://github.com/Stirling-Tools/Stirling-PDF/issues/4428), September 2025, reports requested targets not reached and includes logs saying maximum optimization was reached without meeting target size. Retrieved issue is open.
 - [PDF24 “file size”](https://help.pdf24.org/en/questions/question/file-size), original question 2009 with later answers, describes a scanned document too large to email and manual iteration over quality settings.
 
-**Inference:** a user needs an explicit requirement verdict, the least destructive acceptable option, and a clear “cannot meet this limit” outcome—not an unconditional success toast after a transform. Do not promise arbitrary targets are achievable.
+**Inference:** a user needs an explicit requirement verdict, the least destructive acceptable option, and a clear “cannot meet this limit” outcome; not an unconditional success toast after a transform. Do not promise arbitrary targets are achievable.
 
 ### 2. Recurring across tools: transforms can increase size
 

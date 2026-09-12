@@ -4,10 +4,10 @@
 
 Separate readiness and workflow semantics from codec implementation. Start with a
 small dependency-free JavaScript engine that runs identically in Node and a
-browser. This delivers shared rules to the already useful Portable UI and a real
-CLI without bundling another runtime. Node is a CLI prerequisite, not hidden in
+browser. This gives the Portable UI and CLI the same rules
+without bundling another runtime. Node is a CLI prerequisite, not hidden in
 the downloadable archive. Native Swift/Java converters remain maintained adapters;
-this release does not falsely claim they already execute the shared JS engine.
+they do not yet execute the shared JS engine.
 
 For future native hosts, evaluate a small Rust/C ABI core with the same versioned
 conformance fixtures before replacing these rules. Do not add a JS interpreter

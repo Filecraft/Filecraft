@@ -1,7 +1,7 @@
 # Verification
 
-Current release: [v0.4.0 verification](VERIFICATION-0.4.md).
-The evidence below is retained for the v0.3.0 release. scope
+Historical report for v0.3.0. See also [v0.4.0 verification](VERIFICATION-0.4.md).
+For current packages, use the [release archive](https://filecraft.github.io/releases/).
 
 The 0.3.0 release is validated with executable core checks, release packaging,
 synthetic-image UI smoke testing and browser checks of the project website.

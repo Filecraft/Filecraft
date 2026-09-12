@@ -78,7 +78,7 @@ struct ContentView: View {
                                   model.inputs.contains(where: { $0.id == id }) else { return false }
                             model.move(id, to: entry.id); return true
                         }
-                        .help(entry.url.lastPathComponent + " — select to review; drag to reorder")
+                        .help(entry.url.lastPathComponent + "; select to review; drag to reorder")
                 }
             }
         }.frame(height: 116)

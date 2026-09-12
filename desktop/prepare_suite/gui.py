@@ -20,7 +20,7 @@ def command():
 
 class App:
     def __init__(self,root):
-        self.root=root;root.title('Filecraft — local document suite');root.geometry('1040x780');root.minsize(840,680)
+        self.root=root;root.title('Filecraft | local document suite');root.geometry('1040x780');root.minsize(840,680)
         self.preview_identity=tk.StringVar(value='No preview rendered.');self.preview_request={}
         self.last_receipt=None;self.profile=None;self.option_widgets={}
         self.max_bytes=tk.StringVar();self.max_pages=tk.StringVar();self.requirement_status=tk.StringVar(value='Optional personal requirements; not portal certification.')
@@ -201,7 +201,7 @@ class App:
     def save(self):
         if not self.source or self.busy:return
         target=self.target.get();ext='pdf' if target=='ocr-pdf' else 'txt' if target=='ocr-txt' else target
-        destination=filedialog.asksaveasfilename(title='Save a new copy — existing files are protected',initialfile=Path(self.source).stem+'-prepared.'+ext,defaultextension='.'+ext)
+        destination=filedialog.asksaveasfilename(title='Save a new copy (existing files are protected)',initialfile=Path(self.source).stem+'-prepared.'+ext,defaultextension='.'+ext)
         if destination:self.begin_export(destination)
     def begin_export(self,destination):
         if self.busy:return

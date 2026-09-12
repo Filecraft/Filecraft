@@ -1,6 +1,6 @@
-# Store submission material — not published
+# Store submission material; not published
 
-Name: Filecraft — local document workspace
+Name: Filecraft; local document workspace
 Summary: Prepare a PDF copy for your requirements. Reorder pages, verify output
 bytes and save a receipt. No uploads.
 Category: Productivity

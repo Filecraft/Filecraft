@@ -1,6 +1,6 @@
 # Support
 
-I maintain Prepare independently. Please use public issues for reproducible bugs
+I maintain Filecraft independently. Please use public issues for reproducible bugs
 and discussions for questions: https://github.com/Filecraft/Filecraft/issues
 
 Before reporting, read the platform limitations and try a synthetic JPEG/PNG.

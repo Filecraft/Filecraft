@@ -1,8 +1,8 @@
 # Filecraft documentation
 
-Filecraft is a local document-preparation workspace: import, understand, prepare,
-validate, verify and export. It continues Prepare; historical APIs and releases
-retain their identity where compatibility requires it.
+Filecraft prepares documents locally. Set requirements, make a copy and check
+the result before export. Filecraft continues Prepare; historical APIs and
+releases keep their names where compatibility requires it.
 
 [Download the current release](https://filecraft.github.io/download/) ·
 [Start with a real browser sample](https://filecraft.github.io/workspace/) ·
@@ -13,6 +13,7 @@ packages work offline. The hosted workspace requires loading its assets first;
 download the offline ZIP for predictable disconnected use.
 
 Read the migration, licensing and AI disclosure pages before contributing.
+Maintainers can use the [signing guide](SIGNING.md) to prepare a future signed release.
 
 ## Documentation hosting
 

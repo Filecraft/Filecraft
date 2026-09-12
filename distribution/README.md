@@ -1,4 +1,4 @@
-# Store submission foundations — not submissions
+# Store submission foundations; not submissions
 
 The downloadable builds are not store-certified. Current original source is
 Apache-2.0 after provenance review; preserve third-party terms. Historical

@@ -1,8 +1,8 @@
-# Contributing to Prepare
+# Contributing to Filecraft
 
-I'm Goni Sulaiman. I maintain Prepare as an independent, community-driven
-utility. I want it to help someone finish an application, not become another
-account they have to create. I welcome small fixes, accessibility feedback,
+I'm Goni Sulaiman. I maintain Filecraft independently, with community contributions.
+I want it to help someone finish an application, not become another account they
+have to create. I welcome small fixes, accessibility feedback,
 Windows/Linux testing, clear bug reports and documentation just as much as code.
 
 ## Before you spend a weekend on it
@@ -19,66 +19,54 @@ My decision process is in [GOVERNANCE.md](GOVERNANCE.md).
 
 ## How I build and test
 
-I keep two frontends: a native Mac app and a downloadable browser companion.
-I don't describe the companion as a Windows EXE or Linux native binary.
+I maintain the Python/Tk desktop app for Windows, macOS and Linux, and the
+local browser PDF workspace. The desktop CLI uses the same processing code.
 
-### Native Mac
+### Desktop
 
-I use macOS 14+ and Swift 6. I ship Apple Silicon builds; Intel native builds
-are not release-tested. I don't add third-party Swift packages.
+Use Python 3.13 with Tk installed:
 
 ```sh
-git clone --depth 1 https://github.com/Filecraft/Filecraft.git
-cd Prepare
-swift run Prepare
-swift run PrepareChecks --ui-contract
-swift run -c release PrepareChecks --ui-contract --stress
-swift build -c release -Xswiftc -warnings-as-errors -Xswiftc -strict-concurrency=complete
-bash scripts/package.sh
-codesign --verify --strict build/Prepare.app
+git clone https://github.com/Filecraft/Filecraft.git
+cd Filecraft
+python3 -m venv .venv
+.venv/bin/python -m pip install -r desktop/requirements.txt
+.venv/bin/python desktop/launch.py
+PYTHONPATH=desktop .venv/bin/python -m unittest discover -s desktop/tests -v
 ```
 
-I use `PrepareChecks`, an executable integration harness, rather than XCTest.
-I generate synthetic fixtures and check PDF geometry, rendered pixels, byte
-budgets, original protection, metadata handling and cancellation.
+On Windows use `.venv\Scripts\python.exe`; set `PYTHONPATH` using your shell.
+Tesseract and FFmpeg are optional, separately installed tools. I use synthetic
+fixtures for tests. See [the desktop guide](desktop/README.md).
 
-### Portable companion (Windows, Linux and Mac)
-
-I open `portable/index.html` directly in a current desktop Chrome, Edge or
-Firefox browser. I don't need a server or build step to use it. For development
-checks I use Node 22+, Python 3.9+ and these test-only dependencies:
+### Browser and extensions
 
 ```sh
-cd portable
-npm ci --ignore-scripts
-npx playwright install --with-deps chromium firefox
-npm test
-cd ..
-python -m pip install pymupdf==1.26.5
-python scripts/check-portable-pdf.py
-python scripts/test_portable_budget.py
-python scripts/package_portable.py
+npm --prefix portable ci
+npm --prefix portable exec -- playwright install chromium firefox
+npm --prefix portable test
+python3 extension/tests/test_package.py
 ```
 
-I recommend a Python virtual environment. I keep Node, Playwright, browsers
-and PyMuPDF out of the release archive. I test actual file-URL workflows with
-networking disabled, then independently render the exported PDFs. I run the
-same browser checks on Windows and Linux CI; I don't infer support from a Mac
-browser test alone.
+The workspace opens from `workbench/index.html`. I test real file-URL workflows,
+network isolation and exported files. Browser download prompts are controlled by
+the browser, not an exclusive filesystem write in Filecraft.
 
-### Website and release guards
+### Website and release checks
+
+The website has its own [repository](https://github.com/Filecraft/filecraft.github.io).
+Its README explains layout, language and privacy tests. In this repository:
 
 ```sh
-python3 scripts/check-site.py
-node scripts/test-site.cjs
-python3 scripts/test_release_budget.py
+python3 scripts/test_filecraft_identity.py
+python3 scripts/test_migration_tools.py
+python3 scripts/test_presentation_copy.py
 git diff --check
 ```
 
-I enforce decimal-byte budgets: Mac executable below 2 MB, app files below
-3 MB and ZIP below 1.5 MB; Portable below 200 KB expanded and 100 KB zipped.
-I exclude the user's existing browser and OS frameworks, not hidden bundled
-runtimes. I document prerequisites because those downloads are not tiny.
+The Swift app and older portable image tool remain in source for historical
+continuity. Their old byte budgets are not the current desktop suite's budgets.
+Use [the release guide](docs/RELEASING.md) for current packaging and qualification.
 
 ## What I look for in a pull request
 
@@ -100,7 +88,7 @@ I won't merge a generated patch on confidence alone.
 
 ## Licensing and review
 
-For the 0.9 development line onward, contributions to original Prepare work
+For the 0.9 development line onward, contributions to original Filecraft work
 are accepted under Apache-2.0. Contribute only work you have permission to
 license, retain upstream notices, and identify third-party imports. No copyright
 assignment or separate CLA is required. Earlier releases retain their supplied

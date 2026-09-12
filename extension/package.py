@@ -16,7 +16,7 @@ def build():
         if folder.is_symlink():raise ValueError('Refusing a symlink extension staging directory')
         if folder.exists():shutil.rmtree(folder)
         folder.mkdir(parents=True,exist_ok=False)
-        manifest={'manifest_version':3,'name':'Filecraft — local document workspace','version':VERSION.split('-')[0],'description':'Prepare a PDF copy for your requirements. Reorder pages, verify output bytes and save a receipt. No uploads.','action':{'default_title':'Open Filecraft workspace','default_icon':{'16':'icons/16.png','32':'icons/32.png'}},'icons':{str(n):f'icons/{n}.png' for n in (16,32,48,128)},'permissions':[],'host_permissions':[],'content_security_policy':{'extension_pages':"default-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"}}
+        manifest={'manifest_version':3,'name':'Filecraft: local document workspace','version':VERSION.split('-')[0],'description':'Prepare a PDF copy for your requirements. Reorder pages, verify output bytes and save a receipt. No uploads.','action':{'default_title':'Open Filecraft workspace','default_icon':{'16':'icons/16.png','32':'icons/32.png'}},'icons':{str(n):f'icons/{n}.png' for n in (16,32,48,128)},'permissions':[],'host_permissions':[],'content_security_policy':{'extension_pages':"default-src 'none'; script-src 'self'; style-src 'self'; worker-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"}}
         if browser=='chromium':manifest['background']={'service_worker':'background.js'}
         else:
             manifest['background']={'scripts':['background.js']}

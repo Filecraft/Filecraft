@@ -11,7 +11,7 @@ remote=subprocess.check_output(['git','-C',str(site),'remote','get-url','origin'
 if remote.lower() not in ('git@github.com:filecraft/filecraft.github.io','https://github.com/filecraft/filecraft.github.io'):
     raise SystemExit('Refusing sync: only Filecraft/filecraft.github.io is authorized.')
 shutil.copyfile(ROOT/'product.json',site/'product.json')
-for source,target in [('desktop/README.md','DESKTOP-SUITE.md'),('docs/DEPENDENCIES.md','DEPENDENCIES.md'),('docs/LICENSING.md','LICENSING.md'),('docs/RELEASING.md','RELEASING.md'),('docs/PRODUCT-DECISION-09.md','PRODUCT-DECISION-09.md'),('docs/AUTO-FIT.md','AUTO-FIT.md'),('docs/ONLINE-ASSISTANCE.md','ONLINE-ASSISTANCE.md'),('docs/DOCUMENTATION-HOSTING.md','DOCUMENTATION-HOSTING.md'),('docs/AI-DISCLOSURE.md','AI-DISCLOSURE.md'),('docs/MIGRATION.md','MIGRATION.md')]:
+for source,target in [('desktop/README.md','DESKTOP-SUITE.md'),('docs/DEPENDENCIES.md','DEPENDENCIES.md'),('docs/LICENSING.md','LICENSING.md'),('docs/RELEASING.md','RELEASING.md'),('docs/PRODUCT-DECISION-09.md','PRODUCT-DECISION-09.md'),('docs/AUTO-FIT.md','AUTO-FIT.md'),('docs/ONLINE-ASSISTANCE.md','ONLINE-ASSISTANCE.md'),('docs/DOCUMENTATION-HOSTING.md','DOCUMENTATION-HOSTING.md'),('docs/AI-DISCLOSURE.md','AI-DISCLOSURE.md'),('docs/MIGRATION.md','MIGRATION.md'),('docs/SIGNING.md','SIGNING.md')]:
     shutil.copyfile(ROOT/source,site/target)
 shutil.copytree(ROOT/'workbench',site/'workspace',dirs_exist_ok=True)
 for name in ['LICENSE','NOTICE']:shutil.copyfile(ROOT/name,site/'workspace'/name)

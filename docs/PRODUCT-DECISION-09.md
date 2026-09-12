@@ -34,7 +34,7 @@ No private documents, accounts or competitor customer data were accessed.
 
 Prepare is the workspace between a file and its next destination. Its primary
 object is a prepared copy with explicit personal requirements and inspectable
-evidence—not a converter menu, opaque health score or acceptance certificate.
+evidence, not a converter menu, opaque health score or acceptance certificate.
 
 Build the missing connective tissue:
 

@@ -12,6 +12,9 @@ class IdentityTests(unittest.TestCase):
             text=(ROOT/filename).read_text()
             self.assertIn('Filecraft',text,filename)
             self.assertNotIn('gonisulaimann.github.io',text,filename)
+        workspace=(ROOT/'workbench/index.html').read_text()
+        self.assertIn('<h1>Filecraft ',workspace)
+        self.assertNotIn('0.9 beta',workspace)
     def test_ai_guidelines_and_disclosure(self):
         self.assertTrue((ROOT/'AGENTS.md').is_file())
         text=(ROOT/'docs/AI-DISCLOSURE.md').read_text()

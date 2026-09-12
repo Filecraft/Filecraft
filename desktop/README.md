@@ -69,7 +69,7 @@ Maximum decimal MB and page limits are optional; blank means no limit. A shared
 version-1 JSON profile may also constrain formats, dimensions, orientation and
 filenames. The output is measured before publication; failed requirements leave
 no output copy. Unknown properties remain NEEDS_REVIEW, never a pass. The receipt
-stores only mechanical checks—not visual/accessibility/full-conformance proof.
+stores only mechanical checks; not visual/accessibility/full-conformance proof.
 
 Save receipt after export writes a separate JSON file exclusively. It contains
 hashes, sizes and your chosen rules, not full source paths/passwords. Profile IDs

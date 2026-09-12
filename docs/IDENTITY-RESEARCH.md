@@ -3,7 +3,7 @@
 Preferred name Preparo is not available as the exact GitHub owner:
 https://github.com/preparo is an existing User account. A distinct App Store
 product also uses Preparo: https://apps.apple.com/us/app/id6499164067
-(Preparo — Tech Interview Prep). Do not claim namespace ownership or affinity.
+(Preparo: Tech Interview Prep). Do not claim namespace ownership or affinity.
 
 Alternative candidate: **Preflio** (preflight + folio). It is format-neutral,
 ASCII, short, and communicates preparation rather than editing. GitHub user lookup

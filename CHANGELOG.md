@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.10.0-beta.1 — Filecraft
+## 0.10.0-beta.1; Filecraft
 
 - Prospective identity migration to Filecraft and organization website; historical releases preserved.
 - Bounded PDF auto-fit: exact original or structural compression, full requirement checks, no size growth, candidate receipts.
@@ -9,7 +9,7 @@
 - No online inference service or fine-tuned model is claimed.
 
 
-## 0.9.0-beta.1 — Requirements workspace
+## 0.9.0-beta.1; Requirements workspace
 
 - Personal requirements checked before desktop output publication; hash-bound receipts.
 - Desktop CLI preparation and byte verification, format-specific controls and profile import.
@@ -20,7 +20,7 @@
 - Prospective Apache-2.0 migration for original source; upstream/historical terms retained.
 - Packaging adds pako/zlib attribution and OpenSSL notices; unused DarkGarden fonts excluded.
 
-## 0.8.0-beta.1 — Desktop suite
+## 0.8.0-beta.1; Desktop suite
 
 - Native Tk desktop frontend, output dropdown, private subprocess conversion and previews.
 - Exclusive new-copy publication, source hash, measured output size and loss warnings.
@@ -69,7 +69,7 @@ remaining pre-1.0: file-format and API compatibility are not yet guaranteed.
   submission foundations and redesigned platform-aware website.
 - Privacy remains local; no OCR, encryption, PDF input or forensic-erasure claim.
 
-## 0.4.0 — 2026-09-11
+## 0.4.0; 2026-09-11
 
 ### Added
 
@@ -90,7 +90,7 @@ and Swift/Xcode toolchain are not included. Retains macOS 14 minimum,
 local-only processing and Hippocratic License 3.0 core. Ad-hoc signed,
 not notarized. Existing canonical Pages URL retained after handle research.
 
-## 0.3.0 — 2026-09-11
+## 0.3.0; 2026-09-11
 
 First public release; Hippocratic License 3.0 core.
 
@@ -119,7 +119,7 @@ First public release; Hippocratic License 3.0 core.
 Apple Silicon, macOS 14+. Ad-hoc signed; not Developer ID signed or notarized.
 Not sandboxed. Raster PDF output is lossy and requires visual review.
 
-## 0.2.0 — unpublished local prototype
+## 0.2.0; unpublished local prototype
 
 Native image-to-PDF feasibility build with size constraints, mixed JPEG/PNG/HEIC
 inputs, EXIF orientation, metadata stripping, drag reordering, progress,

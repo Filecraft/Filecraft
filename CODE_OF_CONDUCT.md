@@ -15,7 +15,7 @@ I won't host harassment, threats, discriminatory abuse, unwanted sexual
 attention, doxxing, impersonation or spam. I ask you not to post anybody's
 private documents or personal details, including your own sensitive files.
 I apply these expectations in Prepare's issues, pull requests, discussions
-and other project spaces I manage—not as a test of your opinions elsewhere.
+and other project spaces I manage; not as a test of your opinions elsewhere.
 
 ## What happens when something goes wrong
 

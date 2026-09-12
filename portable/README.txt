@@ -1,4 +1,4 @@
-Prepare Portable 0.7.0-beta.1 — Goni Sulaiman
+Prepare Portable 0.7.0-beta.1; Goni Sulaiman
 
 QUICK START
 Extract the whole ZIP. Open Prepare-Portable/index.html in a current desktop

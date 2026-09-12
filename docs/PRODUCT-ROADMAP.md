@@ -1,10 +1,10 @@
 # From documents to readiness
 
-This is a staged product program, not a promise that all capabilities exist.
-The detailed 100-entry backlog remains in ROADMAP-100.md; stages below organize
-future investment by dependencies and evidence, not an arbitrary feature count.
+This roadmap describes planned work, not shipped capabilities.
+The detailed 100-entry backlog remains in ROADMAP-100.md. The stages below
+follow dependencies and test evidence rather than a target feature count.
 
-## 1. Shared foundation — in progress
+## 1. Shared foundation (in progress)
 
 Shipped source: UI-independent document model, tri-state rules, versioned profiles,
 strict JSON validation, bounded undo/redo, cancellable model workflows, bounded
@@ -37,7 +37,7 @@ batch manifests, resumable jobs, deterministic conflict handling and atomic loca
 exports. Golden fixtures must verify actual content and visual regressions.
 Workflow dry runs remain distinct from rendered/exported output.
 
-## 5. First-class platform products
+## 5. Platform apps
 
 Desktop: choose thin native shells and reusable codec bindings; benchmark cold
 start, peak memory, packaging and accessibility on x64/ARM64 hardware. A browser
@@ -47,7 +47,7 @@ physical-device testing; prototype iOS/iPadOS with Files and VoiceOver before
 claiming support. No store submissions or enrollment spending without owner setup.
 Web: share engine behavior while preserving CSP and no-network document handling.
 
-## 6. Extensible ecosystem
+## 6. CLI, adapters and extensions
 
 Stable CLI exit/schema contract; typed adapter capabilities; allowlisted plugins;
 profile import provenance; threat-modeled extension isolation. No marketplace or
@@ -65,6 +65,6 @@ hardware and fixture dimensions; never generalize a small benchmark to all files
 
 Acrobat and PDF Expert emphasize broad editing; PDF24 and Stirling PDF expose many
 tools; OCRmyPDF adds searchable layers and Ghostscript/ImageMagick enable expert
-pipelines. The opportunity here is a transparent readiness contract: requirements,
-measured evidence, reversible remedies and verified output, working locally.
+pipelines. Filecraft aims to connect requirements, measured checks, reversible changes
+and verified output in a local workflow.
 This is a product hypothesis, not a claim competitors lack every such capability.
