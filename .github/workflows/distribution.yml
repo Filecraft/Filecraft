@@ -31,7 +31,7 @@ jobs:
         run: python -m unittest discover -s distribution/tests -v
       - name: Linux native display dependencies
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y xvfb python3-tk xdotool scrot openbox libxss1 libxft2 libfontconfig1
+        run: sudo apt-get update && sudo apt-get install -y xvfb python3-tk xdotool x11-utils scrot openbox libxss1 libxft2 libfontconfig1
       - name: Native desktop regression Linux
         if: runner.os == 'Linux'
         run: xvfb-run -a python -m unittest discover -s desktop/tests -v

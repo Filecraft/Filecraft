@@ -18,7 +18,7 @@ int wmain(int argc,wchar_t **argv){
  if(!SetTokenInformation(restricted,TokenIntegrityLevel,&label,sizeof(label)+GetLengthSid(medium)))return fail(L"Set medium integrity");
  wchar_t command[32768];if(swprintf_s(command,32768,L"\"%ls\" -NoProfile -ExecutionPolicy RemoteSigned -File \"%ls\"",argv[1],argv[2])<0)return 2;
  STARTUPINFOW si={sizeof(si)};PROCESS_INFORMATION pi={0};si.lpDesktop=L"winsta0\\default";
- if(!CreateProcessAsUserW(restricted,argv[1],command,NULL,NULL,FALSE,0,NULL,NULL,&si,&pi))return fail(L"CreateProcessAsUser");
+ if(!CreateProcessAsUserW(restricted,argv[1],command,NULL,NULL,FALSE,CREATE_NEW_CONSOLE,NULL,NULL,&si,&pi))return fail(L"CreateProcessAsUser");
  DWORD wait=WaitForSingleObject(pi.hProcess,600000),code=1;
  if(wait==WAIT_OBJECT_0)GetExitCodeProcess(pi.hProcess,&code);else {TerminateProcess(pi.hProcess,1);fwprintf(stderr,L"Restricted test timeout\n");}
  CloseHandle(pi.hThread);CloseHandle(pi.hProcess);CloseHandle(restricted);CloseHandle(original);LocalFree(admin);LocalFree(power);LocalFree(medium);return (int)code;

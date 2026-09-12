@@ -22,6 +22,7 @@ try {
     Stop-Transcript | Out-Null
     Set-Content '$res' '0'
 } catch {
+    Stop-Transcript -ErrorAction SilentlyContinue | Out-Null
     `$_ | Out-String | Add-Content '$log'
     Set-Content '$res' '1'
     exit 1
