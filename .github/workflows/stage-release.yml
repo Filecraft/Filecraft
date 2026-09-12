@@ -35,7 +35,7 @@ jobs:
           assert re.fullmatch(r'v[0-9A-Za-z.-]+',tag)
           def api(path):return json.loads(subprocess.check_output(['gh','api','repos/Filecraft/Filecraft/'+path]))
           r=api('actions/runs/'+run);assert r['head_sha']==sha and r['conclusion']=='success' and r['name']=='Desktop suite'
-          release=api('releases/tags/'+tag);assert release['draft']
+          release=next(r for r in api('releases?per_page=100') if r['tag_name']==tag);assert release['draft']
           PY
       - uses: actions/download-artifact@v4
         with:
