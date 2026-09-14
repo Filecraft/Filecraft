@@ -153,6 +153,43 @@ inventory" and the macOS filter never filtered. Fixed, with a regression test
 that fails if the button, card and detection vocabularies drift apart
 (`filecraft.github.io` commit `d5e1e43`), and verified against the live site.
 
+## The Mac architecture is now a choice, not a guess
+
+The landing hero and the download page led with one macOS build chosen from a
+best-effort signal: the GPU renderer when readable, otherwise a client hint
+that reports the default `x86` whenever it is withheld. The guess was invisible
+and final, so a Mac visitor could be served the wrong architecture with no way
+back. Both places now lead with the likely build and carry an Apple Silicon /
+Intel chooser beside it, driven by the one shared decision. Choosing an
+architecture repoints the hero target and label, leads the download list with
+the matching build and marks it recommended; the other build stays in the
+list, one click away.
+
+The static markup is unchanged for visitors without JavaScript: the hero keeps
+the Windows default and the chooser stays hidden, and every published package
+remains listed and linked. No new translation was invented; the chooser group
+is named from the existing localised "Downloads" string.
+
+Two real defects were found and fixed while wiring this up: `platform.js` had a
+duplicated declaration that made the page script fail to parse, and the reorder
+used a static query snapshot, so the chosen build landed second in the list
+rather than first.
+
+Verified in a real browser against a local build and then against the live
+origin after deployment (`filecraft.github.io` commit `2a73f23`):
+
+- A Mac visitor sees the chooser; one click switches the hero and the list in
+  both directions, and clicking the chooser never starts a download by itself.
+- The layout holds at 1440 px and 390 px with no horizontal overflow, and the
+  selected chip inverts correctly in light and dark mode.
+- Windows, Linux, Android, iOS and unknown visitors keep the plain platform
+  default with the chooser hidden.
+- The deployed `platform.js` is byte-identical to the committed one, and both
+  DMGs fetched anonymously from the advertised links match the manifest size
+  and SHA-256 exactly (`...arm64.dmg` 30,216,361 bytes, `...x86_64.dmg`
+  31,705,887 bytes).
+- Covered by a new behavioural regression test in the site CI workflow.
+
 ## Previously verified releases
 
 - The public `v0.10.0-beta.1` release was re-verified independently on
