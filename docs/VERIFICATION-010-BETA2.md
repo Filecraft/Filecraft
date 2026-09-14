@@ -73,6 +73,25 @@ against the published `release-manifest.json`:
   `b6af9eef…` and then to commit `2185272…`, matching `source_commit` in the
   manifest.
 
+## Live site verification after deployment
+
+The website was published and then checked from the outside, anonymously, on the
+live origin rather than against the local build:
+
+- `/download/` presents the current beta and no longer offers a beta.1 download.
+- All four cards render, each labelled with its real format (Download DMG,
+  Download EXE, Download DEB) instead of every artifact being called a ZIP.
+- Every advertised link resolves with HTTP 200, and the bytes served hash to the
+  checksum advertised on the page, which is the digest read back from the
+  published sidecar.
+- The filter buttons, the card platform values and `platform.js` use one
+  platform vocabulary, so a macOS visitor sees the macOS installers.
+- `/releases/` still marks the current release and keeps the earlier betas, so
+  the historical archive is intact.
+
+The site's own `Static site checks` workflow passed on the publishing commit
+(`db913c6`), and the deployed result was verified live rather than assumed.
+
 ## Two compatibility notes on the published assets
 
 Both are naming/encoding fixes only. No artifact byte changed and no digest
