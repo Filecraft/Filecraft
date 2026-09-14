@@ -1,26 +1,49 @@
 """Qualify an installed macOS consumer DMG through real OS input.
 
-Installs the app from the DMG under test, launches the installed bundle, drives
-the file picker and the save panel with synthetic events addressed to that
-process only, then checks the exported bytes, the untouched original, a clean
-quit and a relaunch. Windows and Linux use distribution/test_installed_gui.py;
-this is the macOS equivalent and exists because macOS CI can only record
-gui_export_tested: false without it.
+Installs the app from the DMG under test, launches the installed bundle, and
+drives a real user journey through the OS: open a document via the file
+panel, export a new copy via the save panel, verify the exported pixels and
+the untouched original, then quit and relaunch. Windows and Linux use
+distribution/test_installed_gui.py; this is the macOS equivalent and exists
+because macOS CI can only record gui_export_tested: false without it.
 
-Requires macOS Accessibility permission for the process that runs this script
-(and a process started after that grant). CGPreflightPostEventAccess can report
-stale results after a host restart, so the harness does not trust it: before
-the GUI journey it proves synthetic-input capability with a live delivery probe
-(a Tk child that records the keys posted to its PID). It never grants itself
-permission, never disables Gatekeeper and never asks for a password. Run it on
-an unlocked desktop.
+Input stack (each capability is proven live before use, never assumed):
+- System Events (Accessibility) brings the app frontmost and parks its
+  window at a known position, removing z-order ambiguity.
+- Synthetic keyboard and mouse events are posted at kCGSessionEventTap --
+  the same route hardware events take. PID-targeted events
+  (CGEventPostToPid) are dropped by the window server for Tk apps and are
+  deliberately not used.
+- Panels are driven through the Go-to-Folder sheet on the Accessibility
+  surface: the sheet's text field value is set and read back before it is
+  committed, so navigation never depends on keystroke races. The open panel is
+  given the full file path, which opens that exact file in one step, with a
+  directory-plus-row fallback.
+- The export button is found by its own on-screen label, OCR'd from a crop of a
+  *full-screen* capture (a `screencapture -l` window capture includes the window
+  shadow, which shifts pixel coordinates and misplaces clicks). The layout
+  measurement only narrows the search, so a label that also appears in prose is
+  not mistaken for the button.
+- File panels are located with include_sheets: macOS presents them at a
+  non-zero window layer (observed at layer 8), so a layer-0-only listing never
+  sees them.
+- A delivery probe that must receive a virtual F13 keycode (a key no human
+  presses during the run) gates the whole journey, so the user's own typing
+  can never be mistaken for synthetic input.
+
+Requires macOS Accessibility permission for the host application, granted
+before it started; Screen Recording permission is required (the navigation
+servos off screenshots). The harness never grants itself permission, never
+disables Gatekeeper and never asks for a password. Run it on an unlocked
+desktop.
 
     python3 distribution/macos/test-installed-gui.py \
         --dmg build/qualified-beta2/release/Filecraft-0.10.0-beta.2-macos-arm64.dmg \
         --arch arm64 --source 2185272 --evidence build/gui-evidence
 
---dry-run performs the DMG, install, launch and coordinate-calibration steps
-only, which is useful on hosts that have no Accessibility grant yet.
+--dry-run performs the DMG, install, launch and calibration steps only.
+--human-driven lets the human perform the journey while the harness still
+verifies the bytes, quit and relaunch programmatically.
 """
 from __future__ import annotations
 
@@ -29,6 +52,7 @@ import hashlib
 import json
 import os
 import plistlib
+import re
 import shutil
 import signal
 import subprocess
@@ -42,9 +66,10 @@ APP_NAME = 'Filecraft.app'
 BUNDLE_ID = 'io.github.filecraft.desktop'
 EXECUTABLE = 'Contents/MacOS/Filecraft-Desktop'
 WINDOW_POLL_SECONDS = 40
-EXPORT_WAIT_SECONDS = 60
+EXPORT_WAIT_SECONDS = 120
 HUMAN_WAIT_SECONDS = 300
-KEY_CMD, KEY_SHIFT, KEY_Q, KEY_G, KEY_A, KEY_HOME, KEY_END, KEY_BACKSPACE, KEY_RETURN = 55, 56, 12, 5, 0, 115, 119, 51, 36
+WINDOW_X, WINDOW_Y = 260, 160
+F13_KEYCODE = 105
 
 
 def run(args, **kw):
@@ -59,24 +84,111 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def capture_step(evidence: Path, name: str) -> str:
+    """Save a screenshot of the current display as step evidence (optional)."""
+    target = evidence / f'step-{name}.png'
+    try:
+        result = subprocess.run(['screencapture', '-x', str(target)],
+                                capture_output=True, text=True, timeout=15)
+        if result.returncode == 0 and target.exists() and target.stat().st_size > 0:
+            return str(target)
+    except (subprocess.SubprocessError, OSError):
+        pass
+    return 'unavailable'
+
+
+def osascript(script: str, timeout: int = 45) -> str:
+    result = subprocess.run(['osascript', '-e', script],
+                            capture_output=True, text=True, timeout=timeout)
+    if result.returncode != 0:
+        raise RuntimeError(f'osascript failed: {result.stderr.strip()[:300]}')
+    return result.stdout.strip()
+
+
+def ax_place_window(pid: int, x: float, y: float) -> tuple:
+    """Bring the app frontmost and park its window at (x, y) via the
+    Accessibility surface (System Events), returning the confirmed frame."""
+    script = ('tell application "System Events"\n'
+              f'    tell (first process whose unix id is {pid})\n'
+              '        set frontmost to true\n'
+              '        delay 0.5\n'
+              f'        set position of window 1 to {{{int(x)}, {int(y)}}}\n'
+              '        delay 0.3\n'
+              '        set p to position of window 1\n'
+              '        set s to size of window 1\n'
+              '        return ((item 1 of p) as string) & "," & (item 2 of p) & "," & '
+              '(item 1 of s) & "," & (item 2 of s)\n'
+              '    end tell\n'
+              'end tell')
+    values = osascript(script).split(',')
+    return tuple(float(v) for v in values)
+
+
+def ocr_text(image: Path) -> str:
+    try:
+        out = subprocess.run(['tesseract', str(image), 'stdout'],
+                             capture_output=True, timeout=60)
+        raw = out.stdout
+        if isinstance(raw, bytes):
+            raw = raw.decode('utf-8', 'replace')
+        return raw
+    except (OSError, subprocess.SubprocessError):
+        return ''
+
+
+def ocr_locate(image: Path, needle: str, panel_only: bool = True):
+    """Return the logical-screen centre of the first OCR match, or None.
+    Panel-only restricts to the open panel's column area."""
+    try:
+        out = subprocess.run(['tesseract', str(image), 'stdout', 'tsv'],
+                             capture_output=True, timeout=60)
+        tsv = out.stdout.decode('utf-8', 'replace') if isinstance(out.stdout, bytes) else out.stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+    for line in tsv.splitlines()[1:]:
+        parts = line.split('\t')
+        if len(parts) == 12 and parts[11].strip():
+            x, y, w, h = (int(parts[i]) for i in (6, 7, 8, 9))
+            lx, ly = (x + w / 2) / 2.0, (y + h / 2) / 2.0  # screenshots are 2x
+            if panel_only and not (lx > 430 and 180 < ly < 620):
+                continue
+            if needle.lower() in parts[11].strip().lower():
+                return (lx, ly)
+    return None
+
+
 class QuartzDriver:
-    """Synthetic input addressed to one process, never to the whole desktop."""
+    """Synthetic input posted at the session event tap."""
 
     def __init__(self):
         import Quartz  # noqa: PLC0415 - imported late so --help works without pyobjc
+        from AppKit import NSRunningApplication  # noqa: PLC0415
         self.q = Quartz
+        self._nsapp = NSRunningApplication
 
-    def window_bounds(self, pid: int):
+    def activate(self, pid: int):
+        app = self._nsapp.runningApplicationWithProcessIdentifier_(pid)
+        app.activateWithOptions_(1)
+
+    def window_bounds(self, pid: int, include_sheets: bool = False):
+        """On-screen windows owned by pid.
+
+        include_sheets is required for file panels: macOS presents them as
+        sheets at a non-zero window layer (observed at layer 8), so a
+        layer-0-only listing never sees the open or save panel at all.
+        """
         listing = self.q.CGWindowListCopyWindowInfo(
             self.q.kCGWindowListOptionOnScreenOnly | self.q.kCGWindowListExcludeDesktopElements,
             self.q.kCGNullWindowID)
         found = []
         for window in listing:
-            if window.get('kCGWindowOwnerPID') != pid or window.get('kCGWindowLayer') != 0:
+            if window.get('kCGWindowOwnerPID') != pid:
+                continue
+            if not include_sheets and window.get('kCGWindowLayer') != 0:
                 continue
             bounds = dict(window['kCGWindowBounds'])
             found.append(({key: bounds[key] for key in ('X', 'Y', 'Width', 'Height')},
-                          window.get('kCGWindowName')))
+                          window.get('kCGWindowName'), window.get('kCGWindowNumber')))
         return found
 
     def wait_window(self, pid: int, seconds: float = WINDOW_POLL_SECONDS, minimum: int = 1):
@@ -88,23 +200,36 @@ class QuartzDriver:
             time.sleep(0.2)
         return []
 
-    def click(self, pid: int, point):
-        for kind in (self.q.kCGEventLeftMouseDown, self.q.kCGEventLeftMouseUp):
-            event = self.q.CGEventCreateMouseEvent(None, kind, point, self.q.kCGMouseButtonLeft)
-            self.q.CGEventPostToPid(pid, event)
+    def click(self, point, double=False):
+        q = self.q
+        move = q.CGEventCreateMouseEvent(None, q.kCGEventMouseMoved, point, q.kCGMouseButtonLeft)
+        q.CGEventPost(q.kCGSessionEventTap, move)
+        time.sleep(0.15)
+        clicks = (1, 1) if not double else (1, 2)
+        for click_state in clicks:
+            for kind in (q.kCGEventLeftMouseDown, q.kCGEventLeftMouseUp):
+                event = q.CGEventCreateMouseEvent(None, kind, point, q.kCGMouseButtonLeft)
+                q.CGEventSetIntegerValueField(event, q.kCGMouseEventClickState, click_state)
+                q.CGEventPost(q.kCGSessionEventTap, event)
+                time.sleep(0.08)
+            if click_state == 1 and double:
+                time.sleep(0.15)
 
-    def key(self, pid: int, code: int, flags: int = 0):
+    def key(self, code: int, flags: int = 0):
         for down in (True, False):
             event = self.q.CGEventCreateKeyboardEvent(None, code, down)
             if flags:
                 self.q.CGEventSetFlags(event, flags)
-            self.q.CGEventPostToPid(pid, event)
+            self.q.CGEventPost(self.q.kCGSessionEventTap, event)
+            time.sleep(0.04)
 
-    def text(self, pid: int, value: str):
+    def text(self, value: str):
         event = self.q.CGEventCreateKeyboardEvent(None, 0, True)
         self.q.CGEventKeyboardSetUnicodeString(event, len(value), value)
-        self.q.CGEventPostToPid(pid, event)
-        self.q.CGEventPostToPid(pid, self.q.CGEventCreateKeyboardEvent(None, 0, False))
+        self.q.CGEventPost(self.q.kCGSessionEventTap, event)
+        time.sleep(0.05)
+        up = self.q.CGEventCreateKeyboardEvent(None, 0, False)
+        self.q.CGEventPost(self.q.kCGSessionEventTap, up)
 
 
 def widget_offsets() -> dict:
@@ -163,27 +288,28 @@ def probe_event_delivery(driver: QuartzDriver) -> dict:
 
     The preflight API can be stale for restarted hosts, so the capability gate
     is this probe: a Tk child records every key it receives while the harness
-    posts a virtual keycode and a unicode string to its PID. Capability is
-    proven, not assumed, and the probe's verdict is recorded as evidence.
+    activates it and posts a virtual F13 keycode at the session tap. Only a
+    delivered F13 proves synthetic input; any other key could be the user's
+    own typing if the probe window took focus, so it is never evidence.
     """
     script = (
         "import json,sys,tkinter as tk\n"
         "out=sys.argv[1]\n"
         "got=[]\n"
         "root=tk.Tk();root.title('Filecraft delivery probe');root.geometry('240x120+120+120')\n"
-        "root.bind('<Key>',lambda e:got.append(e.keysym))\n"
-        "def flush():open(out,'w').write(json.dumps(got))\n"
-        "root.bind('<Key>',lambda e:(got.append(e.keysym),flush()))\n"
-        "root.after(15000,root.destroy);root.update();root.focus_force();root.mainloop()\n"
+        "root.bind('<Key>',lambda e:(got.append(e.keysym),open(out,'w').write(json.dumps(got))))\n"
+        "root.after(15000,root.destroy);root.update();root.mainloop()\n"
     )
     out = Path(tempfile.mkdtemp()) / 'received.json'
     proc = subprocess.Popen([sys.executable, '-c', script, str(out)])
     try:
         if driver.wait_window(proc.pid, seconds=15):
+            time.sleep(0.6)
+            driver.activate(proc.pid)
             time.sleep(0.8)
-            driver.key(proc.pid, 105)  # F13: a keycode no human presses during the run
-            time.sleep(0.5)
-            driver.key(proc.pid, 105)
+            for _ in range(3):
+                driver.key(F13_KEYCODE)
+                time.sleep(0.4)
             for _ in range(30):
                 if out.exists():
                     break
@@ -195,9 +321,8 @@ def probe_event_delivery(driver: QuartzDriver) -> dict:
         except subprocess.TimeoutExpired:
             proc.kill()
     received = json.loads(out.read_text()) if out.exists() else []
-    # Only a delivered F13 proves synthetic input; any other key could be the
-    # user's own typing if the probe window took focus, so it is not evidence.
-    return {'delivered': 'F13' in received, 'received': received}
+    return {'delivered': 'F13' in received, 'f13_count': received.count('F13'),
+            'received': received[:10]}
 
 
 def main() -> int:
@@ -218,6 +343,13 @@ def main() -> int:
     args = parser.parse_args()
 
     args.evidence.mkdir(parents=True, exist_ok=True)
+
+    def save() -> None:
+        """Persist the record after every step, so a slow, interrupted or
+        timed-out run still leaves the evidence it actually gathered."""
+        (args.evidence / 'result.json').write_text(
+            json.dumps(record, indent=2, default=str) + '\n')
+
     record = {
         'harness': 'distribution/macos/test-installed-gui.py',
         'candidate': args.dmg.name,
@@ -228,7 +360,7 @@ def main() -> int:
         'integration': 'rosetta-translated' if args.translated else 'native',
         'host': run(['uname', '-m']).stdout.strip(),
         'steps': {},
-        'screenshots': 'not captured: no Screen Recording permission for this process',
+        'screenshots': {},
     }
     if not args.dmg.exists():
         record['status'] = 'FAILED: DMG not found'
@@ -238,8 +370,9 @@ def main() -> int:
 
     try:
         import Quartz  # noqa: F401
+        import AppKit  # noqa: F401
     except ImportError:
-        record['status'] = 'FAILED: pyobjc Quartz is unavailable in this interpreter'
+        record['status'] = 'FAILED: pyobjc Quartz/AppKit unavailable in this interpreter'
         (args.evidence / 'result.json').write_text(json.dumps(record, indent=2) + '\n')
         print(record['status'])
         return 2
@@ -252,6 +385,8 @@ def main() -> int:
         preflight = bool(ctypes.cdll.LoadLibrary(
             '/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics').CGPreflightPostEventAccess())
     record['post_event_access_preflight'] = preflight
+    record['preflight_note'] = ('preflight can be stale after a host restart; the live delivery '
+                                'probe below is the capability gate')
     record['event_delivery_probe'] = probe_event_delivery(driver)
 
     installed = args.install_root / APP_NAME
@@ -263,6 +398,7 @@ def main() -> int:
         assert (mount / 'Applications').is_symlink() and (mount / 'Applications').readlink() == Path('/Applications')
         assert (mount / '.DS_Store').is_file()
         record['steps']['dmg_layout'] = 'Applications symlink and Finder layout present'
+        save()
 
         leftover = subprocess.run(['pgrep', '-f', str(installed)], capture_output=True, text=True).stdout.split()
         for pid in leftover:
@@ -300,6 +436,7 @@ def main() -> int:
         offsets = widget_offsets()
         scale = measure_scale(driver)
         record['steps']['layout'] = {'button_offsets_px': offsets, 'screen_scale': scale}
+        save()
 
         samples = args.evidence / 'samples'
         samples.mkdir(exist_ok=True)
@@ -310,15 +447,245 @@ def main() -> int:
         before = sha256(source_image)
 
         def launch():
-            proc = subprocess.Popen([str(binary)])
+            proc = subprocess.Popen([str(binary)], cwd=str(samples.resolve()),
+                                    stdout=subprocess.DEVNULL,
+                                    stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
             bounds = driver.wait_window(proc.pid)
             if not bounds:
                 raise RuntimeError('installed app produced no window')
-            return proc, bounds
+            time.sleep(0.8)
+            frame = ax_place_window(proc.pid, WINDOW_X, WINDOW_Y)
+            return proc, frame
 
-        proc, bounds = launch()
-        record['steps']['launch'] = {'pid': proc.pid, 'window_bounds': bounds[0][0],
-                                     'windows_visible': len(bounds)}
+        def screenshot() -> Path:
+            path = args.evidence / f'step-{time.time_ns()}.png'
+            subprocess.run(['screencapture', '-x', str(path)], capture_output=True, timeout=15)
+            return path
+
+        def se_keystroke(pid: int, text: str, command: bool = False,
+                         shift: bool = False, timeout: int = 45):
+            """Type into the app via System Events (Accessibility surface)."""
+            mods = (['command down'] if command else []) + (['shift down'] if shift else [])
+            mod = ' using {' + ', '.join(mods) + '}' if mods else ''
+            script = ('tell application "System Events"\n'
+                      f'    tell (first process whose unix id is {pid})\n'
+                      '        set frontmost to true\n'
+                      '        delay 0.3\n'
+                      f'        keystroke "{text}"{mod}\n'
+                      '    end tell\n'
+                      'end tell')
+            osascript(script, timeout=timeout)
+
+        def se_key_code(code: int, timeout: int = 45):
+            osascript(f'tell application "System Events" to key code {code}',
+                      timeout=timeout)
+
+        def capture_window(win, name: str) -> Path:
+            """Occlusion-proof capture of a single window (id in win[2])."""
+            path = args.evidence / f'step-{name}.png'
+            subprocess.run(['screencapture', '-x', f'-l{win[2]}', str(path)],
+                           capture_output=True, timeout=15)
+            return path
+
+        def win_ocr_first(win, needle: str, attempts: int = 4):
+            """Locate needle inside one window via OCR of its own image;
+            return the global click point (screen coordinates) or None."""
+            from PIL import Image  # noqa: PLC0415
+            frame = win[0]
+            for attempt in range(attempts):
+                path = capture_window(win, f'ocr-{needle.replace(".", "-")}-{attempt}')
+                if not path.exists() or path.stat().st_size == 0:
+                    time.sleep(1.2)
+                    continue
+                try:
+                    img_w = Image.open(path).size[0]
+                except OSError:
+                    return None
+                try:
+                    out = subprocess.run(['tesseract', str(path), 'stdout', 'tsv'],
+                                         capture_output=True, timeout=60)
+                    tsv = out.stdout.decode('utf-8', 'replace') if isinstance(out.stdout, bytes) else out.stdout
+                except (OSError, subprocess.SubprocessError):
+                    return None
+                hits = []
+                for line in tsv.splitlines()[1:]:
+                    parts = line.split('\t')
+                    if len(parts) == 12 and parts[11].strip() and needle.lower() in parts[11].strip().lower():
+                        x, y, w, h = (int(parts[i]) for i in (6, 7, 8, 9))
+                        hits.append((x + w / 2, y + h / 2))
+                if hits and img_w and frame['Width']:
+                    px_scale = float(img_w) / float(frame['Width'])
+                    px, py = hits[-1]
+                    return (frame['X'] + px / px_scale, frame['Y'] + py / px_scale)
+                time.sleep(1.2)
+            return None
+
+        def screen_scale_factor() -> float:
+            """Backing scale: display pixels per point (2.0 on Retina hosts).
+
+            Needed because a full-screen capture is in pixels while window
+            frames and CGEvent coordinates are in points."""
+            points = driver.q.CGDisplayBounds(driver.q.CGMainDisplayID()).size.width
+            shot = args.evidence / 'scale-probe.png'
+            subprocess.run(['screencapture', '-x', str(shot)], capture_output=True, timeout=15)
+            try:
+                from PIL import Image  # noqa: PLC0415
+                with Image.open(shot) as img:
+                    width = img.size[0]
+            except (OSError, ImportError):
+                return 1.0
+            # CGDisplayPixelsWide reports points on current macOS, so the scale
+            # is measured from a real capture: pixels per point (2.0 on Retina).
+            return float(width) / float(points) if points else 1.0
+
+        def screen_ocr_in(frame, needle: str, attempts: int = 3, near=None):
+            """Global click point of needle inside a known window frame.
+
+            Deliberately OCRs a crop of a *full-screen* capture rather than a
+            `screencapture -l` window capture: window captures include the
+            window shadow, which shifts every pixel coordinate and silently
+            misplaces synthetic clicks. Screen captures carry no such offset.
+            """
+            from PIL import Image  # noqa: PLC0415
+            factor = screen_scale_factor()
+            for _ in range(attempts):
+                shot = args.evidence / f'screen-{time.time_ns()}.png'
+                subprocess.run(['screencapture', '-x', str(shot)], capture_output=True, timeout=15)
+                if not shot.exists() or shot.stat().st_size == 0:
+                    time.sleep(1.2)
+                    continue
+                crop_path = shot.with_name(shot.stem + '-crop.png')
+                with Image.open(shot) as img:
+                    box = (int(frame['X'] * factor), int(frame['Y'] * factor),
+                           int((frame['X'] + frame['Width']) * factor),
+                           int((frame['Y'] + frame['Height']) * factor))
+                    img.crop(box).save(crop_path)
+                out = subprocess.run(['tesseract', str(crop_path), 'stdout', 'tsv'],
+                                     capture_output=True, timeout=60)
+                tsv = (out.stdout.decode('utf-8', 'replace')
+                       if isinstance(out.stdout, bytes) else out.stdout)
+                hits = []
+                for line in tsv.splitlines()[1:]:
+                    parts = line.split('\t')
+                    if (len(parts) == 12 and parts[11].strip()
+                            and needle.lower() in parts[11].strip().lower()):
+                        x, y, w, h = (int(parts[i]) for i in (6, 7, 8, 9))
+                        hits.append((x + w / 2, y + h / 2))
+                if hits:
+                    if near is not None:
+                        # Several labels can contain the same word (a button and
+                        # a sentence in a disclaimer); pick the match nearest the
+                        # approximate location the layout measurement predicted.
+                        hint = ((near[0] - frame['X']) * factor,
+                                (near[1] - frame['Y']) * factor)
+                        px, py = min(hits, key=lambda h: (h[0] - hint[0]) ** 2 +
+                                     (h[1] - hint[1]) ** 2)
+                    else:
+                        px, py = hits[-1]
+                    return (frame['X'] + px / factor, frame['Y'] + py / factor)
+                time.sleep(1.2)
+            return None
+
+        def panel_goto(pid: int, directory: Path):
+            """Drive the Go-to-Folder sheet of the frontmost open/save panel:
+            the sheet's text field is set and read back over Accessibility
+            before it is committed, so a keystroke race can never send the
+            panel to a stale pre-filled path."""
+            se_keystroke(pid, 'g', command=True, shift=True)
+            time.sleep(1.8)
+            # The go-to sheet sits at a different depth depending on the panel:
+            # the open panel's sheet hangs off a window, while the save panel is
+            # itself a sheet, so its go-to sheet is nested one level deeper.
+            candidates = []
+            for win_idx in (1, 2, 3):
+                candidates.append(f'sheet 1 of window {win_idx}')
+                candidates.append(f'sheet 1 of sheet 1 of window {win_idx}')
+                candidates.append(f'sheet 1 of sheet 1 of sheet 1 of window {win_idx}')
+            for candidate in candidates:
+                script = ('tell application "System Events"\n'
+                          f'    tell (first process whose unix id is {pid})\n'
+                          '        try\n'
+                          f'            set sh to {candidate}\n'
+                          f'            set value of text field 1 of sh to "{directory}"\n'
+                          '            delay 0.4\n'
+                          '            return value of text field 1 of sh\n'
+                          '        on error errMsg\n'
+                          '            return "ERR: " & errMsg\n'
+                          '        end try\n'
+                          '    end tell\n'
+                          'end tell')
+                value = osascript(script)
+                if not value.startswith('ERR'):
+                    if value != str(directory):
+                        raise RuntimeError(f'goto sheet readback mismatch: {value!r}')
+                    se_key_code(36)  # Return commits the sheet
+                    time.sleep(3.0)
+                    return
+            raise RuntimeError('go-to sheet did not appear in any app window')
+
+        def ax_select_row(pid: int, name: str) -> str:
+            """Fallback: select a file row via the panel's Accessibility
+            browser columns -- no screen coordinates involved at all."""
+            template = (
+                'tell application "System Events"\n'
+                '    tell (first process whose unix id is @PID@)\n'
+                '        try\n'
+                '            set lst to missing value\n'
+                '            try\n'
+                '                set lst to list 1 of scroll area @COL@ of scroll area 1 of browser 1 of UI element 3 of UI element 1 of window 1\n'
+                '            end try\n'
+                '            if lst is missing value then\n'
+                '                try\n'
+                '                    set lst to outline 1 of scroll area @COL@ of scroll area 1 of browser 1 of UI element 3 of UI element 1 of window 1\n'
+                '                end try\n'
+                '            end if\n'
+                '            if lst is missing value then\n'
+                '                return "NOCOL"\n'
+                '            end if\n'
+                '            set n to count UI elements of lst\n'
+                '            repeat with i from 1 to n\n'
+                '                set e to UI element i of lst\n'
+                '                set v to "?"\n'
+                '                try\n'
+                '                    set v to value of static text 1 of e as string\n'
+                '                end try\n'
+                '                if v is "?" then\n'
+                '                    try\n'
+                '                        set v to value of text field 1 of e as string\n'
+                '                    end try\n'
+                '                end if\n'
+                '                if v is "@NAME@" then\n'
+                '                    set selected of e to true\n'
+                '                    return "SELECTED"\n'
+                '                end if\n'
+                '            end repeat\n'
+                '            return "NOTFOUND"\n'
+                '        on error errMsg\n'
+                '            return "ERR: " & errMsg\n'
+                '        end try\n'
+                '    end tell\n'
+                'end tell')
+            for col in range(1, 9):
+                script = (template.replace('@PID@', str(pid)).replace('@COL@', str(col))
+                                  .replace('@NAME@', name))
+                value = osascript(script, timeout=60)
+                if value in ('SELECTED', 'NOTFOUND'):
+                    return value
+            return 'NOTFOUND'
+
+        def click_open_button():
+            """Click the Choose file button from the app's own layout."""
+            point = (WINDOW_X + offsets['open'][0] / scale,
+                     WINDOW_Y + (offsets['open'][1] + 28) / scale)
+            driver.click(point)
+            time.sleep(2.5)
+
+        self_driver = driver
+
+        proc, frame = launch()
+        record['steps']['launch'] = {'pid': proc.pid, 'window_frame': frame}
+        record['screenshots']['launch'] = capture_step(args.evidence, 'launch')
+        save()
 
         if args.dry_run:
             proc.terminate()
@@ -353,8 +720,8 @@ def main() -> int:
             proc.wait(timeout=HUMAN_WAIT_SECONDS)
             assert proc.returncode == 0, proc.returncode
             record['steps']['quit'] = {'returncode': proc.returncode, 'driver': 'human'}
-            proc2, bounds2 = launch()
-            record['steps']['relaunch'] = {'pid': proc2.pid, 'window_bounds': bounds2[0][0]}
+            proc2, frame2 = launch()
+            record['steps']['relaunch'] = {'pid': proc2.pid, 'window_frame': frame2}
             print('Relaunched OK. Quit it with Cmd+Q to finish...')
             proc2.wait(timeout=HUMAN_WAIT_SECONDS)
             record['status'] = ('PASS (human-driven): installed GUI import/export, original '
@@ -365,7 +732,7 @@ def main() -> int:
             print('artifact sha256', record['artifact_sha256'])
             return 0
 
-        if not record['event_delivery_probe']['delivered'] and not args.human_driven:
+        if not record['event_delivery_probe']['delivered']:
             record['status'] = ('BLOCKED: the live delivery probe received no synthetic events, '
                                 'so OS input cannot be delivered. Grant Accessibility to the host '
                                 'application and restart it, then rerun, or use --human-driven.')
@@ -375,59 +742,154 @@ def main() -> int:
             print(record['status'])
             return 3
 
-        origin = bounds[0][0]
+        # ---- 1. open the file panel --------------------------------------
+        pre_windows = {w[2] for w in driver.window_bounds(proc.pid)}
+        click_open_button()
+        record['steps']['open_panel_clicked'] = True
+        panel_win = None
+        deadline = time.monotonic() + 15
+        while time.monotonic() < deadline and panel_win is None:
+            for w in driver.window_bounds(proc.pid, include_sheets=True):
+                if w[2] not in pre_windows and (w[1] or '').strip():
+                    panel_win = w
+                    break
+            time.sleep(0.4)
+        if panel_win is None:
+            record['screenshots']['panel_failure'] = capture_step(args.evidence, 'panel-failure')
+            raise RuntimeError('open panel window did not appear')
+        record['steps']['open_panel_window'] = {'title': panel_win[1], 'id': panel_win[2]}
+        save()
 
-        def press(widget, label):
-            """Click a widget and confirm a dialog appeared.
+        # ---- 2. open the file --------------------------------------------
+        # The Go-to-Folder sheet accepts a full file path and opens exactly
+        # that file, so the file is chosen without column drilling and without
+        # any guess about which column a row happens to be rendered in.
+        source_target = source_image.resolve()
+        panel_goto(proc.pid, source_target)
+        record['steps']['panel_navigation'] = {
+            'method': 'go-to sheet with the full file path (Accessibility readback)',
+            'target': str(source_target)}
+        save()
+        time.sleep(2.0)
+        se_key_code(36)  # the go-to sheet selects the file; Return opens it
+        time.sleep(3.0)
+        input_method = 'go-to full file path + Return'
 
-            CG window bounds include the title bar while the derived offsets are
-            content-relative, and Tk's frame convention is not guaranteed across
-            versions, so try the plausible vertical alignments and record the one
-            that actually opened a dialog instead of assuming.
-            """
-            baseline = len(driver.window_bounds(proc.pid))
-            for title_bar in (0, 32, -32):
-                point = (origin['X'] + offsets[widget][0] / scale,
-                         origin['Y'] + (offsets[widget][1] + title_bar) / scale)
-                driver.click(proc.pid, point)
-                if driver.wait_window(proc.pid, seconds=12, minimum=baseline + 1):
-                    record['steps'].setdefault('click_alignment', {})[label] = title_bar
+        def document_loaded() -> bool:
+            """The main window shows the loaded file and no placeholder."""
+            win = next((w for w in driver.window_bounds(proc.pid) if w[2] in pre_windows), None)
+            if win is None:
+                return False
+            text = ocr_text(capture_window(win, f'loaded-{time.time_ns()}'))
+            return source_image.name in text and 'No document selected' not in text
+
+        def wait_loaded() -> bool:
+            for _ in range(6):
+                if document_loaded():
                     return True
+                time.sleep(1.5)
             return False
 
-        if not press('open', 'file_picker'):
-            raise RuntimeError('clicking the open button opened no dialog')
-        time.sleep(1.0)
-        driver.key(proc.pid, KEY_G, flags=driver.q.kCGEventFlagMaskCommand | driver.q.kCGEventFlagMaskShift)
-        time.sleep(1.0)
-        driver.text(proc.pid, str(source_image))
-        time.sleep(1.0)
-        driver.key(proc.pid, KEY_RETURN)
-        time.sleep(1.5)
-        driver.key(proc.pid, KEY_RETURN)
+        loaded = wait_loaded()
+        if not loaded:
+            # Fallback: navigate to the directory, then pick the row.
+            panel_goto(proc.pid, samples.resolve())
+            row_point = screen_ocr_in(panel_win[0], 'source.png')
+            if row_point is not None:
+                record['steps']['file_row_selection'] = {'ocr': 'hit', 'point': list(row_point)}
+                driver.click(row_point)  # select the row
+                time.sleep(0.8)
+                se_key_code(36)  # then press Open
+                input_method = 'go-to directory + ocr row select + Open'
+            else:
+                selected = ax_select_row(proc.pid, 'source.png')
+                record['steps']['file_row_selection'] = {'ocr': 'missed', 'accessibility': selected}
+                if selected != 'SELECTED':
+                    record['screenshots']['row_failure'] = str(
+                        capture_window(panel_win, 'row-failure'))
+                    raise RuntimeError(f'source.png row not selectable: {selected}')
+                input_method = 'go-to directory + accessibility selection + Return'
+                se_key_code(36)
+            time.sleep(3.0)
+            loaded = wait_loaded()
+        if not loaded:
+            record['screenshots']['import_failure'] = capture_step(args.evidence, 'import-failure')
+            raise RuntimeError('document import not visually confirmed')
+        record['steps']['gui_import_navigation'] = {'method': input_method, 'navigated': True}
+        record['steps']['gui_import'] = {'filename_visible': True, 'placeholder_gone': True}
+        save()
 
-        if not press('save', 'save_panel'):
-            raise RuntimeError('clicking the export button opened no dialog')
-        time.sleep(1.2)
-        driver.key(proc.pid, KEY_A, flags=driver.q.kCGEventFlagMaskCommand)
-        driver.text(proc.pid, str(destination))
-        time.sleep(0.8)
-        driver.key(proc.pid, KEY_RETURN)
+        # ---- 4. export: click the export button, drive the save panel -----
+        # The export button is found by its own on-screen label. A measured
+        # offset is only the fallback: the layout differs once a document is
+        # loaded, and a stale offset clicks the wrong widget silently.
+        main_win = next((w for w in driver.window_bounds(proc.pid) if w[2] in pre_windows), None)
+        measured_export = (WINDOW_X + offsets['save'][0] / scale,
+                           WINDOW_Y + (offsets['save'][1] + 28) / scale)
+        export_point = (screen_ocr_in(main_win[0], 'Export', near=measured_export)
+                        if main_win else None)
+        if export_point is None:
+            export_point = measured_export
+            record['steps']['export_button'] = {'located': 'measured offset (label not found)'}
+        else:
+            record['steps']['export_button'] = {'located': 'on-screen label',
+                                                'point': list(export_point)}
+        driver.click(export_point)
+        time.sleep(2.5)
+        record['screenshots']['save_panel'] = capture_step(args.evidence, 'save-panel')
+        save()
 
+        def save_panel_attempt() -> None:
+            # The save panel's name field is focused by default; replace the
+            # suggested name, then save into the remembered directory.
+            se_keystroke(proc.pid, 'a', command=True)
+            time.sleep(0.4)
+            se_keystroke(proc.pid, destination.name)
+            time.sleep(0.6)
+            se_key_code(36)  # Return = Save
+            time.sleep(2.5)
+
+        def resolve_export():
+            """The saved file, allowing for the extension the save panel adds.
+
+            A save panel given a name that already ends in the chosen format's
+            extension appends it again, so the real output can be either the
+            requested path or that path with one more extension.
+            """
+            for candidate in (destination, samples / (destination.name + destination.suffix)):
+                if candidate.exists():
+                    return candidate
+            return None
+
+        produced = None
+        save_panel_attempt()
         deadline = time.monotonic() + EXPORT_WAIT_SECONDS
-        while not destination.exists() and time.monotonic() < deadline:
-            path_dir = destination.parent
-            driver.key(proc.pid, KEY_G, flags=driver.q.kCGEventFlagMaskCommand | driver.q.kCGEventFlagMaskShift)
-            time.sleep(1.0)
-            driver.text(proc.pid, str(path_dir))
-            driver.key(proc.pid, KEY_RETURN)
-            time.sleep(1.0)
-            driver.text(proc.pid, destination.name)
-            time.sleep(0.5)
-            driver.key(proc.pid, KEY_RETURN)
-            time.sleep(2.0)
-        if not destination.exists():
+        while produced is None and time.monotonic() < deadline:
+            produced = resolve_export()
+            if produced is None:
+                time.sleep(1.0)
+        if produced is None:
+            # Fall back to naming the full destination path through the save
+            # panel's go-to sheet, which sets folder and name in one step.
+            try:
+                panel_goto(proc.pid, destination)
+                time.sleep(1.5)
+                se_key_code(36)  # Save
+            except RuntimeError:
+                panel_goto(proc.pid, samples.resolve())
+                save_panel_attempt()
+            for _ in range(20):
+                produced = resolve_export()
+                if produced is not None:
+                    break
+                time.sleep(1.0)
+        if produced is None:
+            record['screenshots']['export_failure'] = capture_step(args.evidence, 'export-failure')
             raise RuntimeError('GUI export produced no file')
+        destination = produced
+        record['steps']['export_file'] = {'path': str(destination),
+                                          'bytes': destination.stat().st_size}
+        save()
 
         with Image.open(destination) as exported, Image.open(source_image) as original:
             assert exported.size == (80, 60), exported.size
@@ -436,15 +898,35 @@ def main() -> int:
         record['steps']['gui_import_export'] = {'exported': str(destination), 'pixels_equal': True,
                                                 'original_unchanged': True}
 
-        driver.key(proc.pid, KEY_Q, flags=driver.q.kCGEventFlagMaskCommand)
-        proc.wait(timeout=20)
-        assert proc.returncode == 0, proc.returncode
-        record['steps']['quit'] = {'returncode': proc.returncode}
+        # ---- 5. quit and relaunch ----------------------------------------
+        def quit_via_cmd_q(p) -> int:
+            try:
+                se_keystroke(p.pid, 'q', command=True)
+            except RuntimeError:
+                pass
+            try:
+                p.wait(timeout=12)
+            except subprocess.TimeoutExpired:
+                # Cmd+Q never took effect: that is a qualification failure,
+                # not something to paper over with a synthetic success.
+                p.terminate()
+                try:
+                    p.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    p.kill()
+                    p.wait(timeout=10)
+            return p.returncode
 
-        proc2, bounds2 = launch()
-        record['steps']['relaunch'] = {'pid': proc2.pid, 'window_bounds': bounds2[0][0]}
-        driver.key(proc2.pid, KEY_Q, flags=driver.q.kCGEventFlagMaskCommand)
-        proc2.wait(timeout=20)
+        record['steps']['quit'] = {'returncode': quit_via_cmd_q(proc)}
+        save()
+        assert record['steps']['quit']['returncode'] == 0, record['steps']['quit']
+
+        proc2, frame2 = launch()
+        record['steps']['relaunch'] = {'pid': proc2.pid, 'window_frame': frame2}
+        save()
+        time.sleep(1.5)
+        record['steps']['relaunch_quit'] = {'returncode': quit_via_cmd_q(proc2)}
+        assert record['steps']['relaunch_quit']['returncode'] == 0, record['steps']['relaunch_quit']
 
         record['status'] = ('PASS: installed GUI import/export, original preserved, clean quit and '
                             'relaunch through OS input')
@@ -454,7 +936,7 @@ def main() -> int:
         return 0
     except Exception as error:  # noqa: BLE001 - recorded as evidence, never swallowed silently
         record['status'] = f'FAILED: {type(error).__name__}: {error}'
-        (args.evidence / 'result.json').write_text(json.dumps(record, indent=2) + '\n')
+        save()
         print(record['status'])
         return 1
     finally:

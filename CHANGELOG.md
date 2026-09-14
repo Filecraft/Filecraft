@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.0-beta.2; Qualified native installers
+
+- Primary consumer path is now a native installer per platform: macOS DMG (arm64 and x86_64), Windows x64 setup and Ubuntu 24.04 x64 DEB, each with a SHA-256 sidecar and a release manifest.
+- macOS installed-GUI qualification harness added; both architectures driven end to end against the exact artifacts (install, launch, import, export, exported-byte comparison, untouched original, quit, relaunch). The Intel artifact was exercised under Rosetta 2 and is recorded as translated, not as native Intel execution.
+- Windows evidence recorded under a restricted medium-integrity process token; Linux evidence under Xvfb/X11.
+- Download inventory gives platform detection and the filter buttons one canonical vocabulary, so a macOS visitor is no longer told no package exists.
+- Builds remain unsigned: macOS ad-hoc only and not notarized, Windows and Linux unsigned. No certificate, signature or notarization is claimed.
+
+
 ## 0.10.0-beta.1; Filecraft
 
 - Prospective identity migration to Filecraft and organization website; historical releases preserved.

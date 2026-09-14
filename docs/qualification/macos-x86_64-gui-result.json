@@ -1,0 +1,114 @@
+{
+  "harness": "distribution/macos/test-installed-gui.py",
+  "candidate": "Filecraft-0.10.0-beta.2-macos-x86_64.dmg",
+  "artifact_sha256": "b430cc66385bf58752759f7dc2ba214e651bb00793c27a65702e5fb75f2b10ae",
+  "artifact_bytes": 31705887,
+  "source_commit": "2185272",
+  "architecture": "x86_64",
+  "integration": "rosetta-translated",
+  "host": "arm64",
+  "steps": {
+    "dmg_layout": "Applications symlink and Finder layout present",
+    "previous_instances_terminated": [],
+    "previous_install_backed_up": "build/gui-x86_64/previous-Filecraft.app",
+    "installed": {
+      "bundle_id": "io.github.filecraft.desktop",
+      "architecture": "x86_64",
+      "signature_integrity": "codesign --verify --deep --strict passed",
+      "gatekeeper_accepted": false,
+      "signing": "ad-hoc, not notarized (per published metadata)"
+    },
+    "layout": {
+      "button_offsets_px": {
+        "open": [
+          79.5,
+          114.0
+        ],
+        "save": [
+          104.0,
+          624.0
+        ],
+        "content": [
+          1040,
+          780
+        ]
+      },
+      "screen_scale": 1.0
+    },
+    "launch": {
+      "pid": 91111,
+      "window_frame": [
+        260.0,
+        160.0,
+        1040.0,
+        812.0
+      ]
+    },
+    "open_panel_clicked": true,
+    "open_panel_window": {
+      "title": "Choose a local file",
+      "id": 4400
+    },
+    "panel_navigation": {
+      "method": "go-to sheet with the full file path (Accessibility readback)",
+      "target": "/Users/goni/Prepare/build/gui-x86_64/samples/source.png"
+    },
+    "gui_import_navigation": {
+      "method": "go-to full file path + Return",
+      "navigated": true
+    },
+    "gui_import": {
+      "filename_visible": true,
+      "placeholder_gone": true
+    },
+    "export_button": {
+      "located": "on-screen label",
+      "point": [
+        335.5,
+        816.5
+      ]
+    },
+    "export_file": {
+      "path": "build/gui-x86_64/samples/export-1789389852036498000.png.png",
+      "bytes": 178
+    },
+    "gui_import_export": {
+      "exported": "build/gui-x86_64/samples/export-1789389852036498000.png.png",
+      "pixels_equal": true,
+      "original_unchanged": true
+    },
+    "quit": {
+      "returncode": 0
+    },
+    "relaunch": {
+      "pid": 91314,
+      "window_frame": [
+        260.0,
+        160.0,
+        1040.0,
+        812.0
+      ]
+    },
+    "relaunch_quit": {
+      "returncode": 0
+    }
+  },
+  "screenshots": {
+    "launch": "build/gui-x86_64/step-launch.png",
+    "save_panel": "build/gui-x86_64/step-save-panel.png"
+  },
+  "post_event_access_preflight": true,
+  "preflight_note": "preflight can be stale after a host restart; the live delivery probe below is the capability gate",
+  "event_delivery_probe": {
+    "delivered": true,
+    "f13_count": 3,
+    "received": [
+      "F13",
+      "F13",
+      "F13"
+    ]
+  },
+  "bundle_version": "0.10.0",
+  "bundle_build": "0.10.0b2",
+  "status": "PASS: installed GUI import/export, original preserved, clean quit and relaunch through OS input"
+}
