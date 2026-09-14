@@ -92,6 +92,42 @@ live origin rather than against the local build:
 The site's own `Static site checks` workflow passed on the publishing commit
 (`db913c6`), and the deployed result was verified live rather than assumed.
 
+## Consumer download experience verified live
+
+The deployed site was then driven as an ordinary anonymous visitor with a real
+browser, not inspected as source:
+
+- A macOS visitor reaches the download page and is shown only the two macOS
+  DMGs, with the Windows and Linux cards hidden and the macOS filter active. A
+  Windows or Linux visitor is shown one installer each. An Android, iPhone or
+  unrecognised visitor is shown every package with an explicit note that no
+  package exists for them, and never a misleading native installer.
+- Nothing downloads until a call to action is clicked: zero asset requests and
+  zero downloads were observed on load in every scenario.
+- The real download was exercised end to end. Clicking the Apple Silicon card
+  in a real browser produced `Filecraft-0.10.0-beta.2-macos-arm64.dmg`,
+  30,216,361 bytes, SHA-256 `9c25a69b…`, which matches the published manifest,
+  the arm64 architecture and version `0.10.0-beta.2`.
+- Mobile viewports (390 px and 412 px) do not overflow, dark mode is a real
+  painted theme rather than a declaration, the theme toggle switches both ways,
+  and with JavaScript disabled every package stays listed and linked.
+- No ZIP or portable Suite package is offered anywhere for this release; the
+  historical archive still carries the earlier betas and marks the current one.
+
+One consumer-facing defect was found and fixed. The landing page's primary
+button was generated from the Windows asset, so on macOS and Linux the most
+prominent download offered another platform's installer; only the download page
+adapted. The hero now carries per-platform targets generated from the published
+inventory and swaps to the visitor's own build, with the Windows button kept as
+the static default so visitors without JavaScript see exactly what they saw
+before (`filecraft.github.io` commit `30d6d40`).
+
+The macOS architecture choice is a pure, tested rule. Chromium reported
+`architecture: x86` on a withheld hint set even on this Apple Silicon Mac, so a
+hint is trusted only when it reports `arm`; the GPU renderer decides first and
+the fallback is Apple Silicon, which the label names. A regression test covers
+that decision table and guards the hero against reverting to one platform.
+
 ## Two compatibility notes on the published assets
 
 Both are naming/encoding fixes only. No artifact byte changed and no digest
